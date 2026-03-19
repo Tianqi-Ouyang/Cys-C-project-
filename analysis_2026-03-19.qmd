@@ -1,0 +1,1714 @@
+---
+title: "Cystatin C / Creatinine Ratio – Platinum Chemotherapy AE Analysis"
+author: "Meg"
+date: "2026-03-19"
+format:
+  html:
+    theme: lumen
+    toc: true
+    toc-float: true
+    toc-depth: 4
+    code-fold: true
+  pdf:
+    toc: true
+    toc-depth: 4
+execute:
+  warning: false
+  message: false
+---
+
+# 1 Variable Name Dictionary
+
+**Gold standard = PDF / REDCap CSV column name** (left column).
+`In Code` = what this variable is called in the working code.
+Naming rules applied in this file:
+
+- Sections 1.1 and 1.2: PDF name used directly in code (no rename)
+- `bl_date` → `baseline_sample_date` (lowercase)
+- `fu_date` → `last_follow_up_date` (lowercase)
+- `empi` → `EMPI` (exception: uppercase required by RPDR functions)
+- New derived variables: all lowercase
+- All other Copy 709 variable names kept as-is
+
+## 1.1 Identifiers & Demographics
+
+| PDF / REDCap | In Code | Note |
+|---|---|---|
+| `record_id` | `record_id` | |
+| `empi` | `EMPI` | Renamed to uppercase for RPDR function compatibility |
+| `sex` | `sex` | |
+| `height` | `height` | |
+| `weight` | `weight` | |
+| `race` | `race` | |
+| `ethnicity` | `ethnicity` | |
+| `age` | `age` | |
+
+## 1.2 Cancer & Treatment
+
+| PDF / REDCap | In Code | Note |
+|---|---|---|
+| `cancer_type` | `cancer_type` | |
+| `tumor_type` | `tumor_type` | |
+| `tumor_stage` | `tumor_stage` | Not renamed to `cancer_stage` |
+| `treatment_regimen` | `treatment_regimen` | |
+| `regimen_dose` | `regimen_dose` | Used by `create_drug_indicators()` |
+| `platin_group` | `platin_group` | Not renamed to long Copy 709 name |
+| `platin_dose` | `platin_dose` | Not renamed to long Copy 709 name |
+| `dosage_mg` | `dosage_mg` | |
+| `ecog_score` | `ecog_score` | |
+
+## 1.3 Dates
+
+| PDF / REDCap | In Code | Note |
+|---|---|---|
+| `bl_date` | `baseline_sample_date` | Renamed (lowercase) |
+| `fu_date` | `last_follow_up_date` | Renamed (lowercase) |
+| — | `days_last_follow_up` | Derived: numeric days from baseline to last follow-up |
+
+## 1.4 Baseline Lab Values (REDCap)
+
+| PDF / REDCap | In Code | Note |
+|---|---|---|
+| `baseline_creatinine` | `baseline_cre` | Renamed (Copy 709 name) |
+| `baseline_cre_egfr` | `baseline_cre_egfr` | From REDCap / cleaned_master |
+| `cys_c_baseline` | `baseline_cys_c` | Renamed |
+| `baseline_cys_c_egfr` | `baseline_cys_c_egfr` | From REDCap / cleaned_master |
+
+## 1.5 Computed eGFR Variables (from cleaned_master)
+
+| In Code | Description |
+|---|---|
+| `cockcroft` | Cockcroft-Gault creatinine clearance |
+| `ckd_epi_gfr_cre_cys_unindex` | Body-adjusted combined CKD-EPI eGFR |
+| `baseline_cre_egfr_unindexed` | Body-adjusted creatinine-based eGFR |
+| `baseline_cys_c_egfr_unindexed` | Body-adjusted cystatin-based eGFR |
+| `ckd_stage_cg` | CKD stage derived from Cockcroft-Gault |
+
+## 1.6 RPDR Pre-baseline Lab Values (within 45 days)
+
+| In Code | RPDR Group_Id | Description |
+|---|---|---|
+| `pre_HGB_45days` | `HGB` | Hemoglobin, closest value ≤ 45 days before baseline |
+| `pre_PLT_45days` | `PLT` | Platelet count |
+| `pre_ALB_45days` | `ALB` | Albumin |
+| `pre_WBC_45days` | `WBC` | WBC |
+| `pre_K_45days` | `K` | Potassium |
+| `pre_MG_45days` | `MG` | Magnesium |
+| `pre_NA_45days` | `NA` | Sodium |
+
+## 1.7 ED Visit Variables
+
+| PDF / REDCap | In Code | Note |
+|---|---|---|
+| `er_status_90d` | `ed_status_90d` | Renamed by Copy 709 |
+| `er_visit_date` | `ed_visit_date` | Renamed by Copy 709 |
+| `er_visit_diff` | `ed_visit_diff` | Renamed by Copy 709 |
+| `other_ed_visit` | `other_ed` | Renamed by Copy 709 |
+| — | `extra_ed_n` | Derived: count of extra ED visits |
+| — | `ed_visit_0_diff`, `ed_visit_0_reason_1–11` | Renamed from `ed_visit_*` |
+
+## 1.8 Hospitalization Variables
+
+| PDF / REDCap | In Code | Note |
+|---|---|---|
+| `hosp_status_90d` | `hosp_status_90d` | |
+| `hosp_visit_date` | `hosp_visit_date` | |
+| `hosp_visit_diff` | `hosp_visit_0_diff` | Renamed (baseline visit) |
+| `hosp_visit_reason___1–11` | `hosp_visit_0_reason_1–11` | Renamed |
+| `other_hosp` | `other_hosp` | |
+| — | `extra_hosp_n` | Derived: count of extra hospitalizations |
+| — | `event_hosp_1–11` | Derived by `create_events_and_times_1_11()` |
+| — | `time_to_event_hosp_1–11` | Derived (days from baseline) |
+| — | `side_effect` | Hosp reasons 1–7 (platinum-related), any = 1 |
+| — | `time_to_side_effect` | Time to first platinum-related hosp (90 if none) |
+
+## 1.9 Adverse Event Outcome Variables (from cleaned_master)
+
+| In Code | Description |
+|---|---|
+| `post_Anemia_2_cutpoint_90days` | Lab value at first grade ≥ 2 anemia event |
+| `post_Anemia_2_cutpoint_90days_date` | Date of that event |
+| `Anemia_g2_90days` | Binary: 1 if grade ≥ 2 anemia within 90 days |
+| `Anemia_g3_90days` | Binary: 1 if grade ≥ 3 anemia |
+| `Throm_g2_90days` | Binary: 1 if grade ≥ 2 thrombocytopenia |
+| `Throm_g3_90days` | Binary: 1 if grade ≥ 3 thrombocytopenia |
+| `AKI_g2_90days` | Binary: 1 if grade ≥ 2 AKI |
+| `AKI_g3_90days` | Binary: 1 if grade ≥ 3 AKI |
+| `grade_2_aes` | Composite: any of anemia/throm/AKI grade 2 |
+| `grade_3_aes` | Composite: any of anemia/throm/AKI grade 3 |
+| `time_to_anemia_2` … `time_to_aki_3` | Days to each AE (90 if none) |
+| `cmp_time_anemia_2`, `cmp_status_anemia_2` … | Competing risk variables (from cleaned_master) |
+
+## 1.10 Electrolyte Outcomes (new, Copy 709)
+
+| In Code | Description |
+|---|---|
+| `post_Hypokalemia_cutpoint_90days` | First K value < 3.0 mEq/L post-baseline |
+| `Hypokalemia_90days` | Binary: 1 if K < 3.0 within 90 days |
+| `time_to_Hypokalemia` | Days to event (90 if none) |
+| `post_Hypomagnesemia_cutpoint_90days` | First Mg value < 0.9 mg/dL post-baseline |
+| `Hypomagnesemia_90days` | Binary: 1 if Mg < 0.9 within 90 days |
+| `time_to_Hypomagnesemia` | Days to event |
+| `post_Hyponatremia_cutpoint_90days` | First Na value < 125 mEq/L post-baseline |
+| `Hyponatremia_90days` | Binary: 1 if Na < 125 within 90 days |
+| `time_to_Hyponatremia` | Days to event |
+
+## 1.11 Mortality
+
+| PDF / REDCap | In Code | Note |
+|---|---|---|
+| `pt_status` | `pt_status` | PDF name kept; decoded to "Alive"/"On Hospice"/"Dead" |
+| — | `days_last_follow_up` | Numeric days from baseline to last follow-up |
+| — | `death_90` | 1 if died within 90 days |
+| — | `time_to_death_90` | Days to death (capped at 90) |
+| — | `time_to_death_90_status` | 0=censored/alive, 2=dead (competing-risk coding) |
+| — | `mortality_90` | Same as `death_90` (alias) |
+
+## 1.12 Exposure Variables
+
+| In Code | Description |
+|---|---|
+| `cr_cys` | baseline_cre / baseline_cys_c |
+| `cr_cys_7` | Binary: 1 if cr_cys < 0.7 (primary exposure) |
+| `cr_cys_cat` | Categorical: <0.5 / 0.5–0.7 / 0.7–0.9 / ≥0.9 |
+| `exposure_epi_30` | baseline_cys_c_egfr < 0.7 × baseline_cre_egfr |
+| `exposure_cg_30` | ckd_epi_gfr_cre_cys_unindex < 0.7 × cockcroft |
+| `exposure_cg_15` | ckd_epi_gfr_cre_cys_unindex < 0.85 × cockcroft |
+| `egfr_combined_cg_ratio` | ckd_epi_gfr_cre_cys_unindex / cockcroft |
+
+## 1.13 Comorbidities & Medications
+
+| In Code | Description |
+|---|---|
+| `score` | Charlson comorbidity score (RPDR ICD-9/10) |
+| `cci` | "mild" / "moderate" / "severe" |
+| `thyroid` | Thyroid disease (RPDR diagnosis + medication) |
+| `hiv` | HIV from RPDR (Copy 709 uses `hiv`; Jiaxuan used `hiv_new`) |
+| `dm`, `htn`, `cirrhosis`, `cad` | Comorbidity flags (REDCap) |
+| `ppi`, `ace_arb`, `diu`, `steroids`, `statins`, `nsaids`, `smoking` | Medication/lifestyle flags (REDCap) |
+| `bmi` | weight / (height/100)² |
+| `bmi_cat` | 1=underweight, 2=normal, 3=overweight, 4=obese |
+| `age_cat` | 1=≤65, 2=66–80, 3=>80 |
+| `ici` | 1 if Atezolizumab OR Pembrolizumab OR Durvalumab |
+
+## 1.14 Platinum Dosing Variables
+
+| In Code | Description |
+|---|---|
+| `carbo` | 1 = Carboplatin |
+| `cis` | 1 = Cisplatin |
+| `carbo_AUC` | Carboplatin AUC value |
+| `carbo_dose` | Same as carbo_AUC (alternate name for table) |
+| `cis_dose` / `cis_recommend` | Cisplatin mg/m² |
+| `dose_1` | High-dose: carbo AUC ≥ 5 OR cisplatin ≥ 75 mg/m² |
+| `carbo_AUC_cat` | 1=AUC≤4, 2=AUC≥5, 0=not carboplatin |
+| `cis_dose_cat` | 1=<75 mg/m², 2=≥75 mg/m², 0=not cisplatin |
+| `cis_group` | 1=<40, 2=40–60, 3=≥60 mg/m² |
+
+## 1.15 Drug Indicators (from `create_drug_indicators()`)
+
+All parsed from `regimen_dose` text:
+`Bevacizumab`, `Paclitaxel`, `Pemetrexed`, `Durvalumab`, `Doxorubicin`,
+`Pembrolizumab`, `Etoposide`, `Gemcitabine`, `Atezolizumab`, `Pertuzumab`,
+`Trastuzumab`, `Docetaxel`, `Fluorouracil`, `Methotrexate`, `Vinblastine`,
+`Administered_alone`
+
+## 1.16 Competing Risk Variables
+
+| Pattern | Description |
+|---|---|
+| `cmp_time_<outcome>` | Time for competing risk model |
+| `cmp_status_<outcome>` | 0=censored, 1=event, 2=death |
+| AE outcomes (anemia, throm, aki, grade_2_aes, grade_3_aes) | Pre-computed in `cleaned_master` (master_709.xlsx) |
+| New outcomes (side_effect, hosp_1–11, electrolytes) | Computed with `cmp_variable()` in this code |
+
+---
+
+# 2 Setup & Libraries
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#| label: libraries
+rm(list = ls())
+library(readxl)
+library(openxlsx)
+library(dplyr)
+library(tidyverse)
+library(tableone)
+library(writexl)
+library(gtsummary)
+library(survival)
+library(ggplot2)
+library(ggpubr)
+library(splines)
+library(lattice)
+library(mice)
+library(DescTools)
+library(survminer)
+library(finalfit)
+library(tidycmprsk)
+library(ggsurvfit)
+library(comorbidity)
+library(readr)
+library(cowplot)
+library(scales)
+```
+
+---
+
+# 3 Functions (all from Copy 709)
+
+Each function is defined in its own labeled cell.
+
+## 3.1 standardize_colnames
+
+```{r}
+#| label: fn-standardize-colnames
+standardize_colnames <- function(df) {
+  # Replace non-alphanumeric characters with underscore
+  names(df) <- gsub("[^[:alnum:]_]", "_", names(df))
+
+  # Reduce multiple underscores to a single underscore
+  names(df) <- gsub("_+", "_", names(df))
+
+  # Remove underscore if it's at the end of the name
+  names(df) <- gsub("_$", "", names(df))
+
+  # Return the cleaned dataframe
+  return(df)
+}
+```
+
+## 3.2 create_events_and_times_1_11
+
+Creates `event_hosp_1`–`event_hosp_11` and `time_to_event_hosp_1`–`time_to_event_hosp_11`
+from `hosp_visit_0_*` (baseline) and extra `hosp_visit_1_*`–`hosp_visit_5_*` rows.
+
+```{r}
+#| label: fn-create-events-and-times-1-11
+create_events_and_times_1_11 <- function(data) {
+    # Initialize hospital event and time variables
+    for (i in 1:11) {
+        data[[paste0("event_hosp_", i)]] <- 0
+        data[[paste0("time_to_event_hosp_", i)]] <- NA
+    }
+
+    # Process each row
+    for (i in seq_len(nrow(data))) {
+        # If baseline hospital visit is missing, set all to 0/NA
+        if (is.na(data[i, "hosp_visit_0_diff"])) {
+            for (j in 1:11) {
+                data[i, paste0("event_hosp_", j)] <- 0
+                data[i, paste0("time_to_event_hosp_", j)] <- NA
+            }
+        } else {
+            # Baseline hospital visit
+            for (j in 1:11) {
+                if (!is.na(data[i, paste0("hosp_visit_0_reason_", j)]) &&
+                    data[i, paste0("hosp_visit_0_reason_", j)] == 1) {
+                    data[i, paste0("event_hosp_", j)] <- 1
+                    data[i, paste0("time_to_event_hosp_", j)] <- data[i, "hosp_visit_0_diff"]
+                }
+            }
+        }
+
+        # Additional hospital visits
+        if (!is.na(data[i, "other_hosp"]) && data[i, "other_hosp"] == 1) {
+            extra_hosp_n <- as.numeric(data[i, "extra_hosp_n"])
+            if (!is.na(extra_hosp_n) && extra_hosp_n > 0) {
+                for (visit in 1:extra_hosp_n) {
+                    for (j in 1:11) {
+                        if (!is.na(data[i, paste0("event_hosp_", j)]) &&
+                            data[i, paste0("event_hosp_", j)] == 0 &&
+                            !is.na(data[i, paste0("hosp_visit_", visit, "_reason_", j)]) &&
+                            data[i, paste0("hosp_visit_", visit, "_reason_", j)] == 1) {
+                            data[i, paste0("event_hosp_", j)] <- 1
+                            data[i, paste0("time_to_event_hosp_", j)] <- data[i, paste0("hosp_visit_", visit, "_diff")]
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return(data)
+}
+```
+
+## 3.3 create_drug_indicators
+
+Parses `regimen_dose` free text to create 0/1 indicators per co-drug.
+`Administered_alone` = 1 when none of the 15 drugs are present.
+
+```{r}
+#| label: fn-create-drug-indicators
+create_drug_indicators <- function(data) {
+
+  # Create indicator for Bevacizumab
+  data$Bevacizumab <- ifelse(grepl("Bevacizumab|Avastin", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Paclitaxel
+  data$Paclitaxel <- ifelse(grepl("Paclitaxel|Taxol|Abraxane", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Pemetrexed
+  data$Pemetrexed <- ifelse(grepl("Pemetrexed|pem\\b", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Durvalumab
+  data$Durvalumab <- ifelse(grepl("Durvalumab|Durva", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Doxorubicin
+  data$Doxorubicin <- ifelse(grepl("Doxorubicin|Adriamycin", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Pembrolizumab
+  data$Pembrolizumab <- ifelse(grepl("Pembrolizumab|Pembro", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Etoposide
+  data$Etoposide <- ifelse(grepl("Etoposide|etop\\b", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Gemcitabine
+  data$Gemcitabine <- ifelse(grepl("Gemcitabine|\\bGem\\b", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Atezolizumab
+  data$Atezolizumab <- ifelse(grepl("Atezolizumab", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Pertuzumab
+  data$Pertuzumab <- ifelse(grepl("Pertuzumab", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Trastuzumab
+  data$Trastuzumab <- ifelse(grepl("Trastuzumab|Traztuzumab|Transtuzumab|Herceptin",
+                                   data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Docetaxel
+  data$Docetaxel <- ifelse(grepl("Docetaxel|Taxotere", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Fluorouracil
+  data$Fluorouracil <- ifelse(grepl("Fluorouracil|5FU", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Methotrexate
+  data$Methotrexate <- ifelse(grepl("Methotrexate", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Vinblastine
+  data$Vinblastine <- ifelse(grepl("Vinblastine", data$regimen_dose, ignore.case = TRUE), 1, 0)
+
+  # Create indicator for Administered alone (absence of all the above drugs)
+  all_drugs <- c("Bevacizumab", "Paclitaxel", "Pemetrexed", "Durvalumab", "Doxorubicin",
+                 "Pembrolizumab", "Etoposide", "Gemcitabine", "Atezolizumab", "Pertuzumab",
+                 "Trastuzumab", "Docetaxel", "Fluorouracil", "Methotrexate", "Vinblastine")
+
+  data$Administered_alone <- ifelse(rowSums(data[, all_drugs]) == 0, 1, 0)
+
+  return(data)
+}
+```
+
+## 3.4 cmp_variable
+
+Builds competing-risk time and status for a single outcome.
+Status coding: 0 = censored, 1 = event occurred, 2 = death (competing event).
+If death occurs first, the death time and status (0/2) override the event.
+
+```{r}
+#| label: fn-cmp-variable
+cmp_variable <- function(data, event_time, event_status, name) {
+  # Enquote the time and status variables to allow their evaluation within the data context
+  event_time <- enquo(event_time)
+  event_status <- enquo(event_status)
+
+
+  # Create dynamic names for the new columns
+  cmp_time_name <- paste0("cmp_time_", name)
+  cmp_status_name <- paste0("cmp_status_", name)
+
+  # Add new columns to the dataset using mutate()
+  data %>%
+    mutate(
+      !!cmp_time_name := ifelse(time_to_death_90 <= !!event_time ,time_to_death_90,!!event_time),
+      !!cmp_status_name := ifelse(time_to_death_90 <= !!event_time,time_to_death_90_status,!!event_status)
+    )
+}
+```
+
+## 3.5 pre_lab
+
+Finds the **closest lab value on or before** `index_date` within the time window.
+Returns one row per patient (most recent qualifying lab result).
+
+> See **Section 6.1** for the bug found in Jiaxuan's version of this function
+> and how Copy 709 correctly implements it.
+
+```{r}
+#| label: fn-pre-lab
+###### pre lab  index data included closest date
+pre_lab <- function(data, month, time, index_date, Group_Id) {
+  index_date <- enquo(index_date)
+  if (month) {
+    time_value <- time * 30
+  } else {
+    time_value <- time
+  }
+
+
+  lab_name <- paste0("pre_", Group_Id, "_", time_value, "days")
+  lab_date_name <- paste0("pre_", Group_Id, "_", time_value, "days_date")
+
+  result <- data %>%
+    filter(Group_Id == !!Group_Id, grepl("^\\d+\\.\\d+$", Result)) %>%
+    filter(!is.na(Result)) %>%
+    mutate(Result = as.numeric(Result)) %>%
+    filter(Seq_Date_Time >= (!!index_date) - time_value, Seq_Date_Time <= !!index_date) %>%
+    arrange(EMPI, desc(Seq_Date_Time)) %>%
+    distinct(EMPI, .keep_all = TRUE) %>%
+    rename(!!lab_name := Result,
+           !!lab_date_name := Seq_Date_Time) %>%
+    select(EMPI,
+           !!lab_name, !!lab_date_name)
+
+  return(result)
+}
+```
+
+## 3.6 post_lab_less_than_cutpoint
+
+Finds the **first post-baseline lab value below a clinical cutpoint** within `days`.
+Used for Hypokalemia, Hypomagnesemia, Hyponatremia outcomes.
+
+```{r}
+#| label: fn-post-lab-less-than-cutpoint
+## post lab cutoff function
+post_lab_less_than_cutpoint <- function(data,days,index_date,Group_ID,Group_ID_name,outcome_name,cutpoint) {
+  index_date <- enquo(index_date)
+  lab_name <- paste0("post_", Group_ID_name, "_cutpoint_", days, "days")
+  lab_date_name <- paste0("post_", Group_ID_name, "_cutpoint_", days, "days_date")
+
+  result <- data %>%
+    filter(Group_Id %in% Group_ID) %>%
+    filter(grepl("^[><]?\\d+\\.?\\d* ?$",Result)) %>%
+    mutate(Result=as.numeric(parse_number(Result))) %>%
+    filter(!is.na(Result)) %>%
+    filter(Seq_Date_Time > (!!index_date), Seq_Date_Time <= !!index_date + days) %>%
+    filter(Result<cutpoint) %>%
+    arrange(EMPI,Seq_Date_Time) %>%
+    distinct(EMPI, .keep_all = TRUE) %>%
+    rename(!!lab_name := Result,
+           !!lab_date_name := Seq_Date_Time) %>%
+    select(EMPI,
+           !!lab_name, !!lab_date_name)
+  return(result)
+}
+```
+
+## 3.7 dia_list_name
+
+Identifies patients with a given diagnosis (and optionally medication) on or before
+`index_date`. Supports excluding specific diagnosis name strings.
+
+```{r}
+#| label: fn-dia-list-name
+dia_list_name <- function(data, listed_names, index_date, excluded_names = NULL, med_data = NULL, med_names = NULL) {
+  #
+  if (!is.null(excluded_names)) {
+    excluded_pattern <- paste(
+      gsub("([][()])", "\\\\\\1", excluded_names),  #
+      collapse = "|"
+    )
+  }
+
+  if (is.null(excluded_names)) {
+    dia_result <- data %>%
+      filter(Date <= {{index_date}}) %>%
+      filter(grepl(paste(listed_names, collapse = "|"), Diagnosis_Name, ignore.case = TRUE)) %>%
+      distinct(EMPI)
+  } else {
+    dia_result <- data %>%
+      filter(Date <= {{index_date}}) %>%
+      filter(
+        grepl(paste(listed_names, collapse = "|"), Diagnosis_Name, ignore.case = TRUE),
+        !grepl(excluded_pattern, Diagnosis_Name, ignore.case = TRUE)  #
+      ) %>%
+      distinct(EMPI)
+  }
+
+  if (!is.null(med_data)) {
+    med_result <- med_data %>%
+      filter(Medication_Date <= {{index_date}}) %>%
+      filter(grepl(paste(med_names, collapse = "|"), Medication, ignore.case = TRUE)) %>%
+      distinct(EMPI)
+  } else {
+    med_result <- NULL
+  }
+
+  final_result <- rbind(dia_result, med_result) %>%
+    distinct(EMPI)
+
+  return(final_result)
+}
+```
+
+---
+
+# 4 Data Loading
+
+## 4.1 REDCap export
+
+```{r}
+#| label: load-redcap
+master <- read_csv("/Users/to909/Downloads/CystatinCInPatientsO_DATA_2025-07-24_1327.csv")
+```
+
+## 4.2 Standardise column names, rename ED / hosp variables
+
+```{r}
+#| label: load-standardize-rename
+master <- standardize_colnames(master)
+
+# Rename ED variables: PDF uses er_* prefix → code uses ed_*
+# Rename hosp_visit_* → hosp_visit_0_* (baseline) and other_hosp_* → hosp_visit_*
+master <- master %>%
+   rename(ed_visit_diff  = er_visit_diff,
+          ed_visit_date  = er_visit_date,
+          ed_status_90d  = er_status_90d,
+          other_ed       = other_ed_visit) %>%
+  rename_with(~ gsub("^hosp_visit_", "hosp_visit_0_", .x), starts_with("hosp_visit_")) %>%
+  rename_with(~ gsub("^other_hosp_", "hosp_visit_", .x), starts_with("other_hosp_")) %>%
+  rename_with(~ gsub("_visit", "", .x) %>%
+                gsub("_(\\d+)_", "_\\1_reason_", .), starts_with("other_ed_visit_")) %>%
+  rename_with(~ gsub("^ed_visit_", "ed_visit_0_", .x), starts_with("ed_visit_")) %>%
+  rename_with(~ gsub("^other_ed_", "ed_visit_", .x), starts_with("other_ed_")) %>%
+  mutate(other_hosp = ifelse(other_hosp != 1 | is.na(other_hosp), 0, 1),
+         other_ed   = ifelse(other_ed   != 1 | is.na(other_ed),   0, 1),
+         extra_hosp_n = ifelse(other_hosp == 1,
+                               rowSums(across(hosp_extra_1:hosp_extra_5), na.rm = TRUE), 0),
+         extra_ed_n   = ifelse(other_ed == 1,
+                               rowSums(across(ed_extra_1:ed_extra_3)), 0))
+```
+
+## 4.3 Create hospitalization event / time variables (reasons 1–11)
+
+```{r}
+#| label: load-hosp-events
+master <- create_events_and_times_1_11(master)
+```
+
+## 4.4 Create platinum-related side_effect variable (hosp reasons 1–7)
+
+```{r}
+#| label: load-side-effect
+# side_effect = 1 if any of hosp reasons 1–7 (platinum-associated AEs) occurred
+side_effect <- master %>%
+  select(record_id, matches("^event_hosp_[1-7]$|^time_to_event_hosp_[1-7]$")) %>%
+  rowwise() %>%
+  mutate(
+    side_effect = if_else(any(c_across(starts_with("event_hosp_")) == 1, na.rm = TRUE), 1, 0),
+    time_to_side_effect = {
+      if (side_effect == 1) {
+        times <- c_across(starts_with("time_to_event_hosp_"))[c_across(starts_with("event_hosp_")) == 1]
+        if (any(!is.na(times))) min(times, na.rm = TRUE) else NA_real_
+      } else {
+        NA_real_
+      }
+    }
+  ) %>%
+  ungroup() %>% select(record_id, side_effect, time_to_side_effect)
+
+# Censor at 90 days
+side_effect <- side_effect %>% mutate(
+  side_effect = case_when(
+    side_effect == 1 & time_to_side_effect > 90 ~ 0,
+    TRUE ~ side_effect
+  ),
+  time_to_side_effect = case_when(
+    side_effect == 1 & time_to_side_effect > 90 ~ 90,
+    side_effect == 0 ~ 90,
+    TRUE ~ time_to_side_effect
+  )
+)
+```
+
+## 4.5 Create final_master (merge side_effect and drug indicators)
+
+```{r}
+#| label: load-create-final-master
+# Cohort filtering (excl. missing cystatin C / platinum) happens in section 5.4.
+# eGFR and AE outcomes are now computed from RPDR in sections 4.8–4.9.
+final_master <- master %>%
+  merge(side_effect, by = "record_id", all.x = TRUE)
+
+final_master <- create_drug_indicators(final_master)
+```
+
+## 4.6 Rename date variables and EMPI; coerce types
+
+```{r}
+#| label: load-rename-dates
+# empi → EMPI  (uppercase required by RPDR functions)
+# bl_date → baseline_sample_date
+# fu_date → last_follow_up_date
+final_master <- final_master %>%
+  rename(
+    EMPI                 = empi,
+    baseline_sample_date = bl_date,
+    last_follow_up_date  = fu_date
+  )
+
+final_master$last_follow_up_date  <- as.Date(final_master$last_follow_up_date)
+final_master$baseline_sample_date <- as.Date(final_master$baseline_sample_date)
+final_master$platin_dose          <- as.numeric(final_master$platin_dose)
+```
+
+## 4.7 Load RPDR files
+
+```{r}
+#| label: load-rpdr
+rpdr_path <- "/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/RPDR 800/"
+
+# Diagnoses
+dia <- read.table(paste0(rpdr_path, "mes98_051625135308675085_Dia.txt"),
+  sep = "|", fill = TRUE, quote = "", header = TRUE)
+dia$Date <- as.Date(dia$Date, "%m/%d/%Y")
+
+# Labs – original pull (HGB, PLT, ALB, CRE)
+lab <- read.table(paste0(rpdr_path, "mes98_051625135308675085_Lab.txt"),
+  sep = "|", fill = TRUE, quote = "", header = TRUE) %>%
+  select(EMPI, Seq_Date_Time, Result, Group_Id, Test_Description)
+lab$Seq_Date_Time <- as.Date(lab$Seq_Date_Time, "%m/%d/%Y")
+
+# Labs – updated pull (NA, MG, K)
+lab_new <- read.table(paste0(rpdr_path, "mes98_071025164203189492_Lab.txt"),
+  sep = "|", fill = TRUE, quote = "", header = TRUE) %>%
+  select(EMPI, Seq_Date_Time, Result, Group_Id, Test_Description)
+lab_new$Seq_Date_Time <- as.Date(lab_new$Seq_Date_Time, "%m/%d/%Y")
+
+# Medications
+med <- read.table(paste0(rpdr_path, "mes98_051625135308675085_Med.txt"),
+  sep = "|", fill = TRUE, quote = "", header = TRUE) %>%
+  select(EMPI, Medication_Date, Medication)
+med$Medication_Date <- as.Date(med$Medication_Date, "%m/%d/%Y")
+
+# Patient index: EMPI + baseline date (needed by pre/post lab functions)
+master_list <- final_master %>% select(EMPI, baseline_sample_date)
+
+master_lab     <- merge(master_list, lab,     by = "EMPI", all.x = TRUE)
+master_lab_new <- merge(master_list, lab_new, by = "EMPI", all.x = TRUE) %>%
+  mutate(Group_Id = ifelse(is.na(Group_Id), "NA", Group_Id))
+master_dia     <- merge(master_list, dia,     by = "EMPI", all.y = TRUE)
+master_med     <- merge(master_list, med,     by = "EMPI", all.y = TRUE)
+```
+
+## 4.8 Pipeline functions: eGFR formulas
+
+**Variables produced by this pipeline:**
+
+| In Code | Formula | Description |
+|---|---|---|
+| `male` | `sex == "Male"` | 0/1, required by CKD-EPI |
+| `BSA` | DuBois | Body surface area (m²) |
+| `cockcroft` | Cockcroft-Gault | Creatinine clearance (mL/min) |
+| `baseline_cre_egfr` | CKD-EPI 2012 Cr | Indexed creatinine eGFR |
+| `baseline_cys_c_egfr` | CKD-EPI 2012 CysC | Indexed cystatin eGFR |
+| `ckd_epi_gfr_cre_cys_unindex` | CKD-EPI 2012 combined, unindexed | Primary combined eGFR for exposures |
+| `baseline_cre_egfr_unindexed` | Cr eGFR × BSA/1.73 | Body-adjusted |
+| `baseline_cys_c_egfr_unindexed` | CysC eGFR × BSA/1.73 | Body-adjusted |
+| `pre_CRE_45days` | `pre_lab()` | Baseline CRE for AKI grading |
+| `post_Anemia_2/3_cutpoint_90days` | `post_lab_less_than_cutpoint()` | Grade 2/3 anemia (HGB) |
+| `post_Throm_2/3_cutpoint_90days` | `post_lab_less_than_cutpoint()` | Grade 2/3 thrombocytopenia (PLT) |
+| `post_AKI_2/3_cutpoint_90days` | CRE > 1.5×/3× pre-baseline CRE | Grade 2/3 AKI (KDIGO) |
+
+**Bug check — `Cockcroft`:** Standard formula; female correction (× 0.85) applied correctly. No bug.
+
+**Bug check — CKD-EPI functions:** Scalar implementations via `mapply()`. `min(c(x,1))` and `max(c(x,1))` are correct for scalar inputs. No bug.
+
+**Bug check — AKI computation:** `filter(Result > 1.5 * pre_CRE_45days)` compares each row to the patient-specific pre-baseline CRE carried in by `merge()`. This is correct — each patient's post-baseline CRE is compared to their own reference. No bug.
+
+```{r}
+#| label: fn-pipeline-cockcroft
+Cockcroft <- function(age, weight, male, cre) {
+  if (male == 0) {
+    value <- (140 - age) * weight * 0.85 / (72 * cre)
+  } else {
+    value <- (140 - age) * weight / (72 * cre)
+  }
+  return(value)
+}
+```
+
+```{r}
+#| label: fn-pipeline-ckd-epi-cre
+# CKD-EPI 2012 creatinine-based eGFR (race-free CKD-EPI equation)
+ckd_epi_gfr <- function(cre, male, age) {
+  k <- ifelse(male == 1, 0.9, 0.7)
+  a <- ifelse(male == 1, -0.302, -0.241)
+  m <- ifelse(male == 1, 1, 1.012)
+  gfr <- 142 * min(c(cre/k, 1))^a * max(c(cre/k, 1))^-1.2 * 0.9938^age * m
+  return(gfr)
+}
+```
+
+```{r}
+#| label: fn-pipeline-ckd-epi-cys
+# CKD-EPI 2012 cystatin C-based eGFR (Inker et al. 2012)
+# Age coefficient = 0.996 per official NKF/Inker 2012 (not 0.9961, which is the 2021 Cr+CysC value)
+ckd_epi_cys_gfr <- function(cys, male, age) {
+  gfr <- 133 * min(c(cys/0.8, 1))^(-0.499) * max(c(cys/0.8, 1))^(-1.328) *
+         0.996^age * ifelse(male == 0, 0.932, 1)
+  return(gfr)
+}
+```
+
+```{r}
+#| label: fn-pipeline-ckd-epi-cre-cys
+# Combined creatinine + cystatin C eGFR — exact coefficients from R code summary.Rmd
+# Note: coefficients differ from CKD-EPI 2021 race-free (a=-0.144/-0.219, max_cr=-0.544,
+# min_cys=-0.323, max_cys=-0.778, age=0.9961, female=0.963)
+ckd_epi_cre_cys_gfr <- function(creatinine, cystatin_c, male, age) {
+  k      <- ifelse(male == 1, 0.9, 0.7)
+  a      <- ifelse(male == 1, -0.144, -0.219)
+  female <- ifelse(male == 0, 0.963, 1)
+  gfr_cr_cys <- 135 *
+    min(c(creatinine/k, 1.0))^a  *
+    max(c(creatinine/k, 1.0))^(-0.544) *
+    min(c(cystatin_c/0.8, 1.0))^(-0.323) *
+    max(c(cystatin_c/0.8, 1.0))^(-0.778) *
+    0.9961^age * female
+  return(gfr_cr_cys)
+}
+```
+
+```{r}
+#| label: fn-pipeline-unindex
+# Adjust indexed eGFR for body surface area
+unindex <- function(value, bsa) {
+  return(value * bsa / 1.73)
+}
+```
+
+## 4.9 Pipeline execution: pre-labs, eGFR, AE outcomes
+
+```{r}
+#| label: pipeline-derived-vars
+# male (0/1) and BSA are required by all eGFR formulas
+final_master <- final_master %>%
+  mutate(
+    male = case_when(
+      sex %in% c("Male", "male", 1)    ~ 1,
+      sex %in% c("Female", "female", 2) ~ 0,
+      TRUE ~ NA_real_
+    ),
+    BSA = 0.007184 * (weight ^ 0.425) * (height ^ 0.725)
+  )
+```
+
+```{r}
+#| label: pipeline-pre-labs
+# pre_CRE_45days: baseline creatinine (AKI grade 2/3 reference denominator)
+pre_CRE_45days <- pre_lab(master_lab, month = FALSE, time = 45,
+                           index_date = baseline_sample_date, Group_Id = "CRE")
+
+# Haematology / biochemistry pre-baseline labs
+pre_HGB_45days <- pre_lab(master_lab, month = FALSE, time = 45,
+                           index_date = baseline_sample_date, Group_Id = "HGB")
+pre_PLT_45days <- pre_lab(master_lab, month = FALSE, time = 45,
+                           index_date = baseline_sample_date, Group_Id = "PLT")
+pre_ALB_45days <- pre_lab(master_lab, month = FALSE, time = 45,
+                           index_date = baseline_sample_date, Group_Id = "ALB")
+
+# Electrolyte pre-baseline labs (updated pull)
+pre_K_45days  <- pre_lab(master_lab_new, month = FALSE, time = 45,
+                          index_date = baseline_sample_date, Group_Id = "K")
+pre_MG_45days <- pre_lab(master_lab_new, month = FALSE, time = 45,
+                          index_date = baseline_sample_date, Group_Id = "MG")
+pre_NA_45days <- pre_lab(master_lab_new, month = FALSE, time = 45,
+                          index_date = baseline_sample_date, Group_Id = "NA")
+
+# Merge all pre-baseline labs into final_master
+final_master <- final_master %>%
+  merge(pre_CRE_45days, by = "EMPI", all.x = TRUE) %>%
+  merge(pre_HGB_45days, by = "EMPI", all.x = TRUE) %>%
+  merge(pre_PLT_45days, by = "EMPI", all.x = TRUE) %>%
+  merge(pre_ALB_45days, by = "EMPI", all.x = TRUE) %>%
+  merge(pre_K_45days,   by = "EMPI", all.x = TRUE) %>%
+  merge(pre_MG_45days,  by = "EMPI", all.x = TRUE) %>%
+  merge(pre_NA_45days,  by = "EMPI", all.x = TRUE)
+```
+
+```{r}
+#| label: pipeline-egfr
+# All eGFR variables computed via mapply() (scalar functions over rows).
+# Uses PDF names baseline_creatinine and cys_c_baseline (renamed in section 5.8).
+final_master <- final_master %>%
+  mutate(
+    baseline_cre_egfr            = mapply(ckd_epi_gfr, baseline_creatinine, male, age),
+    baseline_cys_c_egfr          = mapply(ckd_epi_cys_gfr, cys_c_baseline, male, age),
+    ckd_epi_gfr_cre_cys          = mapply(ckd_epi_cre_cys_gfr,
+                                          baseline_creatinine, cys_c_baseline, male, age),
+    cockcroft                    = mapply(Cockcroft, age, weight, male, baseline_creatinine),
+    baseline_cre_egfr_unindexed  = mapply(unindex, baseline_cre_egfr, BSA),
+    baseline_cys_c_egfr_unindexed = mapply(unindex, baseline_cys_c_egfr, BSA),
+    ckd_epi_gfr_cre_cys_unindex  = mapply(unindex, ckd_epi_gfr_cre_cys, BSA)
+  )
+```
+
+```{r}
+#| label: pipeline-ae-labs
+# Post-baseline AE lab outcomes (from RPDR lab — original pull).
+# Dates are already Date type from section 4.7; no further conversion needed.
+
+Anemia_g2_value <- post_lab_less_than_cutpoint(
+  data = master_lab, days = 90, index_date = baseline_sample_date,
+  Group_ID = "HGB", Group_ID_name = "Anemia_2", cutpoint = 10)   # HGB < 10 g/dL
+
+Anemia_g3_value <- post_lab_less_than_cutpoint(
+  data = master_lab, days = 90, index_date = baseline_sample_date,
+  Group_ID = "HGB", Group_ID_name = "Anemia_3", cutpoint = 8)    # HGB < 8 g/dL
+
+Throm_g2_value <- post_lab_less_than_cutpoint(
+  data = master_lab, days = 90, index_date = baseline_sample_date,
+  Group_ID = "PLT", Group_ID_name = "Throm_2", cutpoint = 75)    # PLT < 75×10^9/L
+
+Throm_g3_value <- post_lab_less_than_cutpoint(
+  data = master_lab, days = 90, index_date = baseline_sample_date,
+  Group_ID = "PLT", Group_ID_name = "Throm_3", cutpoint = 50)    # PLT < 50×10^9/L
+
+# AKI grade 2: post-baseline CRE > 1.5 × pre-baseline CRE (KDIGO)
+AKI_g2_value <- master_lab %>%
+  merge(pre_CRE_45days, by = "EMPI", all.x = TRUE) %>%
+  filter(Group_Id == "CRE") %>%
+  filter(grepl("^[><]?\\d+\\.?\\d* ?$", Result)) %>%
+  mutate(Result = as.numeric(parse_number(Result))) %>%
+  filter(!is.na(Result), !is.na(pre_CRE_45days)) %>%
+  filter(Seq_Date_Time > baseline_sample_date,
+         Seq_Date_Time <= baseline_sample_date + 90) %>%
+  filter(Result > 1.5 * pre_CRE_45days) %>%
+  arrange(EMPI, Seq_Date_Time) %>%
+  distinct(EMPI, .keep_all = TRUE) %>%
+  select(EMPI, Result, Seq_Date_Time) %>%
+  rename(post_AKI_2_cutpoint_90days      = Result,
+         post_AKI_2_cutpoint_90days_date = Seq_Date_Time)
+
+# AKI grade 3: post-baseline CRE > 3 × pre-baseline CRE (KDIGO)
+AKI_g3_value <- master_lab %>%
+  merge(pre_CRE_45days, by = "EMPI", all.x = TRUE) %>%
+  filter(Group_Id == "CRE") %>%
+  filter(grepl("^[><]?\\d+\\.?\\d* ?$", Result)) %>%
+  mutate(Result = as.numeric(parse_number(Result))) %>%
+  filter(!is.na(Result), !is.na(pre_CRE_45days)) %>%
+  filter(Seq_Date_Time > baseline_sample_date,
+         Seq_Date_Time <= baseline_sample_date + 90) %>%
+  filter(Result > 3 * pre_CRE_45days) %>%
+  arrange(EMPI, Seq_Date_Time) %>%
+  distinct(EMPI, .keep_all = TRUE) %>%
+  select(EMPI, Result, Seq_Date_Time) %>%
+  rename(post_AKI_3_cutpoint_90days      = Result,
+         post_AKI_3_cutpoint_90days_date = Seq_Date_Time)
+
+# Merge AE outcomes into final_master
+final_master <- final_master %>%
+  merge(Anemia_g2_value, by = "EMPI", all.x = TRUE) %>%
+  merge(Anemia_g3_value, by = "EMPI", all.x = TRUE) %>%
+  merge(Throm_g2_value,  by = "EMPI", all.x = TRUE) %>%
+  merge(Throm_g3_value,  by = "EMPI", all.x = TRUE) %>%
+  merge(AKI_g2_value,    by = "EMPI", all.x = TRUE) %>%
+  merge(AKI_g3_value,    by = "EMPI", all.x = TRUE)
+```
+
+---
+
+# 5 Data Cleaning & Variable Creation
+
+## 5.1 Mortality variables
+
+```{r}
+#| label: clean-mortality
+# days_last_follow_up: numeric days from baseline to last known follow-up date
+final_master <- final_master %>%
+  mutate(days_last_follow_up = as.numeric(last_follow_up_date - baseline_sample_date))
+
+# decode pt_status (PDF name kept) to character label
+final_master <- final_master %>%
+  mutate(pt_status = case_when(
+    pt_status == 1 ~ "Alive",
+    pt_status == 2 ~ "On Hospice",
+    pt_status == 3 ~ "Dead"
+  ))
+
+# time_to_death_90: follow-up time capped at 90 days
+# time_to_death_90_status: 0=alive/censored, 2=dead (competing-risk coding)
+# death_90: binary 0/1
+# mortality_90: alias for death_90
+final_master <- final_master %>%
+  mutate(
+    time_to_death_90 = ifelse(days_last_follow_up > 90, 90, days_last_follow_up),
+    time_to_death_90_status = case_when(
+      days_last_follow_up > 90                          ~ 0,
+      days_last_follow_up <= 90 & pt_status == "Dead"  ~ 2,
+      days_last_follow_up <= 90 & pt_status != "Dead"  ~ 0
+    ),
+    death_90    = ifelse(time_to_death_90_status == 2, 1, 0)
+  )
+```
+
+## 5.2 Censor hospitalization time variables at 90 days
+
+```{r}
+#| label: clean-hosp-censor
+# For each reason 1–11: no-event patients get time = 90 (censored)
+for (i in 1:11) {
+  event_col <- paste0("event_hosp_", i)
+  time_col  <- paste0("time_to_event_hosp_", i)
+  final_master[[time_col]][final_master[[event_col]] == 0] <- 90
+}
+```
+
+## 5.3 Adverse event outcome variables (from RPDR pipeline)
+
+```{r}
+#| label: clean-ae-outcomes
+# AE dates come from RPDR (Seq_Date_Time), already Date type — no conversion needed.
+
+# Binary AE flags: 1 if cutpoint value is non-missing (event occurred within 90 days)
+final_master <- final_master %>%
+  mutate(
+    Anemia_g2_90days = ifelse(!is.na(post_Anemia_2_cutpoint_90days), 1, 0),
+    Anemia_g3_90days = ifelse(!is.na(post_Anemia_3_cutpoint_90days), 1, 0),
+    Throm_g2_90days  = ifelse(!is.na(post_Throm_2_cutpoint_90days),  1, 0),
+    Throm_g3_90days  = ifelse(!is.na(post_Throm_3_cutpoint_90days),  1, 0),
+    AKI_g2_90days    = ifelse(!is.na(post_AKI_2_cutpoint_90days),    1, 0),
+    AKI_g3_90days    = ifelse(!is.na(post_AKI_3_cutpoint_90days),    1, 0)
+  )
+
+# Time-to-AE in days; NA (no event) replaced with 90 (censored)
+final_master <- final_master %>%
+  mutate(
+    time_to_anemia_2 = post_Anemia_2_cutpoint_90days_date - baseline_sample_date,
+    time_to_anemia_3 = post_Anemia_3_cutpoint_90days_date - baseline_sample_date,
+    time_to_throm_2  = post_Throm_2_cutpoint_90days_date  - baseline_sample_date,
+    time_to_throm_3  = post_Throm_3_cutpoint_90days_date  - baseline_sample_date,
+    time_to_aki_2    = post_AKI_2_cutpoint_90days_date    - baseline_sample_date,
+    time_to_aki_3    = post_AKI_3_cutpoint_90days_date    - baseline_sample_date
+  ) %>%
+  mutate(across(
+    c(time_to_anemia_2, time_to_anemia_3,
+      time_to_throm_2,  time_to_throm_3,
+      time_to_aki_2,    time_to_aki_3),
+    ~ ifelse(is.na(.), 90, as.numeric(.))   # no-event patients censored at 90 days
+  ))
+
+# grade_2_aes: composite — any of anemia / throm / AKI grade 2
+# grade_3_aes: composite — any of anemia / throm / AKI grade 3
+final_master <- final_master %>%
+  mutate(
+    grade_2_aes = case_when(
+      Anemia_g2_90days == 1 | Throm_g2_90days == 1 | AKI_g2_90days == 1 ~ 1,
+      TRUE ~ 0
+    ),
+    grade_3_aes = case_when(
+      Anemia_g3_90days == 1 | Throm_g3_90days == 1 | AKI_g3_90days == 1 ~ 1,
+      TRUE ~ 0
+    )
+  )
+```
+
+## 5.4 Exclusion filter: missing cystatin C or platinum type
+
+```{r}
+#| label: clean-exclusion
+# 3 patients missing baseline cystatin C, 1 missing platinum group → exclude
+final_master <- final_master %>%
+  mutate(cys_c_baseline = as.numeric(cys_c_baseline)) %>%
+  filter(!is.na(cys_c_baseline)) %>%
+  filter(!is.na(platin_group))
+```
+
+## 5.5 Exposure variables
+
+```{r}
+#| label: clean-exposure
+# cr_cys: raw ratio (creatinine / cystatin C)
+final_master$cr_cys <- final_master$baseline_creatinine / final_master$cys_c_baseline
+
+# cr_cys_cat: four ordered categories
+final_master <- final_master %>%
+  mutate(cr_cys_cat = case_when(
+    cr_cys < 0.5                  ~ 1,
+    cr_cys >= 0.5 & cr_cys < 0.7 ~ 2,
+    cr_cys >= 0.7 & cr_cys < 0.9 ~ 3,
+    cr_cys >= 0.9                 ~ 4
+  ))
+final_master$cr_cys_cat <- factor(
+  final_master$cr_cys_cat,
+  levels = c("1", "2", "3", "4"),
+  labels = c("< 0.5", "0.5-0.7", "0.7-0.9", "≥ 0.9")
+)
+
+# cr_cys_7: primary binary exposure — 1 if cr_cys < 0.7
+final_master$cr_cys_7 <- ifelse(final_master$cr_cys < 0.7, 1, 0)
+
+# Alternative eGFR-based exposures
+final_master <- final_master %>%
+  mutate(
+    # 30% discrepancy: cystatin eGFR vs creatinine eGFR (CKD-EPI)
+    exposure_epi_30 = ifelse(baseline_cys_c_egfr < 0.7 * baseline_cre_egfr, 1, 0),
+    # 30% discrepancy: combined unindexed eGFR vs Cockcroft
+    exposure_cg_30  = ifelse(ckd_epi_gfr_cre_cys_unindex < 0.7  * cockcroft, 1, 0),
+    # 15% discrepancy: combined unindexed eGFR vs Cockcroft
+    exposure_cg_15  = ifelse(ckd_epi_gfr_cre_cys_unindex < 0.85 * cockcroft, 1, 0),
+    # Sensitivity ratio: combined unindexed eGFR / Cockcroft
+    egfr_combined_cg_ratio = ckd_epi_gfr_cre_cys_unindex / cockcroft
+  )
+
+table(final_master$cr_cys_7)
+```
+
+## 5.6 BMI, age categories, ICI, CKD stage
+
+```{r}
+#| label: clean-categories
+# bmi: calculated from height (cm) and weight (kg)
+# bmi_cat: 1=underweight <18.5, 2=normal 18.5–25, 3=overweight 25–30, 4=obese ≥30
+# age_cat: 1=≤65, 2=66–80, 3=>80
+# ici: immunotherapy co-administration (Atezolizumab OR Pembrolizumab OR Durvalumab)
+# ckd_stage_cg: CKD stage derived from Cockcroft-Gault eGFR
+final_master <- final_master %>%
+  mutate(
+    bmi = weight / (height / 100)^2,
+    bmi_cat = case_when(
+      bmi < 18.5              ~ 1,
+      bmi >= 18.5 & bmi < 25 ~ 2,
+      bmi >= 25   & bmi < 30 ~ 3,
+      bmi >= 30               ~ 4,
+      TRUE ~ NA_real_
+    ),
+    age_cat = case_when(
+      age <= 65             ~ 1,
+      age > 65 & age <= 80 ~ 2,
+      age > 80              ~ 3
+    ),
+    ici = ifelse(Atezolizumab == 1 | Pembrolizumab == 1 | Durvalumab == 1, 1, 0),
+    ckd_stage_cg = factor(case_when(
+      cockcroft >= 90              ~ 1,
+      cockcroft >= 60 & cockcroft < 90 ~ 2,
+      cockcroft >= 30 & cockcroft < 60 ~ 3,
+      cockcroft >= 15 & cockcroft < 30 ~ 4,
+      cockcroft < 15                   ~ 5
+    ))
+  )
+```
+
+## 5.7 Cancer type categories (7 groups)
+
+```{r}
+#| label: clean-cancer-type-cat
+# cancer_type_cat_7: recode REDCap cancer_type (numeric 1–9) into 6 clinical groups
+# Mapping from Jiaxuan's cancer_retype (final code Rmd):
+#   1 = Thoracic (Lung)
+#   2 = Breast
+#   3 = GI (Upper GI + Lower GI + "Other" GI cases)
+#   4 = GU (Genitourinary)
+#   5 = GYN (Gynecological)
+#   6 = HEENT (Head & Neck)
+# Note: Without detailed_cancer_type text field (not in raw REDCap CSV),
+#   cancer_type 9 ("Other") cannot be split into pancreatic→GI vs truly Other.
+#   Mesothelioma (cancer_type 6) grouped with Other per Jiaxuan's code.
+final_master <- final_master %>%
+  mutate(
+    cancer_type_cat_7 = factor(case_when(
+      cancer_type == 1             ~ 1,   # Thoracic
+      cancer_type == 2             ~ 2,   # Breast
+      cancer_type %in% c(3, 4)    ~ 3,   # GI (Upper + Lower)
+      cancer_type == 5             ~ 4,   # GU
+      cancer_type == 7             ~ 5,   # GYN
+      cancer_type == 8             ~ 6,   # HEENT
+      cancer_type %in% c(6, 9)    ~ 7,   # Other (Mesothelioma + Other)
+      TRUE ~ NA_real_
+    ), labels = c("Thoracic", "Breast", "GI", "GU", "GYN", "HEENT", "Other"))
+  )
+
+table(final_master$cancer_type_cat_7)
+```
+
+## 5.8 Platinum dosing variables
+
+```{r}
+#| label: clean-platinum
+# carbo / cis: binary platinum type
+# carbo_AUC / cis_dose / cis_recommend: dose values (NA for wrong type)
+# cis_group: cisplatin dose tier (1=<40, 2=40–60, 3=≥60 mg/m²)
+# dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)
+# carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin
+# cis_dose_cat: 1=<75 mg/m², 2=≥75, 0=not cisplatin
+final_master <- final_master %>%
+  mutate(
+    carbo        = ifelse(platin_group == "Carboplatin", 1, 0),
+    cis          = ifelse(platin_group == "Cisplatin",   1, 0),
+    carbo_dose   = case_when(carbo == 1 ~ platin_dose, TRUE ~ NA_real_),
+    cis_dose     = case_when(cis   == 1 ~ platin_dose, TRUE ~ NA_real_),
+    cis_group    = case_when(
+      cis_dose < 40                    ~ 1,
+      cis_dose >= 40 & cis_dose < 60  ~ 2,
+      cis_dose >= 60                   ~ 3,
+      TRUE ~ NA_real_
+    ),
+    dose_1 = factor(case_when(
+      carbo_dose >= 5 | cis_dose >= 75 ~ 1,
+      carbo_dose <  5 | cis_dose <  75 ~ 0,
+      TRUE ~ NA_real_
+    )),
+    carbo_AUC_cat = case_when(
+      carbo_dose <= 4 ~ 1,
+      carbo_dose >= 5 ~ 2,
+      TRUE ~ 0
+    ),
+    cis_dose_cat = case_when(
+      cis_dose <  75 ~ 1,
+      cis_dose >= 75 ~ 2,
+      TRUE ~ 0
+    )
+  )
+
+table(final_master$dose_1)
+```
+
+## 5.9 Rename baseline lab variables (Copy 709 convention)
+
+```{r}
+#| label: clean-rename-labs
+# baseline_cre: from baseline_creatinine (PDF name)
+# baseline_cre: from baseline_creatinine (PDF name)
+# baseline_cys_c: from cys_c_baseline (PDF name)
+final_master <- final_master %>%
+  rename(
+    baseline_cre   = baseline_creatinine,
+    baseline_cys_c = cys_c_baseline
+  )
+```
+
+## 5.10 Post-baseline electrolyte outcomes (Hypokalemia / Hypomagnesemia / Hyponatremia)
+
+```{r}
+#| label: clean-electrolyte-outcomes
+final_master$baseline_sample_date <- as.Date(final_master$baseline_sample_date)
+
+# Hypokalemia: first K < 3.0 mEq/L within 90 days post-baseline
+Hypokalemia_value <- post_lab_less_than_cutpoint(
+  data = master_lab_new, days = 90, index_date = baseline_sample_date,
+  Group_ID = "K", Group_ID_name = "Hypokalemia", cutpoint = 3
+)
+
+# Hypomagnesemia: first Mg < 0.9 mg/dL within 90 days post-baseline
+Hypomagnesemia_value <- post_lab_less_than_cutpoint(
+  data = master_lab_new, days = 90, index_date = baseline_sample_date,
+  Group_ID = "MG", Group_ID_name = "Hypomagnesemia", cutpoint = 0.9
+)
+
+# Hyponatremia: first Na < 125 mEq/L within 90 days post-baseline
+Hyponatremia_value <- post_lab_less_than_cutpoint(
+  data = master_lab_new, days = 90, index_date = baseline_sample_date,
+  Group_ID = "NA", Group_ID_name = "Hyponatremia", cutpoint = 125
+)
+
+final_master <- final_master %>% merge(Hypokalemia_value,    by = "EMPI", all.x = TRUE)
+final_master <- final_master %>% merge(Hypomagnesemia_value, by = "EMPI", all.x = TRUE)
+final_master <- final_master %>% merge(Hyponatremia_value,   by = "EMPI", all.x = TRUE)
+
+# Binary outcome flags and time-to-event (days); 90 if no event occurred
+final_master <- final_master %>%
+  mutate(
+    time_to_Hypomagnesemia = post_Hypomagnesemia_cutpoint_90days_date - baseline_sample_date,
+    time_to_Hypokalemia    = post_Hypokalemia_cutpoint_90days_date    - baseline_sample_date,
+    time_to_Hyponatremia   = post_Hyponatremia_cutpoint_90days_date   - baseline_sample_date,
+    Hypomagnesemia_90days  = ifelse(!is.na(post_Hypomagnesemia_cutpoint_90days), 1, 0),
+    Hypokalemia_90days     = ifelse(!is.na(post_Hypokalemia_cutpoint_90days),    1, 0),
+    Hyponatremia_90days    = ifelse(!is.na(post_Hyponatremia_cutpoint_90days),   1, 0)
+  ) %>%
+  mutate(
+    time_to_Hypomagnesemia = ifelse(is.na(time_to_Hypomagnesemia), 90, time_to_Hypomagnesemia),
+    time_to_Hypokalemia    = ifelse(is.na(time_to_Hypokalemia),    90, time_to_Hypokalemia),
+    time_to_Hyponatremia   = ifelse(is.na(time_to_Hyponatremia),   90, time_to_Hyponatremia)
+  )
+```
+
+## 5.11 Thyroid disease (RPDR diagnosis + medication)
+
+```{r}
+#| label: clean-thyroid
+thyroid <- c("hypothyroidism", "hyperthyroidism", "thyroiditis")
+thyroid_med_list <- c("Methimazole", "Tapazole", "Propylthiouracil", "Potassium Iodide",
+                      "Radioactive Iodine ", "levothyroxine", "Euthyrox", "Synthroid",
+                      "Eltroxin", "Desiccated Thyroid Extract", "Armour Thyroid")
+
+thyroid_final <- dia_list_name(
+  master_dia,
+  listed_names = thyroid,
+  med_data     = master_med,
+  med_names    = thyroid_med_list,
+  index_date   = baseline_sample_date
+)
+
+# thyroid: 1 if diagnosed or treated for thyroid disease before baseline
+final_master <- final_master %>%
+  mutate(thyroid = ifelse(EMPI %in% thyroid_final$EMPI, 1, 0))
+```
+
+## 5.12 HIV from RPDR (hiv_rpdr)
+
+```{r}
+#| label: clean-hiv-rpdr
+# hiv_rpdr: HIV status from RPDR diagnoses + medications (Jiaxuan's pipeline).
+# Note: There is no hiv column in the REDCap CSV. The hiv variable in Copy 709 / cleaned_master
+# was always derived from RPDR. Jiaxuan's final code Rmd used the name hiv_new.
+#
+# Step 1: dia_list_name with HIV terms, excluding false-positive diagnosis names
+# Step 2: Further exclude patients whose HIV diagnosis co-occurs with hepatitis B/C
+
+no_hiv <- c(
+  "1 - Hives-Oncall",
+  "Contact with and (suspected) exposure to human immunodeficiency virus [hiv]",
+  "Encounter for screening for human immunodeficiency virus [hiv]",
+  "counseling",
+  "Inconclusive laboratory evidence of human immunodeficiency virus [hiv]",
+  "Asymptomatic human immunodeficiency virus [hiv] infection status",
+  "Family history of human immunodeficiency virus [hiv] disease",
+  "HIV exposure-Oncall"
+)
+
+hiv_terms <- c("hiv", "human immunodeficiency virus")
+
+hiv_med_list <- c(
+  "abacavir", "ziagen", "emtricitabine", "emtriva", "lamivudine", "tenofovir", "viread",
+  "zidovudine", "retrovir", "doravirine", "pifeltro", "efavirenz", "sustiva", "etravirine",
+  "intelence", "nevirapine", "viramune", "rilpivirine", "edurant", "atazanavir", "reyataz",
+  "darunavir", "prezista", "fosamprenavir", "lexiva", "ritonavir", "norvir", "saquinavir",
+  "invirase", "tipranavir", "aptivus", "enfuvirtide", "fuzeon", "maraviroc", "selzentry",
+  "cabotegravir", "vocabria", "dolutegravir", "tivicay", "raltegravir", "isentress", "fostemsavir",
+  "rukobia", "ibalizumab", "trogarzo", "lenacapavir", "sunlenca",
+  "atripla", "biktarvy", "cabenuva", "cimduo", "combivir", "complera", "descovy", "dovato",
+  "epzicom", "evotaz", "genvoya", "juluca", "kaletra", "odefsey", "prezcobix", "stribild",
+  "symtuza", "triumeq", "truvada", "trizivir",
+  "didanosine", "stavudine", "videx", "zerit", "delavirdine", "rescriptor", "indinavir",
+  "crixivan", "nelfinavir", "viracept", "fortovase"
+)
+
+hiv_rpdr_initial <- dia_list_name(
+  master_dia,
+  listed_names  = hiv_terms,
+  excluded_names = no_hiv,
+  med_data       = master_med,
+  med_names      = hiv_med_list,
+  index_date     = baseline_sample_date
+)
+
+# Step 2: Further filter — exclude patients whose HIV diagnosis also mentions hepatitis B/C
+hiv_rpdr_cleaned <- hiv_rpdr_initial %>%
+  left_join(master_dia %>% select(EMPI, Diagnosis_Name), by = "EMPI") %>%
+  filter(
+    str_detect(Diagnosis_Name, regex("hiv|human immunodeficiency virus", ignore_case = TRUE)),
+    !str_detect(Diagnosis_Name, regex("hepatitis B|hepatitis C", ignore_case = TRUE))
+  ) %>%
+  distinct(EMPI)
+
+final_master <- final_master %>%
+  mutate(hiv_rpdr = ifelse(EMPI %in% hiv_rpdr_cleaned$EMPI, 1, 0))
+
+table(final_master$hiv_rpdr)
+```
+
+## 5.13 pre_WBC_45days — NOT available
+
+> **`pre_WBC_45days`** cannot be created: WBC is not present in either RPDR lab pull
+> (`mes98_051625135308675085_Lab.txt` has HGB/PLT/ALB/CRE;
+> `mes98_071025164203189492_Lab.txt` has K/MG/NA).
+> A new RPDR pull including `Group_Id = "WBC"` is needed to create this variable.
+> It was listed in Jiaxuan's `all_vars` and Table 1 but was likely pre-computed in an
+> external xlsx file that is no longer used.
+
+## 5.14 Charlson Comorbidity Index
+
+```{r}
+#| label: clean-charlson
+### Charlson comorbidity index
+ici_diag <- dia %>% subset(select = c(EMPI, Diagnosis_Name, Date, Code, Code_Type))
+ici_diag <- ici_diag %>% merge(final_master %>% select(EMPI, baseline_sample_date),
+                                by = "EMPI", all.y = TRUE)
+ici_diag$Date <- as.Date(ici_diag$Date, "%m/%d/%Y")
+ici_diag_pre  <- subset(ici_diag, Date < baseline_sample_date)
+
+# Leukemia and lymphoma must be extracted manually (ICD code map includes them under cancer)
+leukemia <- ici_diag_pre[grep("leukemia", ici_diag_pre$Diagnosis_Name, ignore.case = TRUE), ]
+leukemia <- leukemia[!grepl("lymphoma", leukemia$Diagnosis_Name, ignore.case = TRUE), ]
+leukemia <- as.data.frame(table(leukemia$EMPI))
+names(leukemia)[names(leukemia) == "Var1"] <- "EMPI"
+names(leukemia)[names(leukemia) == "Freq"] <- "leukemia"
+leukemia$leukemia[leukemia$leukemia > 0] <- 1
+
+lymphoma <- ici_diag_pre[grep("lymphoma", ici_diag_pre$Diagnosis_Name, ignore.case = TRUE), ]
+lymphoma <- lymphoma[!grepl("leukemia", lymphoma$Diagnosis_Name, ignore.case = TRUE), ]
+lymphoma <- as.data.frame(table(lymphoma$EMPI))
+names(lymphoma)[names(lymphoma) == "Var1"] <- "EMPI"
+names(lymphoma)[names(lymphoma) == "Freq"] <- "lymphoma"
+lymphoma$lymphoma[lymphoma$lymphoma > 0] <- 1
+
+leuk_lymph <- merge(leukemia, lymphoma, by = "EMPI", all = TRUE)
+
+# Compute comorbidity scores separately for ICD-9 and ICD-10
+diag_icd9  <- subset(ici_diag_pre, Code_Type == "ICD9",  select = c("EMPI", "Code"))
+diag_icd10 <- subset(ici_diag_pre, Code_Type == "ICD10", select = c("EMPI", "Code"))
+diag_icd9  <- diag_icd9[!(diag_icd9$Code == ""), ]
+diag_icd10 <- diag_icd10[!(diag_icd10$Code == ""), ]
+
+charlson9  <- comorbidity(x = diag_icd9,  id = "EMPI", code = "Code",
+                           map = "charlson_icd9_quan",  assign0 = FALSE)
+charlson10 <- comorbidity(x = diag_icd10, id = "EMPI", code = "Code",
+                           map = "charlson_icd10_quan", assign0 = FALSE)
+
+charlson <- merge(charlson9, charlson10, by = "EMPI", all = TRUE)
+charlson[is.na(charlson)] <- 0
+
+# Take maximum across ICD-9 / ICD-10 for each domain
+charlson$ami      <- pmax(charlson$mi.x,       charlson$mi.y)
+charlson$chf      <- pmax(charlson$chf.x,      charlson$chf.y)
+charlson$pvd      <- pmax(charlson$pvd.x,      charlson$pvd.y)
+charlson$cevd     <- pmax(charlson$cevd.x,     charlson$cevd.y)
+charlson$dementia <- pmax(charlson$dementia.x,  charlson$dementia.y)
+charlson$copd     <- pmax(charlson$cpd.x,      charlson$cpd.y)
+charlson$rheumd   <- pmax(charlson$rheumd.x,   charlson$rheumd.y)
+charlson$pud      <- pmax(charlson$pud.x,      charlson$pud.y)
+charlson$mld      <- pmax(charlson$mld.x,      charlson$mld.y)
+charlson$diab     <- pmax(charlson$diab.x,     charlson$diab.y)
+charlson$diabwc   <- pmax(charlson$diabwc.x,   charlson$diabwc.y)
+charlson$hp       <- pmax(charlson$hp.x,       charlson$hp.y)
+charlson$rend     <- pmax(charlson$rend.x,     charlson$rend.y)
+charlson$canc     <- pmax(charlson$canc.x,     charlson$canc.y)
+charlson$msld     <- pmax(charlson$msld.x,     charlson$msld.y)
+charlson$metacanc <- pmax(charlson$metacanc.x, charlson$metacanc.y)
+charlson$aids     <- pmax(charlson$aids.x,     charlson$aids.y)
+
+charlson <- charlson %>%
+  subset(select = c(EMPI, ami, chf, pvd, cevd, dementia, copd, rheumd, pud, mld,
+                    diab, diabwc, hp, rend, canc, msld, metacanc, aids))
+charlson$canc <- 1  # all patients have cancer by definition
+
+charlson <- merge(charlson, leuk_lymph, by = "EMPI", all = TRUE)
+charlson[is.na(charlson)] <- 0
+
+ages <- final_master %>% subset(select = c(EMPI, age))
+charlson <- merge(charlson, ages, by.x = 1, by.y = 1)
+
+# Weighted Charlson score with age adjustment (Quan 2011)
+charlson$score <-
+  charlson$ami + charlson$chf + charlson$pvd + charlson$cevd +
+  charlson$dementia + charlson$copd + charlson$rheumd + charlson$pud +
+  ifelse(charlson$mld == 1 & charlson$msld == 0, 1, 0) +
+  ifelse(charlson$msld == 1, 3, 0) +
+  charlson$diab + charlson$diabwc +
+  charlson$hp * 2 + charlson$rend * 2 + charlson$canc * 2 +
+  charlson$metacanc * 4 + charlson$aids * 6 +
+  charlson$leukemia * 2 + charlson$lymphoma * 2 +
+  ifelse(charlson$age >= 50 & charlson$age < 60, 1, 0) +
+  ifelse(charlson$age >= 60 & charlson$age < 70, 2, 0) +
+  ifelse(charlson$age >= 70 & charlson$age < 80, 3, 0) +
+  ifelse(charlson$age >= 80, 4, 0)
+
+# cci: categorical severity
+charlson_sc <- charlson %>% subset(select = c(EMPI, score))
+charlson_sc$cci <- ifelse(charlson_sc$score < 3, "mild",
+                   ifelse(charlson_sc$score >= 3 & charlson_sc$score < 5, "moderate", "severe"))
+
+final_master <- final_master %>% merge(charlson_sc, by = "EMPI", all.x = TRUE)
+```
+
+## 5.15 Competing risk variables
+
+```{r}
+#| label: clean-competing-risk
+# Apply cmp_variable() to build cmp_time_* and cmp_status_* for each outcome.
+# AE outcomes (anemia, throm, aki, grade_2/3_aes) are now computed from RPDR pipeline
+# (section 4.9) and their competing-risk variables are computed here.
+
+# Adverse event competing risk
+final_master <- cmp_variable(final_master, event_time = time_to_anemia_2, event_status = Anemia_g2_90days, name = "anemia_2")
+final_master <- cmp_variable(final_master, event_time = time_to_anemia_3, event_status = Anemia_g3_90days, name = "anemia_3")
+final_master <- cmp_variable(final_master, event_time = time_to_throm_2,  event_status = Throm_g2_90days,  name = "throm_2")
+final_master <- cmp_variable(final_master, event_time = time_to_throm_3,  event_status = Throm_g3_90days,  name = "throm_3")
+final_master <- cmp_variable(final_master, event_time = time_to_aki_2,    event_status = AKI_g2_90days,    name = "aki_2")
+final_master <- cmp_variable(final_master, event_time = time_to_aki_3,    event_status = AKI_g3_90days,    name = "aki_3")
+final_master <- cmp_variable(final_master, event_time = time_to_anemia_2, event_status = grade_2_aes,      name = "grade_2_aes")
+final_master <- cmp_variable(final_master, event_time = time_to_anemia_3, event_status = grade_3_aes,      name = "grade_3_aes")
+
+# Platinum-related hospitalization (side effects: hosp reasons 1–7)
+final_master <- cmp_variable(final_master,
+  event_time = time_to_side_effect, event_status = side_effect, name = "side_effect")
+
+# Hospitalization by reason 1–11 (see Section 6.2 for the hosp_8–11 bug fix)
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_1,  event_status = event_hosp_1,  name = "hosp_1")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_2,  event_status = event_hosp_2,  name = "hosp_2")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_3,  event_status = event_hosp_3,  name = "hosp_3")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_4,  event_status = event_hosp_4,  name = "hosp_4")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_5,  event_status = event_hosp_5,  name = "hosp_5")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_6,  event_status = event_hosp_6,  name = "hosp_6")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_7,  event_status = event_hosp_7,  name = "hosp_7")
+# hosp_8–11 use their own event_status (FIXED — see Section 6.2)
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_8,  event_status = event_hosp_8,  name = "hosp_8")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_9,  event_status = event_hosp_9,  name = "hosp_9")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_10, event_status = event_hosp_10, name = "hosp_10")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_11, event_status = event_hosp_11, name = "hosp_11")
+
+# Electrolyte outcomes
+final_master <- cmp_variable(final_master, event_time = time_to_Hypomagnesemia, event_status = Hypomagnesemia_90days, name = "Hypomagnesemia")
+final_master <- cmp_variable(final_master, event_time = time_to_Hypokalemia,    event_status = Hypokalemia_90days,    name = "Hypokalemia")
+final_master <- cmp_variable(final_master, event_time = time_to_Hyponatremia,   event_status = Hyponatremia_90days,   name = "Hyponatremia")
+
+# Convert all cmp_status_* columns to factor (required by tidycmprsk)
+final_master <- final_master %>%
+  mutate(across(contains("cmp_status_"), as.factor))
+```
+
+---
+
+# 6 Bug Documentation
+
+## 6.1 Bug: `pre_lab` — wrong date column (found in Jiaxuan's code)
+
+### Old code — incorrect (Jiaxuan's version)
+
+The filter and sort used `Baseline_sample_Date` (the patient's fixed index date)
+instead of `Seq_Date_Time` (the actual lab collection date).
+Because `Baseline_sample_Date` is the same value for every lab row of a given patient,
+the date-window filter is always `TRUE`, and `desc()` sorting is meaningless —
+`distinct()` returns an arbitrary row rather than the most recent lab.
+
+```{r}
+#| label: bug-pre-lab-old
+#| eval: false
+# WRONG — from Jiaxuan's final code Rmd
+pre_lab_JIAXUAN_BUG <- function(data, month, time, index_date, Group_ID, Group_ID_name) {
+  index_date <- enquo(index_date)
+  if (month) { time_value <- time * 30 } else { time_value <- time }
+
+  lab_name      <- paste0("pre_", Group_ID_name, "_", time_value, "days")
+  lab_date_name <- paste0("pre_", Group_ID_name, "_", time_value, "days_date")
+
+  result <- data %>%
+    filter(Group_Id %in% Group_ID) %>%
+    filter(grepl("^[><]?\\d+\\.?\\d* ?$", Result)) %>%
+    mutate(Result = as.numeric(parse_number(Result))) %>%
+    filter(!is.na(Result)) %>%
+    # BUG: filters on Baseline_sample_Date (the index date itself, same for all lab rows)
+    # → window is always TRUE; no actual date filtering happens
+    filter(Baseline_sample_Date >= (!!index_date) - time_value,
+           Baseline_sample_Date <= !!index_date) %>%
+    # BUG: sorts by Baseline_sample_Date (constant per patient) not the lab date
+    # → desc() has no effect; "closest" is arbitrary
+    arrange(EMPI, desc(Baseline_sample_Date)) %>%
+    distinct(EMPI, .keep_all = TRUE) %>%
+    rename(!!lab_name := Result, !!lab_date_name := Baseline_sample_Date) %>%
+    select(EMPI, !!lab_name, !!lab_date_name)
+
+  return(result)
+}
+```
+
+### Fixed code — correct (Copy 709 version, used in Section 3.5)
+
+```{r}
+#| label: bug-pre-lab-fixed
+#| eval: false
+# CORRECT — from Copy 709; also defined in Section 3.5 above
+pre_lab_FIXED <- function(data, month, time, index_date, Group_Id) {
+  index_date <- enquo(index_date)
+  if (month) { time_value <- time * 30 } else { time_value <- time }
+
+  lab_name      <- paste0("pre_", Group_Id, "_", time_value, "days")
+  lab_date_name <- paste0("pre_", Group_Id, "_", time_value, "days_date")
+
+  result <- data %>%
+    filter(Group_Id == !!Group_Id, grepl("^\\d+\\.\\d+$", Result)) %>%
+    filter(!is.na(Result)) %>%
+    mutate(Result = as.numeric(Result)) %>%
+    # FIXED: filter on Seq_Date_Time (actual lab collection date)
+    filter(Seq_Date_Time >= (!!index_date) - time_value,
+           Seq_Date_Time <= !!index_date) %>%
+    # FIXED: sort by Seq_Date_Time descending → closest lab before baseline comes first
+    arrange(EMPI, desc(Seq_Date_Time)) %>%
+    distinct(EMPI, .keep_all = TRUE) %>%
+    rename(!!lab_name := Result, !!lab_date_name := Seq_Date_Time) %>%
+    select(EMPI, !!lab_name, !!lab_date_name)
+
+  return(result)
+}
+```
+
+---
+
+## 6.2 Bug: `cmp_variable` — wrong `event_status` for hosp_8 through hosp_11 (found in Copy 709)
+
+### Old code — incorrect (Copy 709)
+
+`event_hosp_7` was pasted in for all four calls instead of the matching reason number.
+This made `cmp_status_hosp_8` through `cmp_status_hosp_11` identical to `cmp_status_hosp_7`.
+
+```{r}
+#| label: bug-cmp-hosp-old
+#| eval: false
+# WRONG — from Copy 709 (all four use event_hosp_7 as the event status)
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_8,
+                             event_status = event_hosp_7, name = "hosp_8")   # should be event_hosp_8
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_9,
+                             event_status = event_hosp_7, name = "hosp_9")   # should be event_hosp_9
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_10,
+                             event_status = event_hosp_7, name = "hosp_10")  # should be event_hosp_10
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_11,
+                             event_status = event_hosp_7, name = "hosp_11")  # should be event_hosp_11
+```
+
+### Fixed code — correct (used in Section 5.15)
+
+```{r}
+#| label: bug-cmp-hosp-fixed
+#| eval: false
+# CORRECT — each call uses its own matching event_status column
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_8,
+                             event_status = event_hosp_8,  name = "hosp_8")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_9,
+                             event_status = event_hosp_9,  name = "hosp_9")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_10,
+                             event_status = event_hosp_10, name = "hosp_10")
+final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_11,
+                             event_status = event_hosp_11, name = "hosp_11")
+```
+
+---
+
+## 6.3 Bug: `ckd_epi_cys_gfr` — function referenced but never defined anywhere
+
+`prospective cys.Rmd` calls `mapply(ckd_epi_cys_gfr, ...)` but this function is not
+defined in that file, in `R code summary.Rmd`, in `Copy 709.Rmd`, or in the primary
+analysis Rmd. It does not exist in any file in the project.
+
+**Resolution:** Section 4.8 uses the published CKD-EPI 2012 CysC formula (Inker 2012):
+`133 × min(cys/0.8, 1)^(−0.499) × max(cys/0.8, 1)^(−1.328) × 0.996^age × female(0.932)`.
+The original source for the version used in `prospective cys.Rmd` is unknown.
+
+---
+
+## 6.4 Note: `ckd_epi_cre_cys_gfr` — coefficients verified against CKD-EPI 2021
+
+The combined creatinine + cystatin C function in `R code summary.Rmd` and Section 4.8 uses:
+
+| Parameter | Code | Official CKD-EPI 2021 Cr+CysC (NKF) | Match? |
+|---|---|---|---|
+| Multiplier | 135 | 135 | ✓ |
+| `a` (male) | −0.144 | −0.144 | ✓ |
+| `a` (female) | −0.219 | −0.219 | ✓ |
+| Max-Cr exponent | −0.544 | −0.544 | ✓ |
+| Min-CysC exponent | −0.323 | −0.323 | ✓ |
+| Max-CysC exponent | −0.778 | −0.778 | ✓ |
+| Age exponent | 0.9961 | 0.9961 | ✓ |
+| Female multiplier | 0.963 | 0.963 | ✓ |
+
+**`ckd_epi_cre_cys_gfr` matches the official NKF CKD-EPI 2021 Creatinine-Cystatin C
+equation exactly.** An earlier note in this file (now corrected) incorrectly stated the
+coefficients were non-standard.
+
+---
+
+## 6.5 Bug: `dia_list_name` in `R code summary.Rmd` — missing `index_date` filter
+
+The version of `dia_list_name` in `R code summary.Rmd` lacks the `index_date` parameter
+and the `filter(Date <= index_date)` step. This means it returns all diagnoses regardless
+of when they were recorded — including diagnoses after the baseline date.
+
+**Resolution:** The version from `Copy 709.Rmd` (used in Section 3.7 of this file) is
+correct: it accepts `index_date` and filters `Date <= index_date` before any name matching.
+
+---
+
+## 6.6 Bug: Orphaned `%>%` fragment in `R code summary.Rmd` (lines 348–380)
+
+Lines 348–380 of `R code summary.Rmd` begin with `%>%` and have no left-hand assignment,
+making the block unparseable as standalone R code. Running or sourcing that file as-is will
+throw a parse error. The fragment appears to be a detached pipeline that was accidentally
+cut from its parent expression. It has no effect on the analysis in this file since
+`R code summary.Rmd` is referenced only for function definitions, not sourced.
+
+---
+
+# 7 Pipeline Summary & Plot
+
+## 7.1 Data pipeline summary
+
+| Section | Step | Key output |
+|---|---|---|
+| 4.1–4.4 | REDCap load, hosp events, side_effect | `master`, `side_effect` |
+| 4.5 | Merge side_effect + drug indicators | `final_master` base |
+| 4.6 | Rename dates (empi→EMPI, bl_date→baseline_sample_date) | — |
+| 4.7 | Load RPDR (lab, lab_new, dia, med) → master_lab/dia/med | — |
+| 4.8 | Define eGFR functions (Cockcroft, CKD-EPI cre/cys/combined) | — |
+| 4.9 | Pre-labs (CRE, HGB, PLT, ALB, K, MG, NA), eGFR vars, AE labs | Merged into `final_master` |
+| 5.1 | Mortality, time_to_death_90 | — |
+| 5.2 | Censor hosp times at 90 days | — |
+| 5.3 | AE binary flags + time-to-AE | Anemia/Throm/AKI grade 2/3 |
+| 5.4 | Exclusion filter (missing cystatin C / platinum) | Cohort = ~877 pts |
+| 5.5–5.6 | Exposure, BMI/age/ICI/CKD stage | cr_cys_7, ckd_stage_cg, etc. |
+| 5.7 | Cancer type categories | `cancer_type_cat_7` (7 levels) |
+| 5.8 | Platinum dosing | dose_1, carbo_dose, cis_dose, etc. |
+| 5.9 | Rename baseline labs (PDF → Copy 709 names) | baseline_cre, baseline_cys_c |
+| 5.10 | Electrolyte outcomes (Hypokalemia/Hypomagnesemia/Hyponatremia) | — |
+| 5.11 | Thyroid (RPDR) | `thyroid` |
+| 5.12 | HIV from RPDR | `hiv_rpdr` |
+| 5.13 | pre_WBC_45days — NOT available (WBC not in RPDR pulls) | — |
+| 5.14 | Charlson CCI | `score`, `cci` |
+| 5.15 | Competing risk variables — all outcomes | cmp_time_* / cmp_status_* |
+
+## 7.2 Pipeline plot
+
+```{r}
+#| label: pipeline-plot
+#| fig-width: 14
+#| fig-height: 9
+source("/Users/to909/Desktop/Meg/Cystain C redcap/pipeline_plot.R")
+```
+
+---
+
+# 8 Verification Checks
+
+```{r}
+#| label: check-exposure
+# Primary exposure distribution
+table(final_master$cr_cys_7)
+table(final_master$cr_cys_cat)
+```
+
+```{r}
+#| label: check-ae-by-exposure
+# AE outcomes by exposure group
+table(final_master$cr_cys_7, final_master$grade_2_aes)
+table(final_master$cr_cys_7, final_master$grade_3_aes)
+```
+
+```{r}
+#| label: check-pre-lab-window
+# Verify pre_lab date window: lab date should be within 45 days before baseline
+pre_HGB_45days %>%
+  left_join(final_master %>% select(EMPI, baseline_sample_date), by = "EMPI") %>%
+  mutate(days_before_baseline = as.numeric(baseline_sample_date - pre_HGB_45days_date)) %>%
+  summarise(
+    min_days  = min(days_before_baseline, na.rm = TRUE),   # must be ≥ 0
+    max_days  = max(days_before_baseline, na.rm = TRUE),   # must be ≤ 45
+    mean_days = mean(days_before_baseline, na.rm = TRUE),
+    n_missing = sum(is.na(days_before_baseline))
+  )
+```
+
+```{r}
+#| label: check-cmp-status-values
+# cmp_status_* must only contain 0, 1, 2
+lapply(
+  grep("cmp_status_", names(final_master), value = TRUE),
+  function(col) table(final_master[[col]])
+)
+```

@@ -1,0 +1,1072 @@
+---
+title: "Untitled"
+output: html_document
+date: "2025-05-28"
+---
+```{r}
+library(tidyverse)
+library(tableone)
+library(writexl)
+library(gtsummary)
+library(survival)
+library(ggplot2)
+library(readxl)
+library(ggpubr)
+library(splines)
+# library(xlsx)
+library(lattice)
+library(mice)
+library(DescTools)
+library(survminer)
+library(cmprsk)
+library(haven)
+library(sqldf)
+library(twang)
+library(survey)
+library(table1)
+
+##### read master file 
+master<- read_excel(
+'/Users/to909/Downloads/CysC patient (N=711) for Tianqi_5.30.2025.xlsx'
+)
+```
+
+```{r}
+
+
+
+standardize_colnames <- function(df) {
+  # Replace non-standard characters with underscore
+  names(df) <- gsub("[^[:alnum:]_]", "_", names(df))
+  
+  # Reduce multiple underscores to a single underscore
+  names(df) <- gsub("_+", "_", names(df))
+  
+  # Remove trailing underscore
+  names(df) <- gsub("_$", "", names(df))
+  
+  return(df)
+}
+
+
+
+```
+
+```{r}
+##### read master file 
+master <- standardize_colnames(master)
+
+
+master$Baseline_Sample_Date <- as.Date(master$Baseline_Sample_Date, format = "%Y-%m-%d")
+
+
+##### read RPDR
+
+
+#dems
+dems <- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/RPDR 800/mes98_051625135308675085_Dem.txt', sep = '|',
+                   fill = TRUE,
+                   quote = "",
+                   header = T)
+
+
+#Med
+med <- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/RPDR 800/mes98_051625135308675085_Med.txt', sep = '|',
+                  fill = TRUE,
+                  quote = "",
+                  header = T) %>% select(EMPI,Medication_Date,Medication)
+med$Medication_Date <- as.Date(med$Medication_Date, "%m/%d/%Y")
+
+
+
+
+
+#Dia
+dia <- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/RPDR 800/mes98_051625135308675085_Dia.txt', sep = '|',
+                  fill = TRUE,
+                  quote = "",
+                  header = T) %>% select(EMPI,Code,Date,Diagnosis_Name) 
+dia$Date <- as.Date(dia$Date,"%m/%d/%Y")
+
+
+#Lab
+
+lab <- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/RPDR 800/mes98_051625135308675085_Lab.txt', sep = '|',
+                  fill = TRUE,
+                  quote = "",
+                  header = T)%>% select(EMPI,Seq_Date_Time,Result,Group_Id,Test_Description)  
+
+lab$Seq_Date_Time <- as.Date(lab$Seq_Date_Time, "%m/%d/%Y")
+
+
+master_list <- master %>% select(EMPI,Baseline_Sample_Date)
+##### create master rpdr
+master_med <- master_list %>% merge(med,by="EMPI",all.x = T)
+master_lab <- merge(master_list,lab,by="EMPI",all.y = T)
+master_dia <- merge(master_list,dia,by="EMPI",all.y = T)
+
+```
+
+
+
+```{r}
+########################################## function ########################################## 
+
+############ Medication  1 YEAR BEFORE
+med_list <- function(names,index_date,excluded_names = NULL, data) {
+  if (!is.null(excluded_names)) {
+    result <- data %>%
+      filter(grepl(paste(names, collapse = "|"), Medication, ignore.case = TRUE) & !grepl(paste(excluded_names, collapse = "|"), Medication, ignore.case = TRUE)) %>%
+      filter(Medication_Date >={{index_date}}-365,Medication_Date<={{index_date}} ) %>% 
+      distinct(EMPI)
+  } else {
+    result <- data %>%
+      filter(grepl(paste(names, collapse = "|"), Medication, ignore.case = TRUE)) %>%
+      filter(Medication_Date >={{index_date}}-365,Medication_Date<={{index_date}} ) %>% 
+      distinct(EMPI)
+  }
+  
+  return(result)
+}
+
+
+############# Diagnosis function using icd
+
+
+
+dia_list_icd <- function(data,index_date,icd_code,excluded_names = NULL, med_data = NULL, med_names = NULL){
+  if (is.null(excluded_names)) {
+    dia_result <- data %>% filter(Date<={{index_date}}) %>% 
+      filter(grepl(paste(icd_code, collapse = "|"), Code, ignore.case = TRUE),
+             grepl(paste(excluded_names, collapse = "|"), Diagnosis_Name, ignore.case = TRUE)) %>% distinct(EMPI)
+  }
+  else {
+    dia_result <- data %>% filter(Date<={{index_date}}) %>% 
+      filter(grepl(paste(icd_code, collapse = "|"), Code, ignore.case = TRUE)) %>% distinct(EMPI)
+  }
+  
+  if (!is.null(med_data)) {
+    med_result <- med_data %>% filter(Medication_Date<={{index_date}}) %>% 
+      filter(grepl(paste(med_names, collapse = "|"), Medication, ignore.case = TRUE)) %>% distinct(EMPI)
+  } else {
+    med_result <- NULL
+  }
+  
+  final_result <- rbind(dia_result,med_result) %>% distinct(EMPI)
+  return(final_result)
+}
+
+############## Diagnosis function using name 
+dia_list_name <- function(data,listed_names,index_date,excluded_names = NULL, med_data = NULL, med_names = NULL){
+  if (is.null(excluded_names)) {
+    dia_result <- data %>%  filter(Date<={{index_date}}) %>% 
+      filter(grepl(paste(listed_names, collapse = "|"), Diagnosis_Name, ignore.case = TRUE),
+             grepl(paste(excluded_names, collapse = "|"), Diagnosis_Name, ignore.case = TRUE)) %>% distinct(EMPI)
+  }
+  else {
+    dia_result <- data %>%  filter(Date<={{index_date}}) %>% 
+      filter(grepl(paste(listed_names, collapse = "|"), Diagnosis_Name, ignore.case = TRUE),
+             !grepl(paste(excluded_names, collapse = "|"), Diagnosis_Name, ignore.case = TRUE)) %>% distinct(EMPI)
+  }
+  
+  if (!is.null(med_data)) {
+    med_result <- med_data %>%  filter(Medication_Date<={{index_date}}) %>% 
+      filter(grepl(paste(med_names, collapse = "|"), Medication, ignore.case = TRUE)) %>% distinct(EMPI)
+  } else {
+    med_result <- NULL
+  }
+  
+  final_result <- rbind(dia_result,med_result) %>% distinct(EMPI)
+  return(final_result)
+}
+
+```
+
+```{r}
+################################# Medication 
+
+
+#####ppi
+ppi_names <- c("omeprazole","Prilosec","Yosprala","lansoprazole","Prevacid","Prevacid 24-Hour",
+               "dexlansoprazole","Dexilent","rabeprazole","Aciphex","pantoprazole","Protonix",
+               "esomeprazole","Nexium","Vimovo","Zegerid","dexilant","dexlansoprazole")
+#####ace_arb
+ace_arb_names <- c("benazepril", "lotensin", "captopril", "capoten", "enalapril", "vasotech",
+                   "epaned", "lexxel", "fosinopril", "monopril", "lisinopril", "prinvil",
+                   "zestril", "qbrelis", "moexipril", "univasc", "perindopril", "aceon",
+                   "quinapril", "accupril", "ramipril", "altace", "trandolapril", "mavik",
+                   "azilsartan", "edarbi", "candesartan", "atacand", "eprosartan", "teveten",
+                   "irbesartan", "avapro", "telmisartan", "micardis", "valsartan", "diovan",
+                   "losartan", "cozaar", "olmesartan", "benicar", "lotrel", "hyzaar")
+#####diuretics
+diuretics_names <- c("bumetanide","bumex","ethacrynic acid","edecrin","furosemide","Lasix",
+                     "torsemide","demadex", "hydrochlorothiazide","hctz","benicar","chlorathiazide",
+                     "chlorthalidone","diuril","hyzaar","indapamide","metolazone","micardis",
+                     "prinzide", "aldactone","amiloride","dyazide","eplerenone","maxzide",
+                     "spironolactone","triamterene")
+
+#####steroids
+steroids_names<- c("prednisone", "methylpred", "Deltasone", "Orasone", "budesonide", "Entocort", "methylprednisolone", "prednisolone", "Millipred", "dexamethasone", "Ozurdex", "Maxidex", "DexPak")
+no_steroid_names <- c("Inhaler","Nebulization","Ointment","Ophthalmic","Symbicort")
+
+
+######statins
+statins_list <- c("Atorvastatin", "Atorvaliq", "Lipitor",
+                  "Cerivastatin", "Baycol",
+                  "Fluvastatin", "Lescol", "Lescol XL",
+                  "Lovastatin", "Altocor", "Altoprev", "Mevacor",
+                  "Pitavastatin", "Livalo", "Nikita Zypitamag",
+                  "Pravastatin", "Pravachol",
+                  "Rosuvastatin", "Crestor", "Ezallor",
+                  "Simvastatin", "FloLipid", "Zocor")
+###### nsaids
+nsaids_list <- c("celecoxib","celebrex","diclofenac","cambia","cataflam","voltaren","zipsor",
+                 "zorvolex","diflunisal","dolobid","etodolac","lodine","ibuprofen","motrin",
+                 "advil","idomethacin","indocin","ketoprofen","orudis","ketorolac","toradol",
+                 "nabumetone","relafen","naproxen","aleve","anaprox","naprelan","naprosyn",
+                 "oxaprozin","daypro","piroxicam","feldene","salsalate","disalsate","amigesic",
+                 "sulindac","clinoril","tolmetin","tolectin")
+
+
+
+########### final medication list 
+ppi <- med_list(data=master_med,index_date=Baseline_Sample_Date,names=ppi_names)
+
+ace_arb <- med_list(data=master_med,index_date=Baseline_Sample_Date,names=ace_arb_names)
+
+diu <- med_list(data=master_med,index_date=Baseline_Sample_Date,names=diuretics_names)
+
+steroids <- med_list(data=master_med,index_date=Baseline_Sample_Date,names=steroids_names,excluded_names =no_steroid_names)
+
+statins<- med_list(statins_list,index_date=Baseline_Sample_Date, data=master_med)
+
+nsaids<- med_list(nsaids_list,index_date=Baseline_Sample_Date, data=master_med)
+
+
+
+
+########################################## Diagnosis  variables #####################
+
+################ Diabetes
+diabetes_codes <- c(
+  # ICD-9 Codes for Diabetes
+  "250.00",   # Diabetes mellitus without complication, type 2 or unspecified type, not stated as uncontrolled
+  "250.01",   # Diabetes mellitus without complication, type 1, not stated as uncontrolled
+  "250.02",   # Diabetes mellitus without complication, type 2 or unspecified type, uncontrolled
+  "250.03",   # Diabetes mellitus without complication, type 1, uncontrolled
+  "250.10",   # Diabetes with ketoacidosis, type 2 or unspecified type, not stated as uncontrolled
+  "250.11",   # Diabetes with ketoacidosis, type 1, not stated as uncontrolled
+  "250.12",   # Diabetes with ketoacidosis, type 2 or unspecified type, uncontrolled
+  "250.13",   # Diabetes with ketoacidosis, type 1, uncontrolled
+  "250.40",   # Diabetes with renal manifestations, type 2 or unspecified type, not stated as uncontrolled
+  "250.41",   # Diabetes with renal manifestations, type 1, not stated as uncontrolled
+  "250.42",   # Diabetes with renal manifestations, type 2 or unspecified type, uncontrolled
+  "250.43",   # Diabetes with renal manifestations, type 1, uncontrolled
+  
+  # ICD-10 Codes for Diabetes
+  "E10.9",    # Type 1 diabetes mellitus without complications
+  "E11.9",    # Type 2 diabetes mellitus without complications
+  "E10.65",   # Type 1 diabetes mellitus with hyperglycemia
+  "E11.65",   # Type 2 diabetes mellitus with hyperglycemia
+  "E10.21",   # Type 1 diabetes mellitus with diabetic nephropathy
+  "E11.21",   # Type 2 diabetes mellitus with diabetic nephropathy
+  "E10.22",   # Type 1 diabetes mellitus with chronic kidney disease
+  "E11.22",   # Type 2 diabetes mellitus with chronic kidney disease
+  "E10.29",   # Type 1 diabetes mellitus with other kidney complications
+  "E11.29",   # Type 2 diabetes mellitus with other kidney complications
+  "E10.40",   # Type 1 diabetes mellitus with diabetic neuropathy, unspecified
+  "E11.40",   # Type 2 diabetes mellitus with diabetic neuropathy, unspecified
+  "E10.49",   # Type 1 diabetes mellitus with other diabetic neuropathy
+  "E11.49",   # Type 2 diabetes mellitus with other diabetic neuropathy
+  "E10.65",   # Type 1 diabetes mellitus with hyperglycemia
+  "E11.65",   # Type 2 diabetes mellitus with hyperglycemia
+  "E13.9"     # Other specified diabetes mellitus without complications
+)
+
+
+dm <- dia_list_icd(master_dia,icd_code =diabetes_codes,index_date = Baseline_Sample_Date)
+
+
+
+
+
+########### HTN
+
+htn_codes <-       c(  "401.1" ,  "401.0" ,  "401.9" ,
+                       "I10" ,  "LPA196" ,  "LPA1305" ,  "MHAB1" ,
+                       "134" ,  "199" ,  "HTN_pI0.5" ,  "I15.1" ,
+                       "405.99" ,  "I15.9" ,  "I15.8" ,  "405.09" ,
+                       "997.91" ,  "405.91" ,  "I15.0" ,  "I87.303" ,
+                       "I87.311" ,  "I87.312" ,  "I87.313" ,  "I15.2" ,
+                       "I87.323" ,  "I87.331" ,  "459.31" ,  "I87.329" ,
+                       "I87.332" ,  "I87.302" ,  "459.30" ,  "I87.333" ,
+                       "405.01" ,  "I87.321" ,  "I87.393" ,  "I87.309" ,
+                       "459.33")
+
+no_htn_list <- c("Pulmonary Embolism (APR v30)","N - Borderline hypertension-Oncall","C - Labile hypertension-Oncall","Hepatobiliary diagnostic procedure for malignancy (AP v21)","Hepatobiliary Diagnostic Procedure For Malignancy (MS v24)","Chronic venous hypertension (idiopathic) with inflammation of bilateral lower extremity","Chronic venous hypertension (idiopathic) with inflammation of right lower extremity","Chronic venous hypertension (idiopathic) with inflammation of unspecified lower extremity",
+                 "Chronic venous hypertension (idiopathic) with other complications of bilateral lower extremity",
+                 "Chronic venous hypertension (idiopathic) with ulcer and inflammation of left lower extremity",
+                 "Chronic venous hypertension (idiopathic) with ulcer and inflammation of left lower extremity",
+                 "Chronic venous hypertension (idiopathic) with ulcer of bilateral lower extremity",
+                 "Chronic venous hypertension (idiopathic) with ulcer of left lower extremity",
+                 "Chronic venous hypertension (idiopathic) with ulcer of right lower extremity",
+                 "Chronic venous hypertension (idiopathic) without complications of bilateral lower extremity",
+                 "Chronic venous hypertension with ulcer",
+                 "Chronic venous hypertension without complications"
+)
+
+
+htn_med_list <- c("chlorthalidone","hygroton","chlorothiazide","diuril","hydrochlorothiazide",
+                  "esidrix","hydrodiuril", "microzide","indapamide", "lozol","metolazone",
+                  "mykrox", "zaroxolyn","amilioride hydrochloride", "midamar","spironolactone",
+                  "aldactone","triamterene", "dyrenium","amlodipine besylate", "norvasc", "lotrel",
+                  "bepridil", "vasocor","diltiazem hydrochloride", "cardizem", "dilacor", "tiazac",
+                  "felodipine", "plendil","isradipine", "dynacirc","nicardipine", "cardene",
+                  "nifedipine", "adalat", "procardia","nisoldipine", "sular","verapamil hydrochloride",
+                  "calan", "covera", "isoptin", "verelan","alpha methyldopa", "aldomet",
+                  "clonidine hydrochloride", "catapre","guanabenz acetate", "wytensin",
+                  "guanfacine hydrochloride", "tenex","hydralazine hydrochloride", "apresoline",
+                  "minoxidil", "loniten","benazepril", "lotensin", "captopril", "capoten",
+                  "enalapril", "vasotech", "epaned", "lexxel", "fosinopril", "monopril",
+                  "lisinopril", "prinvil", "zestril", "qbrelis", "moexipril", "univasc",
+                  "perindopril", "aceon", "quinapril", "accupril", "ramipril", "altace",
+                  "trandolapril", "mavik", "azilsartan", "edarbi", "candesartan", "atacand",
+                  "eprosartan", "teveten", "irbesartan", "avapro", "telmisartan", "micardis",
+                  "valsartan", "diovan", "losartan", "cozaar", "olmesartan", "benicar")
+
+
+
+
+htn <- dia_list_icd(master_dia,index_date = Baseline_Sample_Date,icd_code =htn_codes, excluded_names=no_htn_list,med_data= master_med,med_names= htn_med_list)
+
+
+####### Cirrhosis
+cirrhosis <- master_dia %>% filter(grepl("cirrhosis",Diagnosis_Name, ignore.case = TRUE),) %>% select(EMPI) %>% distinct(EMPI)
+
+################# Coronary artery disease
+
+cad_list <- c("2 - Coronary artery disease-Oncall","A - Coronary artery disease-Oncall",
+              "A - Unstable angina-Oncall","Acute ischemic heart disease, unspecified",
+              "Angina pectoris (AP v21)","Angina Pectoris (MS v24)",
+              "Angina Pectoris And Coronary Atherosclerosis (APR v30)",
+              "Angina pectoris with documented spasm","Angina pectoris-Oncall",
+              "Angina pectoris, unspecified","Atherosclerosis",
+              "Atherosclerosis of autologous vein coronary artery bypass graft(s) with unspecified angina pectoris",
+              "Atherosclerosis of autologous vein coronary artery bypass graft(s) with unstable angina pectoris",
+              "Atherosclerosis of bypass graft of coronary artery of transplanted heart with unstable angina",
+              "Atherosclerosis of bypass graft of coronary artery of transplanted heart without angina pectoris",
+              "Atherosclerosis of coronary artery bypass graft(s) without angina pectoris",
+              "Atherosclerosis of coronary artery bypass graft(s), unspecified, with other forms of angina pectoris",
+              "Atherosclerosis of coronary artery bypass graft(s), unspecified, with unspecified angina pectoris",
+              "Atherosclerosis of coronary artery bypass graft(s), unspecified, with unstable angina pectoris",
+              "Atherosclerosis of native coronary artery of transplanted heart without angina pectoris",
+              "Atherosclerosis of other type of bypass graft(s) of the extremities with gangrene, unspecified extremity",
+              "Atherosclerosis of unspecified type of bypass graft(s) of other extremity with ulceration",
+              "Atherosclerosis w CC (AP v21)","Atherosclerosis W Cc (MS v24)","Atherosclerosis-LMR 32",
+              "Atherosclerotic heart disease of native coronary artery with angina pectoris with documented spasm",
+              "Atherosclerotic heart disease of native coronary artery with other forms of angina pectoris",
+              "Atherosclerotic heart disease of native coronary artery with unspecified angina pectoris",
+              "Atherosclerotic heart disease of native coronary artery with unstable angina pectoris",
+              "Atherosclerotic heart disease of native coronary artery without angina pectoris",
+              "B - Coronary artery disease of native artery-Oncall","Chronic ischemic heart disease, unspecified",
+              "Chronic total occlusion of coronary artery","Coronary arteriosclerosis-Oncall",
+              "Coronary artery disease-LMR 91","Coronary atherosclerosis",
+              "Coronary atherosclerosis due to calcified coronary lesion",
+              "Coronary atherosclerosis due to lipid rich plaque","Coronary atherosclerosis of artery bypass graft",
+              "Coronary atherosclerosis of autologous biological bypass graft",
+              "Coronary atherosclerosis of native coronary artery","Coronary atherosclerosis of unspecified type of bypass graft",
+              "Coronary atherosclerosis of unspecified type of vessel, native or graft",
+              "Coronary atherosclerosis-Oncall","Coronary occlusion without myocardial infarction",
+              "Current or Past History of CAD [PheNorm_ICD >= 0.5]","I - Ischemic cardiomyopathy-Oncall",
+              "Ischemic heart disease-Oncall","Other acute and subacute forms of ischemic heart disease",
+              "Other forms of acute ischemic heart disease","Other forms of angina pectoris",
+              "Other forms of chronic ischemic heart disease","Other specified forms of chronic ischemic heart disease",
+              "Unstable angina")
+
+
+cad <- dia_list_name(master_dia,index_date = Baseline_Sample_Date,listed_names =cad_list)
+
+############# Smoking 
+smoking_list <- c("smoking", "tobacco", "cigarette", "cigarettes", "nicotine", "smoke")
+smoking <- master_dia %>% filter(grepl(paste(smoking_list,collapse = "|"),Diagnosis_Name, ignore.case = TRUE),) %>% distinct(EMPI)
+
+######  CHF
+chf_list <- c("congestive heart failure", "chf")
+chf<- master_dia %>% filter(grepl(paste(chf_list,collapse = "|"),Diagnosis_Name, ignore.case = TRUE),) %>% distinct(EMPI)
+
+######## HIV
+
+no_hiv <- c(
+  "1 - Hives-Oncall",
+  "Contact with and (suspected) exposure to human immunodeficiency virus [hiv]",
+  "Encounter for screening for human immunodeficiency virus [hiv]",
+  "counseling",
+  "Inconclusive laboratory evidence of human immunodeficiency virus [hiv]",
+  "Infectious And Parasitic Diseases Including Hiv W O.R. Procedure (APR v30)",
+  "Family history of human immunodeficiency virus [hiv] disease",
+  "HIV exposure-Oncall"
+)
+
+
+hiv <- c("hiv","human immunodeficiency virus")
+
+hiv_med_list <- c("abacavir", "ziagen", "emtricitabine", "emtriva", "lamivudine",  "tenofovir", "viread",
+                  "zidovudine", "retrovir", "doravirine", "pifeltro", "efavirenz", "sustiva", "etravirine",
+                  "intelence", "nevirapine", "viramune", "rilpivirine", "edurant", "atazanavir", "reyataz",
+                  "darunavir", "prezista", "fosamprenavir", "lexiva", "ritonavir", "norvir", "saquinavir",
+                  "invirase", "tipranavir", "aptivus", "enfuvirtide", "fuzeon", "maraviroc", "selzentry",
+                  "cabotegravir", "vocabria", "dolutegravir", "tivicay", "raltegravir", "isentress", "fostemsavir",
+                  "rukobia", "ibalizumab-uiyk", "trogarzo", "tybost", "epzicom", "triumeq", "trizivir",
+                  "evotaz", "biktarvy", "bictegravir", "alafenamide", "cabenuva", "prezcobix", "symtuza", "dovato",
+                  "juluca", "delstrigo", "atripla", "symfi", "genvoya", "stribild", "odefsey", "complera", "descovy",
+                  "truvada", "cimduo", "combivir", "kaletra", "lopinavir", "elvitegravir", "disoproxil", "vitekta",
+                  "didanosine", "stavudine", "videx", "zerit", "delavirdine", "rescriptor", "indinavir",
+                  "crixivan", "nelfinavir", "viracept", "fortovase")
+
+###I excluded "cobicistat", vemlidy,epivir
+
+hiv <- dia_list_name(master_dia,listed_names = hiv, excluded_names=no_hiv,med_data= master_med,med_names= hiv_med_list,index_date = Baseline_Sample_Date)
+
+
+
+hiv <- hiv %>%
+  left_join(master_dia, by = "EMPI")%>%
+  filter(
+    # including HIV dignosis
+    str_detect(Diagnosis_Name, regex("hiv|human immunodeficiency virus", ignore_case = TRUE)),
+    #exclude hepatitis B or hepatitis C
+    !str_detect(Diagnosis_Name, regex("hepatitis B|hepatitis C", ignore_case = TRUE))
+  )%>%
+  distinct(EMPI, .keep_all = TRUE)
+
+
+hiv <- hiv %>% select(EMPI)
+
+
+
+thyroid <- c ("hypothyroidism","hyperthyroidism","thyroiditis")
+thyroid_med_list <- c ("Methimazole","Tapazole","Propylthiouracil","Potassium Iodide","Radioactive Iodine ","levothyroxine","Euthyrox", "Synthroid", "Eltroxin","Desiccated Thyroid Extract","Armour Thyroid")
+
+thyroid <- dia_list_name(master_dia,listed_names = thyroid,med_data= master_med,med_names= thyroid_med_list,index_date = Baseline_Sample_Date)
+
+
+########### MI
+mi_codes <- c('I21.09',
+              'I21.11',
+              'I21.19',
+              'I21.3',
+              'I21.4',
+              'I21.9',
+              'I21.A1',
+              'I23.6',
+              'I24.0',
+              'I25.2',
+              '410.21',
+              '410.41',
+              '410.71',
+              '410.9',
+              '412',
+              '410.0',
+              '410.00',
+              '410.10',
+              '410.11',
+              '410.42',
+              '410.72'
+)
+
+mi <- dia_list_icd(master_dia,icd_code =mi_codes,index_date = Baseline_Sample_Date)
+
+
+
+################### CVD
+cvd_codes <- c('G45.8',
+               'G45.9',
+               'I43.422',
+               'I61.1',
+               'I61.2',
+               'I61.4',
+               'I61.5',
+               'I61.8',
+               'I61.9',
+               'I63.011',
+               'I63.1',
+               'I63.111',
+               'I63.131',
+               'I63.211',
+               'I63.232',
+               'I63.239',
+               'I63.3',
+               'I63.312',
+               'I63.4',
+               'I63.412',
+               'I63.419',
+               'I63.423',
+               'I63.432',
+               'I63.439',
+               'I63.49',
+               'I63.5',
+               'I63.89',
+               'I63.9',
+               'I66.22',
+               'I66.23',
+               'I67.2',
+               'I69.30',
+               'I69.398',
+               '431',
+               '433',
+               '433.1',
+               '433.11',
+               '433.2',
+               '433.3',
+               '433.31',
+               '433.81',
+               '434',
+               '434.01',
+               '434.09',
+               '434.1',
+               '434.11',
+               '434.91',
+               '435.9',
+               '437',
+               'V12.54'
+)
+
+
+
+cvd <- dia_list_icd(master_dia,icd_code =cvd_codes,index_date = Baseline_Sample_Date)
+
+
+
+################################################### all demo variables 
+
+
+
+
+all_como <- sqldf("
+                          select distinct
+                          master.*,
+                          
+                          case when dm.EMPI is not null then 1 else 0 end as dm,
+                          case when htn.EMPI is not null then 1 else 0 end as htn,
+                          case when cirrhosis.EMPI is not null then 1 else 0 end as cirrhosis,
+                          case when smoking.EMPI is not null then 1 else 0 end as smoking,
+                          case when cad.EMPI is not null then 1 else 0 end as cad,
+                          case when chf.EMPI is not null then 1 else 0 end as chf,
+                          case when cvd.EMPI is not null then 1 else 0 end as cvd,
+                          case when hiv.EMPI is not null then 1 else 0 end as hiv,
+                          case when mi.EMPI is not null then 1 else 0 end as mi,
+                          case when thyroid.EMPI is not null then 1 else 0 end as thyroid,
+  
+                          
+                          
+                          case when ppi.EMPI is not null then 1 else 0 end as ppi,
+                          case when ace_arb.EMPI is not null then 1 else 0 end as ace_arb,
+                          case when diu.EMPI is not null then 1 else 0 end as diu,
+                          case when steroids.EMPI is not null then 1 else 0 end as steroids,
+                          case when statins.EMPI is not null then 1 else 0 end as statins,
+                          case when nsaids.EMPI is not null then 1 else 0 end as nsaids
+                          
+                          from master 
+                          left join cirrhosis on cirrhosis.EMPI = master.EMPI
+                          left join ace_arb on ace_arb.EMPI = master.EMPI
+                          left join diu on diu.EMPI = master.EMPI
+                          left join dm on dm.EMPI = master.EMPI
+                          left join htn on htn.EMPI = master.EMPI
+                          left join steroids on steroids.EMPI = master.EMPI
+                          left join cad on cad.EMPI = master.EMPI
+                          left join smoking on smoking.EMPI = master.EMPI
+                          left join ppi on ppi.EMPI = master.EMPI
+                          left join hiv on hiv.EMPI = master.EMPI
+                          left join chf on chf.EMPI = master.EMPI
+                          left join thyroid on thyroid = master.EMPI
+                          
+                          left join mi on mi.EMPI = master.EMPI
+                          left join cvd on cvd.EMPI = master.EMPI
+                          left join statins on statins.EMPI = master.EMPI
+                          left join nsaids on nsaids.EMPI = master.EMPI
+   
+                          ")
+
+```
+
+
+```{r}
+############################################# Labs 
+
+############ lab date functions
+
+#post_lab after index not included
+
+post_lab_value <- function(data,max,index_date,days,Group_Id){
+  index_date <- enquo(index_date)
+  if (max){
+    lab_name <- paste0("highest_",Group_Id,"_",deparse(substitute(days)))
+    lab_date_name <- paste0("highest_",Group_Id,"_",deparse(substitute(days)),"_date")
+    result <- data %>% 
+      filter(Group_Id == !!Group_Id,grepl("^\\d+\\.\\d+$",Result)) %>% 
+      filter(!is.na(Result)) %>% 
+      mutate(Result=as.numeric(Result)) %>% 
+      filter(Seq_Date_Time>!!index_date,Seq_Date_Time<=!!index_date+days)  %>% 
+      arrange(EMPI,desc(Result))%>% 
+      distinct(EMPI,.keep_all = T) %>% 
+      rename(!!lab_name :=Result,
+             !!lab_date_name :=Seq_Date_Time) %>% 
+      select(EMPI,
+             !!lab_name, !!lab_date_name)
+    return(result)
+    
+  }
+  else{
+    lab_name <- paste0("lowest_",Group_Id,"_",deparse(substitute(days)))
+    lab_date_name <- paste0("lowest_",Group_Id,"_",deparse(substitute(days)),"_date")
+    result <- data %>% 
+      filter(Group_Id == !!Group_Id,grepl("^\\d+\\.\\d+$",Result)) %>% 
+      filter(!is.na(Result)) %>% 
+      mutate(Result=as.numeric(Result)) %>% 
+      filter(Seq_Date_Time>!!index_date,Seq_Date_Time<=!!index_date+days)  %>%
+      arrange(EMPI,Result)  %>% 
+      distinct(EMPI,.keep_all = T)  %>% 
+      rename(!!lab_name :=Result,
+             !!lab_date_name :=Seq_Date_Time) %>% 
+      select(EMPI,
+             !!lab_name, !!lab_date_name)
+    return(result)
+    
+  }
+  
+}
+
+
+###### pre lab  index data included closest date 
+pre_lab <- function(data, month, time, index_date, Group_Id) {
+  index_date <- enquo(index_date)
+  if (month) {
+    time_value <- time * 30
+  } else {
+    time_value <- time
+  }
+  
+  
+  lab_name <- paste0("pre_", Group_Id, "_", time_value, "days")
+  lab_date_name <- paste0("pre_", Group_Id, "_", time_value, "days_date")
+  
+  result <- data %>% 
+    filter(Group_Id == !!Group_Id, grepl("^\\d+\\.\\d+$", Result)) %>% 
+    filter(!is.na(Result)) %>% 
+    mutate(Result = as.numeric(Result)) %>% 
+    filter(Seq_Date_Time >= (!!index_date) - time_value, Seq_Date_Time <= !!index_date) %>% 
+    arrange(EMPI, desc(Seq_Date_Time)) %>% 
+    distinct(EMPI, .keep_all = TRUE) %>% 
+    rename(!!lab_name := Result,
+           !!lab_date_name := Seq_Date_Time) %>% 
+    select(EMPI,
+           !!lab_name, !!lab_date_name)
+  
+  return(result)
+}
+
+
+
+
+
+
+###### Lab 
+
+pre_HGB_45days <- pre_lab(master_lab, month=F, time=45, index_date=Baseline_Sample_Date, Group_Id="HGB")
+
+pre_ALB_45days <- pre_lab(master_lab, month=F, time=45, index_date=Baseline_Sample_Date, Group_Id="ALB")
+
+pre_CRE_45days <- pre_lab(master_lab, month=F, time=45, index_date=Baseline_Sample_Date, Group_Id="CRE")
+
+pre_PLT_45days <- pre_lab(master_lab, month=F, time=45, index_date=Baseline_Sample_Date, Group_Id="PLT")
+
+pre_AST_45days <- pre_lab(master_lab, month=F, time=45, index_date=Baseline_Sample_Date, Group_Id="SGOT")
+
+
+pre_HbA1c_45days <- pre_lab(master_lab, month=F, time=45, index_date=Baseline_Sample_Date, Group_Id="GHBA1C")
+
+
+
+
+
+
+#### post_lab
+
+post_lab_value <- function(data,max,index_date,days,Group_Id){
+  index_date <- enquo(index_date)
+  if (max){
+    lab_name <- paste0("highest_",Group_Id,"_",deparse(substitute(days)))
+    lab_date_name <- paste0("highest_",Group_Id,"_",deparse(substitute(days)),"_date")
+    result <- data %>% 
+      filter(Group_Id == !!Group_Id,grepl("^\\d+\\.\\d+$",Result)) %>% 
+      filter(!is.na(Result)) %>% 
+      mutate(Result=as.numeric(Result)) %>% 
+      filter(Seq_Date_Time>!!index_date,Seq_Date_Time<=!!index_date+days)  %>% 
+      arrange(EMPI,desc(Result)) %>% 
+      distinct(EMPI,.keep_all = T) %>% 
+      rename(!!lab_name :=Result,
+             !!lab_date_name :=Seq_Date_Time) %>% 
+      select(EMPI,
+             !!lab_name, !!lab_date_name)
+    return(result)
+    
+  }
+  else{
+    lab_name <- paste0("lowest_",Group_Id,"_",deparse(substitute(days)))
+    lab_date_name <- paste0("lowest_",Group_Id,"_",deparse(substitute(days)),"_date")
+    result <- data %>% 
+      filter(Group_Id == !!Group_Id,grepl("^\\d+\\.\\d+$",Result)) %>% 
+      filter(!is.na(Result)) %>% 
+      mutate(Result=as.numeric(Result)) %>% 
+      filter(Seq_Date_Time>!!index_date,Seq_Date_Time<=!!index_date+days)  %>%
+      arrange(EMPI,Result)  %>% 
+      distinct(EMPI,.keep_all = T)  %>% 
+      rename(!!lab_name :=Result,
+             !!lab_date_name :=Seq_Date_Time) %>% 
+      select(EMPI,
+             !!lab_name, !!lab_date_name)
+    return(result)
+    
+  }
+  
+}
+
+
+
+
+
+
+
+HGB_90_min <- post_lab_value(master_lab,max=F,index_date=Baseline_Sample_Date,days=90,Group_Id="HGB")
+
+CRE_90_max <- post_lab_value(master_lab,max=T,index_date=Baseline_Sample_Date,days=90,Group_Id="CRE")
+
+
+ALB_90_min <- post_lab_value(master_lab,max=F,index_date=Baseline_Sample_Date,days=90,Group_Id="ALB")
+
+PLT_90_min <- post_lab_value(master_lab,max=F,index_date=Baseline_Sample_Date,days=90,Group_Id="PLT")
+
+NEUT_90_min <- post_lab_value(master_lab,max=F,index_date=Baseline_Sample_Date,days=90,Group_Id="ANEU")
+
+
+
+# creaet a merge function 
+left_join_all <- function(master, df_list, by) {
+  for (df in df_list) {
+    master <- merge(master, df, by = by, all.x = TRUE)
+  }
+  return(master)
+}
+
+
+
+
+
+
+
+############################## create cutoff 
+
+#create time to event labs
+
+## post lab cutoff function 
+post_lab_less_than_cutpoint <- function(data,days,index_date,Group_ID,Group_ID_name,outcome_name,cutpoint) {
+  index_date <- enquo(index_date)
+  lab_name <- paste0("post_", Group_ID_name, "_cutpoint_", days, "days")
+  lab_date_name <- paste0("post_", Group_ID_name, "_cutpoint_", days, "days_date")
+  
+  result <- data %>% 
+    filter(Group_Id %in% Group_ID) %>% 
+    filter(grepl("^[><]?\\d+\\.?\\d* ?$",Result)) %>% 
+    mutate(Result=as.numeric(parse_number(Result))) %>% 
+    filter(!is.na(Result)) %>% 
+    filter(Seq_Date_Time > (!!index_date), Seq_Date_Time <= !!index_date + days) %>%
+    filter(Result<cutpoint) %>% 
+    arrange(EMPI,Seq_Date_Time) %>% 
+    distinct(EMPI, .keep_all = TRUE) %>% 
+    rename(!!lab_name := Result,
+           !!lab_date_name := Seq_Date_Time) %>% 
+    select(EMPI,
+           !!lab_name, !!lab_date_name)
+  return(result)
+}
+
+
+#get cutoff outcome 
+
+Anemia_g2_value <- post_lab_less_than_cutpoint(data=master_lab,days=90,index_date=Baseline_Sample_Date,Group_ID="HGB",Group_ID_name="Anemia_2",cutpoint=10)
+
+Anemia_g3_value <- post_lab_less_than_cutpoint(data=master_lab,days=90,index_date=Baseline_Sample_Date,Group_ID="HGB",Group_ID_name="Anemia_3",cutpoint=8)
+
+Throm_g2_value <- post_lab_less_than_cutpoint(data=master_lab,days=90,index_date=Baseline_Sample_Date,Group_ID="PLT",Group_ID_name="Throm_2",cutpoint=75)
+
+Throm_g3_value <- post_lab_less_than_cutpoint(data=master_lab,days=90,index_date=Baseline_Sample_Date,Group_ID="PLT",Group_ID_name="Throm_3",cutpoint=50)
+
+
+
+AKI_g2_value  <- master_lab %>% merge(pre_CRE_45days,by="EMPI",all.x = T) %>% 
+  filter(Group_Id =="CRE") %>% 
+  filter(grepl("^[><]?\\d+\\.?\\d* ?$",Result)) %>% 
+  mutate(Result=as.numeric(parse_number(Result))) %>% 
+  filter(!is.na(Result)) %>% 
+  filter(Seq_Date_Time > Baseline_Sample_Date, Seq_Date_Time <= Baseline_Sample_Date + 90) %>%
+  filter(Result> 1.5* pre_CRE_45days) %>% 
+  arrange(EMPI,Seq_Date_Time) %>% 
+  distinct(EMPI, .keep_all = TRUE) %>% select(EMPI,Result,Seq_Date_Time) %>% rename(post_AKI_2_cutpoint_90days=Result,post_AKI_2_cutpoint_90days_date=Seq_Date_Time)
+
+
+
+AKI_g3_value  <- master_lab %>% merge(pre_CRE_45days,by="EMPI",all.x = T) %>% 
+  filter(Group_Id =="CRE") %>% 
+  filter(grepl("^[><]?\\d+\\.?\\d* ?$",Result)) %>% 
+  mutate(Result=as.numeric(parse_number(Result))) %>% 
+  filter(!is.na(Result)) %>% 
+  filter(Seq_Date_Time > Baseline_Sample_Date, Seq_Date_Time <= Baseline_Sample_Date + 90) %>%
+  filter(Result> 3* pre_CRE_45days) %>% 
+  arrange(EMPI,Seq_Date_Time) %>% 
+  distinct(EMPI, .keep_all = TRUE) %>% select(EMPI,Result,Seq_Date_Time) %>% rename(post_AKI_3_cutpoint_90days=Result,post_AKI_3_cutpoint_90days_date=Seq_Date_Time)
+
+
+
+############################################################# JOIN ALL RPDR VARIABLES
+
+
+
+
+extra_list <- list(pre_CRE_45days,
+                   pre_HGB_45days,
+                   pre_PLT_45days,
+                   pre_ALB_45days,
+                   HGB_90_min,
+                   CRE_90_max,
+                   ALB_90_min,
+                   PLT_90_min,
+                   NEUT_90_min,
+                   Anemia_g2_value,
+                   Anemia_g3_value,
+                   Throm_g2_value,
+                   Throm_g3_value,
+              
+                   AKI_g2_value,
+                   AKI_g3_value
+                   
+              )
+
+
+
+
+
+
+event_master <- left_join_all(all_como,extra_list,by="EMPI")
+
+
+
+# update outcome variables
+event_master_final <- event_master %>% 
+  mutate(
+    Anemia_g2_90days=ifelse(lowest_HGB_90 < 10, 1, 0),
+    Anemia_g3_90days=ifelse(lowest_HGB_90 < 8, 1, 0),
+    Throm_g2_90days=ifelse(lowest_PLT_90 < 75,1,0),
+    Throm_g3_90days=ifelse(lowest_PLT_90 < 50,1,0), # updated 12/29/2023
+    AKI_g2_90days=ifelse(highest_CRE_90> 1.5*pre_CRE_45days, 1, 0),
+    AKI_g3_90days=ifelse(highest_CRE_90> 3.0*pre_CRE_45days, 1, 0)) %>% 
+  
+  mutate(time_aki_2=as.numeric(post_AKI_2_cutpoint_90days_date-Baseline_Sample_Date),
+         status_aki_2=ifelse(is.na(time_aki_2),0,1),
+         
+         time_aki_3=as.numeric(post_AKI_3_cutpoint_90days_date-Baseline_Sample_Date),
+         status_aki_3=ifelse(is.na(time_aki_3),0,1),
+         
+         
+         
+         time_anemia_2=as.numeric(post_Anemia_2_cutpoint_90days_date-Baseline_Sample_Date),
+         status_anemia_2=ifelse(is.na(time_anemia_2),0,1),
+         
+         time_anemia_3=as.numeric(post_Anemia_3_cutpoint_90days_date-Baseline_Sample_Date),
+         status_anemia_3=ifelse(is.na(time_anemia_3),0,1),
+         
+         
+         time_throm_2=as.numeric(post_Throm_2_cutpoint_90days_date-Baseline_Sample_Date),
+         status_throm_2=ifelse(is.na(time_throm_2),0,1),
+         
+         time_throm_3=as.numeric(post_Throm_3_cutpoint_90days_date-Baseline_Sample_Date),
+         status_throm_3=ifelse(is.na(time_throm_3),0,1)
+         
+         
+         
+         
+  ) %>% 
+  mutate(time_aki_2=ifelse(is.na(time_aki_2),90,time_aki_2),
+         time_aki_3=ifelse(is.na(time_aki_3),90,time_aki_3),
+         time_anemia_2=ifelse(is.na(time_anemia_2),90,time_anemia_2),
+         time_anemia_3=ifelse(is.na(time_anemia_3),90,time_anemia_3),
+         time_throm_2=ifelse(is.na(time_throm_2),90,time_throm_2),
+         time_throm_3=ifelse(is.na(time_throm_3),90,time_throm_3),
+         
+  )
+
+
+
+
+event_master_final <-event_master_final %>%
+  mutate(BSA = 0.007184 * (Weight_kg ^ 0.425) * (Height_cm ^ 0.725),
+         male=if_else(Sex=="Male",1,0)) %>%
+  mutate(bmi = Weight_kg / ( (Height_cm / 100) ^ 2 ))
+
+```
+
+
+```{r}
+
+event_master_final$ckd_epi_gfr_cre <- mapply(ckd_epi_gfr, event_master_final$Baseline_Creatinine_Value,event_master_final$male,event_master_final$Age)
+event_master_final$ckd_epi_gfr_cys <- mapply(ckd_epi_cys_gfr, event_master_final$Baseline_Cystatin_C_Value,event_master_final$male,event_master_final$Age)
+event_master_final$ckd_epi_gfr_cre_cys <- mapply(ckd_epi_cre_cys_gfr, event_master_final$Baseline_Creatinine_Value,event_master_final$Baseline_Cystatin_C_Value,event_master_final$male,event_master_final$Age)
+event_master_final$cockcroft<- mapply(Cockcroft,event_master_final$Age,event_master_final$Weight_kg,event_master_final$male,event_master_final$Baseline_Creatinine_Value)
+
+
+unindex  <- function(value,bsa) {
+  
+  new_value <- value*bsa/1.73
+  
+  return(new_value)
+}
+
+
+event_master_final$ckd_epi_gfr_cre_unindex <- mapply(unindex,event_master_final$ckd_epi_gfr_cre,event_master_final$BSA)
+event_master_final$ckd_epi_gfr_cys_unindex <- mapply(unindex,event_master_final$ckd_epi_gfr_cys,event_master_final$BSA)
+event_master_final$ckd_epi_gfr_cre_cys_unindex <- mapply(unindex,event_master_final$ckd_epi_gfr_cre_cys,event_master_final$BSA)
+
+
+```
+
+
+```{r}
+dose_adjustment_level <- function(drug, egfr) {
+  if (is.na(egfr)) return(NA)
+  # cre_lower <- under dosed
+  drug <- tolower(drug)
+  
+  level <- switch(drug,
+    "cisplatin" = {
+      if (egfr > 60) 1
+      else if (egfr >= 50) 2
+      else if (egfr >= 40) 3
+      else 5
+    },
+    
+    "pemetrexed" = {
+      if (egfr >= 45) 1
+      else 5
+    },
+    
+    "etoposide" = {
+      if (egfr >= 50) 1
+      else if (egfr >= 15) 2
+      else 3
+    },
+    
+    "capecitabine" = {
+      if (egfr >= 50) 1
+      else if (egfr >= 30) 2
+      else 5
+    },
+    
+    "bleomycin" = {
+      if (egfr >= 50) 1
+      else if (egfr >= 40) 2
+      else if (egfr >= 30) 3
+      else if (egfr >= 20) 4
+      else if (egfr >= 10) 5
+      else 5
+    },
+    
+    "ifosfamide" = {
+      if (egfr > 60) 1
+      else if (egfr >= 40) 2
+      else if (egfr >= 20) 3
+      else 5
+    },
+    
+    "gemcitabine" = {
+      if (egfr >= 30) 1
+      else 2
+    },
+    
+    "oxaliplatin" = {
+      if (egfr >= 30) 1
+      else 2
+    },
+    
+    NA  # Return NA if unknown drug
+  )
+  
+  return(level)
+}
+
+generate_dose_adjustments <- function(drugs, data, var1, var2) {
+  for (drug in drugs) {
+    # Calculate levels from var1
+    data[[paste0("cre_", drug)]] <- sapply(data[[var1]], function(egfr) {
+      dose_adjustment_level(drug, egfr)
+    })
+    
+    # Calculate levels from var2
+    data[[paste0("cockcroft_", drug)]] <- sapply(data[[var2]], function(egfr) {
+      dose_adjustment_level(drug, egfr)
+    })
+    
+    # Compare and assign label
+    data[[paste0("check_", drug)]] <- ifelse(
+      data[[paste0("cre_", drug)]] < data[[paste0("cockcroft_", drug)]],
+      "under_dosed",
+      ifelse(
+        data[[paste0("cockcroft_", drug)]] < data[[paste0("cre_", drug)]],
+        "over_dosed",
+        "same"
+      )
+    )
+  }
+  return(data)
+}
+
+
+drugs <- c("cisplatin", "pemetrexed", "etoposide", "capecitabine",
+           "bleomycin", "ifosfamide", "gemcitabine", "oxaliplatin")
+
+
+test <- event_master_final %>% select(EMPI,ckd_epi_gfr_cre_cys_unindex,cockcroft)
+
+patient_data <- generate_dose_adjustments(
+  drugs = drugs,
+  data = test,
+  var1 = "ckd_epi_gfr_cre_cys_unindex",
+  var2 = "cockcroft"
+)
+
+
+
+drug_vars <- c("check_cisplatin","check_etoposide","check_pemetrexed","check_capecitabine","check_bleomycin","check_ifosfamide","check_gemcitabine","check_oxaliplatin")
+
+patient_data <- patient_data %>%
+  mutate(
+    any_overdosed = if_else(rowSums(across(all_of(drug_vars), ~ . == "over_dosed")) > 0, 1, 0),
+    any_underdosed = if_else(rowSums(across(all_of(drug_vars), ~ . == "under_dosed")) > 0, 1, 0)
+  )
+
+test <- patient_data %>% select(EMPI,any_of(drug_vars),any_overdosed,any_underdosed)
+
+
+names(event_master_final)
+
+
+event_master_final <- event_master_final %>% merge(test,by="EMPI",all.x = T)
+
+```
+
+
+```{r}
+write.xlsx(as.data.frame(event_master_final),'/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Leyre_Letter/master_711_updated.xlsx',showNA = F,row.names= F)
+
+```
+
+
+
