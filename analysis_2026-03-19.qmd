@@ -162,7 +162,6 @@ Naming rules applied in this file:
 | — | `death_90` | 1 if died within 90 days |
 | — | `time_to_death_90` | Days to death (capped at 90) |
 | — | `time_to_death_90_status` | 0=censored/alive, 2=dead (competing-risk coding) |
-| — | `mortality_90` | Same as `death_90` (alias) |
 
 ## 1.12 Exposure Variables
 
@@ -938,7 +937,6 @@ final_master <- final_master %>%
 # time_to_death_90: follow-up time capped at 90 days
 # time_to_death_90_status: 0=alive/censored, 2=dead (competing-risk coding)
 # death_90: binary 0/1
-# mortality_90: alias for death_90
 final_master <- final_master %>%
   mutate(
     time_to_death_90 = ifelse(days_last_follow_up > 90, 90, days_last_follow_up),
