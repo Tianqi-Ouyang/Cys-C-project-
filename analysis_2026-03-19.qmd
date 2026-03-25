@@ -557,7 +557,12 @@ dia_list_name <- function(data, listed_names, index_date, excluded_names = NULL,
 
 ```{r}
 #| label: load-redcap
-master <- read_csv("/Users/to909/Downloads/CystatinCInPatientsO_DATA_2025-07-24_1327.csv")
+master <- read_csv('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/CystatinCInPatientsO_DATA_2026-03-25_1158.csv') 
+
+list <- read_csv('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/list.csv')
+
+# Keep only patients whose EMPI appears in the list
+master <- master %>% filter(EMPI %in% list$EMPI)
 ```
 
 ## 4.2 Standardise column names, rename ED / hosp variables
@@ -664,27 +669,21 @@ final_master$platin_dose          <- as.numeric(final_master$platin_dose)
 
 ```{r}
 #| label: load-rpdr
-rpdr_path <- "/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/RPDR 800/"
+
 
 # Diagnoses
-dia <- read.table(paste0(rpdr_path, "mes98_051625135308675085_Dia.txt"),
+dia <- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Dia.txt',
   sep = "|", fill = TRUE, quote = "", header = TRUE)
 dia$Date <- as.Date(dia$Date, "%m/%d/%Y")
 
-# Labs – original pull (HGB, PLT, ALB, CRE)
-lab <- read.table(paste0(rpdr_path, "mes98_051625135308675085_Lab.txt"),
+# Labs (HGB, PLT, ALB, CRE, K, MG, NA — single pull)
+lab <- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Lab.txt',
   sep = "|", fill = TRUE, quote = "", header = TRUE) %>%
   select(EMPI, Seq_Date_Time, Result, Group_Id, Test_Description)
 lab$Seq_Date_Time <- as.Date(lab$Seq_Date_Time, "%m/%d/%Y")
 
-# Labs – updated pull (NA, MG, K)
-lab_new <- read.table(paste0(rpdr_path, "mes98_071025164203189492_Lab.txt"),
-  sep = "|", fill = TRUE, quote = "", header = TRUE) %>%
-  select(EMPI, Seq_Date_Time, Result, Group_Id, Test_Description)
-lab_new$Seq_Date_Time <- as.Date(lab_new$Seq_Date_Time, "%m/%d/%Y")
-
 # Medications
-med <- read.table(paste0(rpdr_path, "mes98_051625135308675085_Med.txt"),
+med <- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Med.txt',
   sep = "|", fill = TRUE, quote = "", header = TRUE) %>%
   select(EMPI, Medication_Date, Medication)
 med$Medication_Date <- as.Date(med$Medication_Date, "%m/%d/%Y")
@@ -693,8 +692,6 @@ med$Medication_Date <- as.Date(med$Medication_Date, "%m/%d/%Y")
 master_list <- final_master %>% select(EMPI, baseline_sample_date)
 
 master_lab     <- merge(master_list, lab,     by = "EMPI", all.x = TRUE)
-master_lab_new <- merge(master_list, lab_new, by = "EMPI", all.x = TRUE) %>%
-  mutate(Group_Id = ifelse(is.na(Group_Id), "NA", Group_Id))
 master_dia     <- merge(master_list, dia,     by = "EMPI", all.y = TRUE)
 master_med     <- merge(master_list, med,     by = "EMPI", all.y = TRUE)
 ```
@@ -816,12 +813,12 @@ pre_PLT_45days <- pre_lab(master_lab, month = FALSE, time = 45,
 pre_ALB_45days <- pre_lab(master_lab, month = FALSE, time = 45,
                            index_date = baseline_sample_date, Group_Id = "ALB")
 
-# Electrolyte pre-baseline labs (updated pull)
-pre_K_45days  <- pre_lab(master_lab_new, month = FALSE, time = 45,
+# Electrolyte pre-baseline labs
+pre_K_45days  <- pre_lab(master_lab, month = FALSE, time = 45,
                           index_date = baseline_sample_date, Group_Id = "K")
-pre_MG_45days <- pre_lab(master_lab_new, month = FALSE, time = 45,
+pre_MG_45days <- pre_lab(master_lab, month = FALSE, time = 45,
                           index_date = baseline_sample_date, Group_Id = "MG")
-pre_NA_45days <- pre_lab(master_lab_new, month = FALSE, time = 45,
+pre_NA_45days <- pre_lab(master_lab, month = FALSE, time = 45,
                           index_date = baseline_sample_date, Group_Id = "NA")
 
 # Merge all pre-baseline labs into final_master
@@ -1193,19 +1190,19 @@ final_master$baseline_sample_date <- as.Date(final_master$baseline_sample_date)
 
 # Hypokalemia: first K < 3.0 mEq/L within 90 days post-baseline
 Hypokalemia_value <- post_lab_less_than_cutpoint(
-  data = master_lab_new, days = 90, index_date = baseline_sample_date,
+  data = master_lab, days = 90, index_date = baseline_sample_date,
   Group_ID = "K", Group_ID_name = "Hypokalemia", cutpoint = 3
 )
 
 # Hypomagnesemia: first Mg < 0.9 mg/dL within 90 days post-baseline
 Hypomagnesemia_value <- post_lab_less_than_cutpoint(
-  data = master_lab_new, days = 90, index_date = baseline_sample_date,
+  data = master_lab, days = 90, index_date = baseline_sample_date,
   Group_ID = "MG", Group_ID_name = "Hypomagnesemia", cutpoint = 0.9
 )
 
 # Hyponatremia: first Na < 125 mEq/L within 90 days post-baseline
 Hyponatremia_value <- post_lab_less_than_cutpoint(
-  data = master_lab_new, days = 90, index_date = baseline_sample_date,
+  data = master_lab, days = 90, index_date = baseline_sample_date,
   Group_ID = "NA", Group_ID_name = "Hyponatremia", cutpoint = 125
 )
 
@@ -1317,9 +1314,7 @@ table(final_master$hiv_rpdr)
 
 ## 5.13 pre_WBC_45days — NOT available
 
-> **`pre_WBC_45days`** cannot be created: WBC is not present in either RPDR lab pull
-> (`mes98_051625135308675085_Lab.txt` has HGB/PLT/ALB/CRE;
-> `mes98_071025164203189492_Lab.txt` has K/MG/NA).
+> **`pre_WBC_45days`** cannot be created: WBC is not present in the RPDR lab pull.
 > A new RPDR pull including `Group_Id = "WBC"` is needed to create this variable.
 > It was listed in Jiaxuan's `all_vars` and Table 1 but was likely pre-computed in an
 > external xlsx file that is no longer used.
@@ -1644,7 +1639,7 @@ cut from its parent expression. It has no effect on the analysis in this file si
 | 4.1–4.4 | REDCap load, hosp events, side_effect | `master`, `side_effect` |
 | 4.5 | Merge side_effect + drug indicators | `final_master` base |
 | 4.6 | Rename dates (empi→EMPI, bl_date→baseline_sample_date) | — |
-| 4.7 | Load RPDR (lab, lab_new, dia, med) → master_lab/dia/med | — |
+| 4.7 | Load RPDR (lab, dia, med) → master_lab/dia/med | — |
 | 4.8 | Define eGFR functions (Cockcroft, CKD-EPI cre/cys/combined) | — |
 | 4.9 | Pre-labs (CRE, HGB, PLT, ALB, K, MG, NA), eGFR vars, AE labs | Merged into `final_master` |
 | 5.1 | Mortality, time_to_death_90 | — |
