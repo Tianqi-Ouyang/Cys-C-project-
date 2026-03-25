@@ -170,7 +170,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#verification-checks" id="toc-verification-checks" class="nav-link" data-scroll-target="#verification-checks">8 Verification Checks</a></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="analysis_2026-03-19.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.html"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
 </div>
 <main class="content" id="quarto-document-content">
 
@@ -1289,7 +1289,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"/Users/to909/Downloads/CystatinCInPatientsO_DATA_2025-07-24_1327.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/CystatinCInPatientsO_DATA_2026-03-25_1158.csv'</span>) </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>list <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/list.csv'</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep only patients whose EMPI appears in the list</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> master <span class="sc">%&gt;%</span> <span class="fu">filter</span>(EMPI <span class="sc">%in%</span> list<span class="sc">$</span>EMPI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -1408,39 +1413,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rpdr_path <span class="ot">&lt;-</span> <span class="st">"/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/RPDR 800/"</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Diagnoses</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>dia <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="fu">paste0</span>(rpdr_path, <span class="st">"mes98_051625135308675085_Dia.txt"</span>),</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">"|"</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>, <span class="at">quote =</span> <span class="st">""</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>dia<span class="sc">$</span>Date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(dia<span class="sc">$</span>Date, <span class="st">"%m/%d/%Y"</span>)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Labs – original pull (HGB, PLT, ALB, CRE)</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>lab <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="fu">paste0</span>(rpdr_path, <span class="st">"mes98_051625135308675085_Lab.txt"</span>),</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">"|"</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>, <span class="at">quote =</span> <span class="st">""</span>, <span class="at">header =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(EMPI, Seq_Date_Time, Result, Group_Id, Test_Description)</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>lab<span class="sc">$</span>Seq_Date_Time <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(lab<span class="sc">$</span>Seq_Date_Time, <span class="st">"%m/%d/%Y"</span>)</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Labs – updated pull (NA, MG, K)</span></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>lab_new <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="fu">paste0</span>(rpdr_path, <span class="st">"mes98_071025164203189492_Lab.txt"</span>),</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">"|"</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>, <span class="at">quote =</span> <span class="st">""</span>, <span class="at">header =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(EMPI, Seq_Date_Time, Result, Group_Id, Test_Description)</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>lab_new<span class="sc">$</span>Seq_Date_Time <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(lab_new<span class="sc">$</span>Seq_Date_Time, <span class="st">"%m/%d/%Y"</span>)</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Medications</span></span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>med <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="fu">paste0</span>(rpdr_path, <span class="st">"mes98_051625135308675085_Med.txt"</span>),</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">"|"</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>, <span class="at">quote =</span> <span class="st">""</span>, <span class="at">header =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(EMPI, Medication_Date, Medication)</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>med<span class="sc">$</span>Medication_Date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(med<span class="sc">$</span>Medication_Date, <span class="st">"%m/%d/%Y"</span>)</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Patient index: EMPI + baseline date (needed by pre/post lab functions)</span></span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>master_list <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">select</span>(EMPI, baseline_sample_date)</span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>master_lab     <span class="ot">&lt;-</span> <span class="fu">merge</span>(master_list, lab,     <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>master_lab_new <span class="ot">&lt;-</span> <span class="fu">merge</span>(master_list, lab_new, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Group_Id =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(Group_Id), <span class="st">"NA"</span>, Group_Id))</span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>master_dia     <span class="ot">&lt;-</span> <span class="fu">merge</span>(master_list, dia,     <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.y =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>master_med     <span class="ot">&lt;-</span> <span class="fu">merge</span>(master_list, med,     <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.y =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Diagnoses</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>dia <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">'/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Dia.txt'</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">"|"</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>, <span class="at">quote =</span> <span class="st">""</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>dia<span class="sc">$</span>Date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(dia<span class="sc">$</span>Date, <span class="st">"%m/%d/%Y"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Labs (HGB, PLT, ALB, CRE, K, MG, NA — single pull)</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>lab <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">'/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Lab.txt'</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">"|"</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>, <span class="at">quote =</span> <span class="st">""</span>, <span class="at">header =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(EMPI, Seq_Date_Time, Result, Group_Id, Test_Description)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>lab<span class="sc">$</span>Seq_Date_Time <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(lab<span class="sc">$</span>Seq_Date_Time, <span class="st">"%m/%d/%Y"</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Medications</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>med <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">'/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Med.txt'</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">"|"</span>, <span class="at">fill =</span> <span class="cn">TRUE</span>, <span class="at">quote =</span> <span class="st">""</span>, <span class="at">header =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(EMPI, Medication_Date, Medication)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>med<span class="sc">$</span>Medication_Date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(med<span class="sc">$</span>Medication_Date, <span class="st">"%m/%d/%Y"</span>)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Patient index: EMPI + baseline date (needed by pre/post lab functions)</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>master_list <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">select</span>(EMPI, baseline_sample_date)</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>master_lab     <span class="ot">&lt;-</span> <span class="fu">merge</span>(master_list, lab,     <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>master_dia     <span class="ot">&lt;-</span> <span class="fu">merge</span>(master_list, dia,     <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.y =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>master_med     <span class="ot">&lt;-</span> <span class="fu">merge</span>(master_list, med,     <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.y =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -1626,12 +1621,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>pre_ALB_45days <span class="ot">&lt;-</span> <span class="fu">pre_lab</span>(master_lab, <span class="at">month =</span> <span class="cn">FALSE</span>, <span class="at">time =</span> <span class="dv">45</span>,</span>
 <span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>                           <span class="at">index_date =</span> baseline_sample_date, <span class="at">Group_Id =</span> <span class="st">"ALB"</span>)</span>
 <span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Electrolyte pre-baseline labs (updated pull)</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>pre_K_45days  <span class="ot">&lt;-</span> <span class="fu">pre_lab</span>(master_lab_new, <span class="at">month =</span> <span class="cn">FALSE</span>, <span class="at">time =</span> <span class="dv">45</span>,</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Electrolyte pre-baseline labs</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>pre_K_45days  <span class="ot">&lt;-</span> <span class="fu">pre_lab</span>(master_lab, <span class="at">month =</span> <span class="cn">FALSE</span>, <span class="at">time =</span> <span class="dv">45</span>,</span>
 <span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>                          <span class="at">index_date =</span> baseline_sample_date, <span class="at">Group_Id =</span> <span class="st">"K"</span>)</span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>pre_MG_45days <span class="ot">&lt;-</span> <span class="fu">pre_lab</span>(master_lab_new, <span class="at">month =</span> <span class="cn">FALSE</span>, <span class="at">time =</span> <span class="dv">45</span>,</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>pre_MG_45days <span class="ot">&lt;-</span> <span class="fu">pre_lab</span>(master_lab, <span class="at">month =</span> <span class="cn">FALSE</span>, <span class="at">time =</span> <span class="dv">45</span>,</span>
 <span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>                          <span class="at">index_date =</span> baseline_sample_date, <span class="at">Group_Id =</span> <span class="st">"MG"</span>)</span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>pre_NA_45days <span class="ot">&lt;-</span> <span class="fu">pre_lab</span>(master_lab_new, <span class="at">month =</span> <span class="cn">FALSE</span>, <span class="at">time =</span> <span class="dv">45</span>,</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>pre_NA_45days <span class="ot">&lt;-</span> <span class="fu">pre_lab</span>(master_lab, <span class="at">month =</span> <span class="cn">FALSE</span>, <span class="at">time =</span> <span class="dv">45</span>,</span>
 <span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>                          <span class="at">index_date =</span> baseline_sample_date, <span class="at">Group_Id =</span> <span class="st">"NA"</span>)</span>
 <span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge all pre-baseline labs into final_master</span></span>
@@ -2025,19 +2020,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Hypokalemia: first K &lt; 3.0 mEq/L within 90 days post-baseline</span></span>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>Hypokalemia_value <span class="ot">&lt;-</span> <span class="fu">post_lab_less_than_cutpoint</span>(</span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> master_lab_new, <span class="at">days =</span> <span class="dv">90</span>, <span class="at">index_date =</span> baseline_sample_date,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> master_lab, <span class="at">days =</span> <span class="dv">90</span>, <span class="at">index_date =</span> baseline_sample_date,</span>
 <span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Group_ID =</span> <span class="st">"K"</span>, <span class="at">Group_ID_name =</span> <span class="st">"Hypokalemia"</span>, <span class="at">cutpoint =</span> <span class="dv">3</span></span>
 <span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Hypomagnesemia: first Mg &lt; 0.9 mg/dL within 90 days post-baseline</span></span>
 <span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>Hypomagnesemia_value <span class="ot">&lt;-</span> <span class="fu">post_lab_less_than_cutpoint</span>(</span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> master_lab_new, <span class="at">days =</span> <span class="dv">90</span>, <span class="at">index_date =</span> baseline_sample_date,</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> master_lab, <span class="at">days =</span> <span class="dv">90</span>, <span class="at">index_date =</span> baseline_sample_date,</span>
 <span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">Group_ID =</span> <span class="st">"MG"</span>, <span class="at">Group_ID_name =</span> <span class="st">"Hypomagnesemia"</span>, <span class="at">cutpoint =</span> <span class="fl">0.9</span></span>
 <span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Hyponatremia: first Na &lt; 125 mEq/L within 90 days post-baseline</span></span>
 <span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>Hyponatremia_value <span class="ot">&lt;-</span> <span class="fu">post_lab_less_than_cutpoint</span>(</span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> master_lab_new, <span class="at">days =</span> <span class="dv">90</span>, <span class="at">index_date =</span> baseline_sample_date,</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> master_lab, <span class="at">days =</span> <span class="dv">90</span>, <span class="at">index_date =</span> baseline_sample_date,</span>
 <span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">Group_ID =</span> <span class="st">"NA"</span>, <span class="at">Group_ID_name =</span> <span class="st">"Hyponatremia"</span>, <span class="at">cutpoint =</span> <span class="dv">125</span></span>
 <span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a></span>
@@ -2155,7 +2150,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="pre_wbc_45days-not-available" class="level2">
 <h2 class="anchored" data-anchor-id="pre_wbc_45days-not-available">5.13 pre_WBC_45days — NOT available</h2>
 <blockquote class="blockquote">
-<p><strong><code>pre_WBC_45days</code></strong> cannot be created: WBC is not present in either RPDR lab pull (<code>mes98_051625135308675085_Lab.txt</code> has HGB/PLT/ALB/CRE; <code>mes98_071025164203189492_Lab.txt</code> has K/MG/NA). A new RPDR pull including <code>Group_Id = "WBC"</code> is needed to create this variable. It was listed in Jiaxuan’s <code>all_vars</code> and Table 1 but was likely pre-computed in an external xlsx file that is no longer used.</p>
+<p><strong><code>pre_WBC_45days</code></strong> cannot be created: WBC is not present in the RPDR lab pull. A new RPDR pull including <code>Group_Id = "WBC"</code> is needed to create this variable. It was listed in Jiaxuan’s <code>all_vars</code> and Table 1 but was likely pre-computed in an external xlsx file that is no longer used.</p>
 </blockquote>
 </section>
 <section id="charlson-comorbidity-index" class="level2">
@@ -2535,7 +2530,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td>4.7</td>
-<td>Load RPDR (lab, lab_new, dia, med) → master_lab/dia/med</td>
+<td>Load RPDR (lab, dia, med) → master_lab/dia/med</td>
 <td>—</td>
 </tr>
 <tr class="odd">
