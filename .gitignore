@@ -2,3 +2,6 @@
 *.html
 !docs/*.html
 *.xlsx
+
+/.quarto/
+**/*.quarto_ipynb
