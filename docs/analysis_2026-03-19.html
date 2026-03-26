@@ -189,7 +189,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#create-hospitalization-event-time-variables-reasons-111" id="toc-create-hospitalization-event-time-variables-reasons-111" class="nav-link" data-scroll-target="#create-hospitalization-event-time-variables-reasons-111">4.3 Create hospitalization event / time variables (reasons 1–11)</a></li>
   <li><a href="#create-platinum-related-side_effect-variable-hosp-reasons-17" id="toc-create-platinum-related-side_effect-variable-hosp-reasons-17" class="nav-link" data-scroll-target="#create-platinum-related-side_effect-variable-hosp-reasons-17">4.4 Create platinum-related side_effect variable (hosp reasons 1–7)</a></li>
   <li><a href="#create-final_master-merge-side_effect-and-drug-indicators" id="toc-create-final_master-merge-side_effect-and-drug-indicators" class="nav-link" data-scroll-target="#create-final_master-merge-side_effect-and-drug-indicators">4.5 Create final_master (merge side_effect and drug indicators)</a></li>
-  <li><a href="#rename-date-variables-and-empi-coerce-types" id="toc-rename-date-variables-and-empi-coerce-types" class="nav-link" data-scroll-target="#rename-date-variables-and-empi-coerce-types">4.6 Rename date variables and EMPI; coerce types</a></li>
+  <li><a href="#rename-date-variables-coerce-types" id="toc-rename-date-variables-coerce-types" class="nav-link" data-scroll-target="#rename-date-variables-coerce-types">4.6 Rename date variables; coerce types</a></li>
   <li><a href="#load-rpdr-files" id="toc-load-rpdr-files" class="nav-link" data-scroll-target="#load-rpdr-files">4.7 Load RPDR files</a></li>
   <li><a href="#pipeline-functions-egfr-formulas" id="toc-pipeline-functions-egfr-formulas" class="nav-link" data-scroll-target="#pipeline-functions-egfr-formulas">4.8 Pipeline functions: eGFR formulas</a></li>
   <li><a href="#pipeline-execution-pre-labs-egfr-ae-outcomes" id="toc-pipeline-execution-pre-labs-egfr-ae-outcomes" class="nav-link" data-scroll-target="#pipeline-execution-pre-labs-egfr-ae-outcomes">4.9 Pipeline execution: pre-labs, eGFR, AE outcomes</a></li>
@@ -208,7 +208,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#electrolyte-outcomes-removed" id="toc-electrolyte-outcomes-removed" class="nav-link" data-scroll-target="#electrolyte-outcomes-removed">5.10 Electrolyte outcomes — removed</a></li>
   <li><a href="#thyroid-disease-rpdr-diagnosis-medication" id="toc-thyroid-disease-rpdr-diagnosis-medication" class="nav-link" data-scroll-target="#thyroid-disease-rpdr-diagnosis-medication">5.11 Thyroid disease (RPDR diagnosis + medication)</a></li>
   <li><a href="#hiv-from-rpdr-hiv_rpdr" id="toc-hiv-from-rpdr-hiv_rpdr" class="nav-link" data-scroll-target="#hiv-from-rpdr-hiv_rpdr">5.12 HIV from RPDR (hiv_rpdr)</a></li>
-  <li><a href="#pre_wbc_45days-not-available" id="toc-pre_wbc_45days-not-available" class="nav-link" data-scroll-target="#pre_wbc_45days-not-available">5.13 pre_WBC_45days — NOT available</a></li>
   <li><a href="#charlson-comorbidity-index" id="toc-charlson-comorbidity-index" class="nav-link" data-scroll-target="#charlson-comorbidity-index">5.14 Charlson Comorbidity Index</a></li>
   <li><a href="#competing-risk-variables-1" id="toc-competing-risk-variables-1" class="nav-link" data-scroll-target="#competing-risk-variables-1">5.15 Competing risk variables</a></li>
   </ul></li>
@@ -274,18 +273,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Sections 1.1 and 1.2: PDF name used directly in code (no rename)</li>
 <li><code>bl_date</code> → <code>baseline_sample_date</code> (lowercase)</li>
 <li><code>fu_date</code> → <code>last_follow_up_date</code> (lowercase)</li>
-<li><code>empi</code> → <code>EMPI</code> (exception: uppercase required by RPDR functions)</li>
 <li>New derived variables: all lowercase</li>
 <li>All other Copy 709 variable names kept as-is</li>
 </ul>
 <section id="identifiers-demographics" class="level2">
 <h2 class="anchored" data-anchor-id="identifiers-demographics">1.1 Identifiers &amp; Demographics</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>PDF / REDCap</th>
@@ -300,9 +293,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td></td>
 </tr>
 <tr class="even">
-<td><code>empi</code></td>
 <td><code>EMPI</code></td>
-<td>Renamed to uppercase for RPDR function compatibility</td>
+<td><code>EMPI</code></td>
+<td>Already uppercase in raw data</td>
 </tr>
 <tr class="odd">
 <td><code>sex</code></td>
@@ -519,24 +512,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>pre_HGB_45days</code></td>
-<td><code>HGB</code></td>
-<td>Hemoglobin, closest value ≤ 45 days before baseline</td>
+<td><code>pre_CRE_45days</code></td>
+<td><code>CRE</code></td>
+<td>Creatinine, closest value ≤ 45 days before baseline</td>
 </tr>
 <tr class="even">
+<td><code>pre_HGB_45days</code></td>
+<td><code>HGB</code></td>
+<td>Hemoglobin</td>
+</tr>
+<tr class="odd">
 <td><code>pre_PLT_45days</code></td>
 <td><code>PLT</code></td>
 <td>Platelet count</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>pre_ALB_45days</code></td>
 <td><code>ALB</code></td>
 <td>Albumin</td>
-</tr>
-<tr class="even">
-<td><code>pre_WBC_45days</code></td>
-<td><code>WBC</code></td>
-<td>WBC</td>
 </tr>
 <tr class="odd">
 <td><code>pre_GHBA1C_45days</code></td>
@@ -1392,24 +1385,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="rename-date-variables-and-empi-coerce-types" class="level2">
-<h2 class="anchored" data-anchor-id="rename-date-variables-and-empi-coerce-types">4.6 Rename date variables and EMPI; coerce types</h2>
+<section id="rename-date-variables-coerce-types" class="level2">
+<h2 class="anchored" data-anchor-id="rename-date-variables-coerce-types">4.6 Rename date variables; coerce types</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># empi → EMPI  (uppercase required by RPDR functions)</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># bl_date → baseline_sample_date</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># fu_date → last_follow_up_date</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">EMPI                 =</span> empi,</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_sample_date =</span> bl_date,</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">last_follow_up_date  =</span> fu_date</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>final_master<span class="sc">$</span>last_follow_up_date  <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(final_master<span class="sc">$</span>last_follow_up_date)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>final_master<span class="sc">$</span>baseline_sample_date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(final_master<span class="sc">$</span>baseline_sample_date)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>final_master<span class="sc">$</span>platin_dose          <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(final_master<span class="sc">$</span>platin_dose)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># bl_date → baseline_sample_date</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># fu_date → last_follow_up_date</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_sample_date =</span> bl_date,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">last_follow_up_date  =</span> fu_date</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>final_master<span class="sc">$</span>last_follow_up_date  <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(final_master<span class="sc">$</span>last_follow_up_date)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>final_master<span class="sc">$</span>baseline_sample_date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(final_master<span class="sc">$</span>baseline_sample_date)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>final_master<span class="sc">$</span>platin_dose          <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(final_master<span class="sc">$</span>platin_dose)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -1625,13 +1616,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>                           <span class="at">index_date =</span> baseline_sample_date, <span class="at">Group_Id =</span> <span class="st">"PLT"</span>)</span>
 <span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>pre_ALB_45days <span class="ot">&lt;-</span> <span class="fu">pre_lab</span>(master_lab, <span class="at">month =</span> <span class="cn">FALSE</span>, <span class="at">time =</span> <span class="dv">45</span>,</span>
 <span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>                           <span class="at">index_date =</span> baseline_sample_date, <span class="at">Group_Id =</span> <span class="st">"ALB"</span>)</span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge all pre-baseline labs into final_master</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_CRE_45days, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_HGB_45days, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_PLT_45days, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_ALB_45days, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>pre_GHBA1C_45days <span class="ot">&lt;-</span> <span class="fu">pre_lab</span>(master_lab, <span class="at">month =</span> <span class="cn">FALSE</span>, <span class="at">time =</span> <span class="dv">45</span>,</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>                              <span class="at">index_date =</span> baseline_sample_date, <span class="at">Group_Id =</span> <span class="st">"GHBA1C"</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge all pre-baseline labs into final_master</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_CRE_45days,    <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_HGB_45days,    <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_PLT_45days,    <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_ALB_45days,    <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_GHBA1C_45days, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
@@ -2099,12 +2093,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb35-57"><a href="#cb35-57" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>hiv_rpdr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-</section>
-<section id="pre_wbc_45days-not-available" class="level2">
-<h2 class="anchored" data-anchor-id="pre_wbc_45days-not-available">5.13 pre_WBC_45days — NOT available</h2>
-<blockquote class="blockquote">
-<p><strong><code>pre_WBC_45days</code></strong> cannot be created: WBC is not present in the RPDR lab pull. A new RPDR pull including <code>Group_Id = "WBC"</code> is needed to create this variable. It was listed in Jiaxuan’s <code>all_vars</code> and Table 1 but was likely pre-computed in an external xlsx file that is no longer used.</p>
-</blockquote>
 </section>
 <section id="charlson-comorbidity-index" class="level2">
 <h2 class="anchored" data-anchor-id="charlson-comorbidity-index">5.14 Charlson Comorbidity Index</h2>

@@ -13,7 +13,6 @@ Naming rules applied in this file:
 - Sections 1.1 and 1.2: PDF name used directly in code (no rename)
 - `bl_date` → `baseline_sample_date` (lowercase)
 - `fu_date` → `last_follow_up_date` (lowercase)
-- `empi` → `EMPI` (exception: uppercase required by RPDR functions)
 - New derived variables: all lowercase
 - All other Copy 709 variable names kept as-is
 
@@ -22,7 +21,7 @@ Naming rules applied in this file:
 | PDF / REDCap | In Code | Note |
 |---|---|---|
 | `record_id` | `record_id` | |
-| `empi` | `EMPI` | Renamed to uppercase for RPDR function compatibility |
+| `EMPI` | `EMPI` | Already uppercase in raw data |
 | `sex` | `sex` | |
 | `height` | `height` | |
 | `weight` | `weight` | |
@@ -75,10 +74,10 @@ Naming rules applied in this file:
 
 | In Code | RPDR Group_Id | Description |
 |---|---|---|
-| `pre_HGB_45days` | `HGB` | Hemoglobin, closest value ≤ 45 days before baseline |
+| `pre_CRE_45days` | `CRE` | Creatinine, closest value ≤ 45 days before baseline |
+| `pre_HGB_45days` | `HGB` | Hemoglobin |
 | `pre_PLT_45days` | `PLT` | Platelet count |
 | `pre_ALB_45days` | `ALB` | Albumin |
-| `pre_WBC_45days` | `WBC` | WBC |
 | `pre_GHBA1C_45days` | `GHBA1C` | Hemoglobin A1C |
 
 ## 1.7 ED Visit Variables
@@ -620,16 +619,14 @@ final_master <- master %>%
 final_master <- create_drug_indicators(final_master)
 ```
 
-## 4.6 Rename date variables and EMPI; coerce types
+## 4.6 Rename date variables; coerce types
 
 ```{r}
 #| label: load-rename-dates
-# empi → EMPI  (uppercase required by RPDR functions)
 # bl_date → baseline_sample_date
 # fu_date → last_follow_up_date
 final_master <- final_master %>%
   rename(
-    EMPI                 = empi,
     baseline_sample_date = bl_date,
     last_follow_up_date  = fu_date
   )
@@ -786,13 +783,16 @@ pre_PLT_45days <- pre_lab(master_lab, month = FALSE, time = 45,
                            index_date = baseline_sample_date, Group_Id = "PLT")
 pre_ALB_45days <- pre_lab(master_lab, month = FALSE, time = 45,
                            index_date = baseline_sample_date, Group_Id = "ALB")
+pre_GHBA1C_45days <- pre_lab(master_lab, month = FALSE, time = 45,
+                              index_date = baseline_sample_date, Group_Id = "GHBA1C")
 
 # Merge all pre-baseline labs into final_master
 final_master <- final_master %>%
-  merge(pre_CRE_45days, by = "EMPI", all.x = TRUE) %>%
-  merge(pre_HGB_45days, by = "EMPI", all.x = TRUE) %>%
-  merge(pre_PLT_45days, by = "EMPI", all.x = TRUE) %>%
-  merge(pre_ALB_45days, by = "EMPI", all.x = TRUE)
+  merge(pre_CRE_45days,    by = "EMPI", all.x = TRUE) %>%
+  merge(pre_HGB_45days,    by = "EMPI", all.x = TRUE) %>%
+  merge(pre_PLT_45days,    by = "EMPI", all.x = TRUE) %>%
+  merge(pre_ALB_45days,    by = "EMPI", all.x = TRUE) %>%
+  merge(pre_GHBA1C_45days, by = "EMPI", all.x = TRUE)
 ```
 
 ```{r}
@@ -1235,12 +1235,6 @@ final_master <- final_master %>%
 table(final_master$hiv_rpdr)
 ```
 
-## 5.13 pre_WBC_45days — NOT available
-
-> **`pre_WBC_45days`** cannot be created: WBC is not present in the RPDR lab pull.
-> A new RPDR pull including `Group_Id = "WBC"` is needed to create this variable.
-> It was listed in Jiaxuan's `all_vars` and Table 1 but was likely pre-computed in an
-> external xlsx file that is no longer used.
 
 ## 5.14 Charlson Comorbidity Index
 
