@@ -119,13 +119,26 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#project-overview" id="toc-project-overview" class="nav-link active" data-scroll-target="#project-overview">Project Overview</a></li>
   <li><a href="#study-design" id="toc-study-design" class="nav-link" data-scroll-target="#study-design">Study Design</a></li>
+  <li><a href="#cohort-definition" id="toc-cohort-definition" class="nav-link" data-scroll-target="#cohort-definition">Cohort Definition</a>
+  <ul>
+  <li><a href="#inclusion" id="toc-inclusion" class="nav-link" data-scroll-target="#inclusion">Inclusion</a></li>
+  <li><a href="#exclusion" id="toc-exclusion" class="nav-link" data-scroll-target="#exclusion">Exclusion</a></li>
+  </ul></li>
   <li><a href="#outcomes" id="toc-outcomes" class="nav-link" data-scroll-target="#outcomes">Outcomes</a>
   <ul>
   <li><a href="#grade-23-adverse-events-within-90-days" id="toc-grade-23-adverse-events-within-90-days" class="nav-link" data-scroll-target="#grade-23-adverse-events-within-90-days">Grade 2/3 Adverse Events (within 90 days)</a></li>
-  <li><a href="#other-outcomes" id="toc-other-outcomes" class="nav-link" data-scroll-target="#other-outcomes">Other Outcomes</a></li>
+  <li><a href="#hospitalizations-ed-visits" id="toc-hospitalizations-ed-visits" class="nav-link" data-scroll-target="#hospitalizations-ed-visits">Hospitalizations &amp; ED Visits</a></li>
+  <li><a href="#mortality" id="toc-mortality" class="nav-link" data-scroll-target="#mortality">Mortality</a></li>
   </ul></li>
   <li><a href="#input-files" id="toc-input-files" class="nav-link" data-scroll-target="#input-files">Input Files</a></li>
-  <li><a href="#key-variables" id="toc-key-variables" class="nav-link" data-scroll-target="#key-variables">Key Variables</a></li>
+  <li><a href="#key-variables" id="toc-key-variables" class="nav-link" data-scroll-target="#key-variables">Key Variables</a>
+  <ul>
+  <li><a href="#exposure" id="toc-exposure" class="nav-link" data-scroll-target="#exposure">Exposure</a></li>
+  <li><a href="#egfr-kidney-function" id="toc-egfr-kidney-function" class="nav-link" data-scroll-target="#egfr-kidney-function">eGFR &amp; Kidney Function</a></li>
+  <li><a href="#pre-baseline-labs-closest-value-within-45-days-before-baseline" id="toc-pre-baseline-labs-closest-value-within-45-days-before-baseline" class="nav-link" data-scroll-target="#pre-baseline-labs-closest-value-within-45-days-before-baseline">Pre-baseline Labs (closest value within 45 days before baseline)</a></li>
+  <li><a href="#comorbidities-treatment" id="toc-comorbidities-treatment" class="nav-link" data-scroll-target="#comorbidities-treatment">Comorbidities &amp; Treatment</a></li>
+  <li><a href="#competing-risk-variables" id="toc-competing-risk-variables" class="nav-link" data-scroll-target="#competing-risk-variables">Competing Risk Variables</a></li>
+  </ul></li>
   <li><a href="#key-conventions" id="toc-key-conventions" class="nav-link" data-scroll-target="#key-conventions">Key Conventions</a></li>
   </ul>
 </nav>
@@ -166,10 +179,8 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="project-overview" class="level1">
 <h1>Project Overview</h1>
-<p>This study investigates whether the baseline <strong>creatinine-to-cystatin C ratio</strong> predicts adverse events in cancer patients receiving platinum-based chemotherapy (cisplatin or carboplatin). A low ratio (&lt; 0.7) suggests sarcopenia independent of GFR.</p>
 <ul>
 <li><strong>Primary exposure:</strong> <code>cr_cys_7</code> — binary indicator for creatinine / cystatin C ratio &lt; 0.7</li>
-<li><strong>Cohort:</strong> ~877 patients (after exclusions) from REDCap + RPDR</li>
 <li><strong>Follow-up:</strong> 90 days from baseline sample date</li>
 <li><strong>Framework:</strong> Competing risks (death as competing event for non-fatal outcomes)</li>
 </ul>
@@ -190,14 +201,22 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td><strong>Data sources</strong></td>
-<td>REDCap export (880 pts, ~150 vars) + RPDR (Dia, Lab, Med, Dem)</td>
+<td>REDCap export + RPDR (Dia, Lab, Med)</td>
 </tr>
 <tr class="even">
-<td><strong>RPDR path</strong></td>
+<td><strong>REDCap export</strong></td>
+<td><code>CystatinCInPatientsO_DATA_2026-03-25_1158.csv</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Patient list</strong></td>
+<td><code>list.csv</code> (EMPI filter applied to REDCap)</td>
+</tr>
+<tr class="even">
+<td><strong>RPDR pull</strong></td>
 <td><code>Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216</code></td>
 </tr>
 <tr class="odd">
-<td><strong>RPDR labs</strong></td>
+<td><strong>RPDR lab groups</strong></td>
 <td>ALB, CRE, HGB, PLT, GHBA1C</td>
 </tr>
 <tr class="even">
@@ -206,7 +225,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="odd">
 <td><strong>High dose</strong></td>
-<td>Cisplatin &gt;= 70 mg/m² or Carboplatin AUC &gt;= 5</td>
+<td>Cisplatin &gt;= 75 mg/m² or Carboplatin AUC &gt;= 5</td>
 </tr>
 <tr class="even">
 <td><strong>CKD staging</strong></td>
@@ -214,6 +233,26 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 </tbody>
 </table>
+</section>
+<section id="cohort-definition" class="level1">
+<h1>Cohort Definition</h1>
+<section id="inclusion" class="level2">
+<h2 class="anchored" data-anchor-id="inclusion">Inclusion</h2>
+<ul>
+<li>Patients in REDCap export whose EMPI appears in <code>list.csv</code></li>
+<li>Received cisplatin or carboplatin (<code>platin_group</code> non-missing)</li>
+<li>Baseline cystatin C value available (<code>cys_c_baseline</code> non-missing)</li>
+</ul>
+</section>
+<section id="exclusion" class="level2">
+<h2 class="anchored" data-anchor-id="exclusion">Exclusion</h2>
+<ol type="1">
+<li><strong>EMPI not in list:</strong> REDCap records filtered to only EMPIs present in <code>list.csv</code></li>
+<li><strong>Missing baseline cystatin C:</strong> 3 patients excluded (<code>cys_c_baseline</code> is NA)</li>
+<li><strong>Missing platinum group:</strong> 1 patient excluded (<code>platin_group</code> is NA)</li>
+</ol>
+<p><strong>Final cohort:</strong> ~877 patients (from 880 in REDCap after exclusions)</p>
+</section>
 </section>
 <section id="outcomes" class="level1">
 <h1>Outcomes</h1>
@@ -245,21 +284,35 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="odd">
 <td>AKI grade 2</td>
-<td>Post-baseline CRE &gt; 1.5x pre-baseline CRE</td>
+<td>Post-baseline CRE &gt; 1.5x pre-baseline CRE (KDIGO)</td>
 </tr>
 <tr class="even">
 <td>AKI grade 3</td>
-<td>Post-baseline CRE &gt; 3.0x pre-baseline CRE</td>
+<td>Post-baseline CRE &gt; 3.0x pre-baseline CRE (KDIGO)</td>
+</tr>
+<tr class="odd">
+<td>Composite grade 2</td>
+<td>Any of anemia/thrombocytopenia/AKI grade 2</td>
+</tr>
+<tr class="even">
+<td>Composite grade 3</td>
+<td>Any of anemia/thrombocytopenia/AKI grade 3</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="other-outcomes" class="level2">
-<h2 class="anchored" data-anchor-id="other-outcomes">Other Outcomes</h2>
+<section id="hospitalizations-ed-visits" class="level2">
+<h2 class="anchored" data-anchor-id="hospitalizations-ed-visits">Hospitalizations &amp; ED Visits</h2>
 <ul>
-<li>Hospitalizations (11 categories, reasons 1-7 = platinum-related side effects)</li>
-<li>ED visits (7 categories)</li>
-<li>90-day mortality</li>
+<li><strong>Hospitalizations:</strong> 11 reason categories; reasons 1-7 define <code>side_effect</code> (platinum-related)</li>
+<li><strong>ED visits:</strong> 7 reason categories</li>
+<li>All censored at 90 days</li>
+</ul>
+</section>
+<section id="mortality" class="level2">
+<h2 class="anchored" data-anchor-id="mortality">Mortality</h2>
+<ul>
+<li><strong>90-day mortality</strong> (<code>death_90</code>): derived from <code>pt_status</code> and <code>days_last_follow_up</code></li>
 </ul>
 </section>
 </section>
@@ -278,18 +331,22 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>CystatinCInPatientsO_DATA_2025-07-24_1327.csv</code></td>
+<td><code>CystatinCInPatientsO_DATA_2026-03-25_1158.csv</code></td>
 <td>REDCap export</td>
 </tr>
 <tr class="even">
+<td><code>list.csv</code></td>
+<td>EMPI inclusion list</td>
+</tr>
+<tr class="odd">
 <td><code>mes98_03182614492143216_Dia.txt</code></td>
 <td>RPDR Diagnoses</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>mes98_03182614492143216_Lab.txt</code></td>
 <td>RPDR Labs (ALB, CRE, HGB, PLT, GHBA1C)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>mes98_03182614492143216_Med.txt</code></td>
 <td>RPDR Medications</td>
 </tr>
@@ -298,6 +355,8 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="key-variables" class="level1">
 <h1>Key Variables</h1>
+<section id="exposure" class="level2">
+<h2 class="anchored" data-anchor-id="exposure">Exposure</h2>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -307,13 +366,30 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>cr_cys_7</code></td>
-<td>Primary exposure: Cr/CysC ratio &lt; 0.7</td>
+<td><code>cr_cys</code></td>
+<td>Raw ratio: baseline creatinine / cystatin C</td>
 </tr>
 <tr class="even">
+<td><code>cr_cys_7</code></td>
+<td>Primary exposure: 1 if ratio &lt; 0.7</td>
+</tr>
+<tr class="odd">
 <td><code>cr_cys_cat</code></td>
 <td>Categorical: &lt;0.5 / 0.5-0.7 / 0.7-0.9 / &gt;=0.9</td>
 </tr>
+</tbody>
+</table>
+</section>
+<section id="egfr-kidney-function" class="level2">
+<h2 class="anchored" data-anchor-id="egfr-kidney-function">eGFR &amp; Kidney Function</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
 <tr class="odd">
 <td><code>baseline_cre_egfr</code></td>
 <td>CKD-EPI eGFR from creatinine</td>
@@ -323,27 +399,111 @@ ul.task-list li input[type="checkbox"] {
 <td>CKD-EPI eGFR from cystatin C</td>
 </tr>
 <tr class="odd">
+<td><code>ckd_epi_gfr_cre_cys</code></td>
+<td>CKD-EPI combined creatinine-cystatin C eGFR</td>
+</tr>
+<tr class="even">
 <td><code>cockcroft</code></td>
 <td>Cockcroft-Gault creatinine clearance</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>ckd_stage_cg</code></td>
 <td>CKD stage from Cockcroft-Gault</td>
 </tr>
+</tbody>
+</table>
+</section>
+<section id="pre-baseline-labs-closest-value-within-45-days-before-baseline" class="level2">
+<h2 class="anchored" data-anchor-id="pre-baseline-labs-closest-value-within-45-days-before-baseline">Pre-baseline Labs (closest value within 45 days before baseline)</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>RPDR Group_Id</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pre_CRE_45days</code></td>
+<td>CRE</td>
+</tr>
+<tr class="even">
+<td><code>pre_HGB_45days</code></td>
+<td>HGB</td>
+</tr>
+<tr class="odd">
+<td><code>pre_PLT_45days</code></td>
+<td>PLT</td>
+</tr>
+<tr class="even">
+<td><code>pre_ALB_45days</code></td>
+<td>ALB</td>
+</tr>
+<tr class="odd">
+<td><code>pre_GHBA1C_45days</code></td>
+<td>GHBA1C</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="comorbidities-treatment" class="level2">
+<h2 class="anchored" data-anchor-id="comorbidities-treatment">Comorbidities &amp; Treatment</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
 <tr class="odd">
 <td><code>score</code> / <code>cci</code></td>
-<td>Charlson comorbidity index</td>
+<td>Charlson comorbidity index (from RPDR ICD codes)</td>
+</tr>
+<tr class="even">
+<td><code>thyroid</code></td>
+<td>Thyroid disease (RPDR diagnosis + medication)</td>
+</tr>
+<tr class="odd">
+<td><code>hiv_rpdr</code></td>
+<td>HIV from RPDR diagnoses + medications</td>
 </tr>
 <tr class="even">
 <td><code>dose_1</code></td>
 <td>High-dose platinum flag</td>
 </tr>
 <tr class="odd">
-<td><code>grade_2_aes</code> / <code>grade_3_aes</code></td>
-<td>Composite AE outcomes</td>
+<td><code>cancer_type_cat_7</code></td>
+<td>Cancer type (7 categories)</td>
+</tr>
+<tr class="even">
+<td><code>ici</code></td>
+<td>Immune checkpoint inhibitor use</td>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="competing-risk-variables" class="level2">
+<h2 class="anchored" data-anchor-id="competing-risk-variables">Competing Risk Variables</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Pattern</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>cmp_time_&lt;outcome&gt;</code></td>
+<td>Time for competing risk model</td>
+</tr>
+<tr class="even">
+<td><code>cmp_status_&lt;outcome&gt;</code></td>
+<td>0 = censored, 1 = event, 2 = death</td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 <section id="key-conventions" class="level1">
 <h1>Key Conventions</h1>
@@ -352,6 +512,7 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Competing risks:</strong> Death coded as event = 2; <code>tidycmprsk::crr()</code> used instead of standard Cox</li>
 <li><strong>Pre-baseline labs:</strong> Closest value within 45 days before baseline</li>
 <li><strong>eGFR formulas:</strong> CKD-EPI 2021 (creatinine, cystatin C, combined) and Cockcroft-Gault</li>
+<li><strong>RPDR lab groups:</strong> ALB, CRE, HGB, PLT, GHBA1C (electrolyte labs K/MG/NA and WBC not included)</li>
 </ul>
 
 

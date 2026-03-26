@@ -6,10 +6,7 @@ date: "2026-03-26"
 
 # Project Overview
 
-This study investigates whether the baseline **creatinine-to-cystatin C ratio** predicts adverse events in cancer patients receiving platinum-based chemotherapy (cisplatin or carboplatin). A low ratio (< 0.7) suggests sarcopenia independent of GFR.
-
 - **Primary exposure:** `cr_cys_7` — binary indicator for creatinine / cystatin C ratio < 0.7
-- **Cohort:** ~877 patients (after exclusions) from REDCap + RPDR
 - **Follow-up:** 90 days from baseline sample date
 - **Framework:** Competing risks (death as competing event for non-fatal outcomes)
 
@@ -17,12 +14,30 @@ This study investigates whether the baseline **creatinine-to-cystatin C ratio** 
 
 | | Details |
 |---|---|
-| **Data sources** | REDCap export (880 pts, ~150 vars) + RPDR (Dia, Lab, Med, Dem) |
-| **RPDR path** | `Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216` |
-| **RPDR labs** | ALB, CRE, HGB, PLT, GHBA1C |
+| **Data sources** | REDCap export + RPDR (Dia, Lab, Med) |
+| **REDCap export** | `CystatinCInPatientsO_DATA_2026-03-25_1158.csv` |
+| **Patient list** | `list.csv` (EMPI filter applied to REDCap) |
+| **RPDR pull** | `Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216` |
+| **RPDR lab groups** | ALB, CRE, HGB, PLT, GHBA1C |
 | **Platinum types** | Cisplatin and Carboplatin |
-| **High dose** | Cisplatin >= 70 mg/m² or Carboplatin AUC >= 5 |
+| **High dose** | Cisplatin >= 75 mg/m² or Carboplatin AUC >= 5 |
 | **CKD staging** | Cockcroft-Gault eGFR from pre-baseline creatinine |
+
+# Cohort Definition
+
+## Inclusion
+
+- Patients in REDCap export whose EMPI appears in `list.csv`
+- Received cisplatin or carboplatin (`platin_group` non-missing)
+- Baseline cystatin C value available (`cys_c_baseline` non-missing)
+
+## Exclusion
+
+1. **EMPI not in list:** REDCap records filtered to only EMPIs present in `list.csv`
+2. **Missing baseline cystatin C:** 3 patients excluded (`cys_c_baseline` is NA)
+3. **Missing platinum group:** 1 patient excluded (`platin_group` is NA)
+
+**Final cohort:** ~877 patients (from 880 in REDCap after exclusions)
 
 # Outcomes
 
@@ -34,37 +49,78 @@ This study investigates whether the baseline **creatinine-to-cystatin C ratio** 
 | Anemia grade 3 | HGB < 8 g/dL |
 | Thrombocytopenia grade 2 | PLT < 75 x10^9/L |
 | Thrombocytopenia grade 3 | PLT < 50 x10^9/L |
-| AKI grade 2 | Post-baseline CRE > 1.5x pre-baseline CRE |
-| AKI grade 3 | Post-baseline CRE > 3.0x pre-baseline CRE |
+| AKI grade 2 | Post-baseline CRE > 1.5x pre-baseline CRE (KDIGO) |
+| AKI grade 3 | Post-baseline CRE > 3.0x pre-baseline CRE (KDIGO) |
+| Composite grade 2 | Any of anemia/thrombocytopenia/AKI grade 2 |
+| Composite grade 3 | Any of anemia/thrombocytopenia/AKI grade 3 |
 
-## Other Outcomes
+## Hospitalizations & ED Visits
 
-- Hospitalizations (11 categories, reasons 1-7 = platinum-related side effects)
-- ED visits (7 categories)
-- 90-day mortality
+- **Hospitalizations:** 11 reason categories; reasons 1-7 define `side_effect` (platinum-related)
+- **ED visits:** 7 reason categories
+- All censored at 90 days
+
+## Mortality
+
+- **90-day mortality** (`death_90`): derived from `pt_status` and `days_last_follow_up`
 
 # Input Files
 
 | File | Description |
 |---|---|
-| `CystatinCInPatientsO_DATA_2025-07-24_1327.csv` | REDCap export |
+| `CystatinCInPatientsO_DATA_2026-03-25_1158.csv` | REDCap export |
+| `list.csv` | EMPI inclusion list |
 | `mes98_03182614492143216_Dia.txt` | RPDR Diagnoses |
 | `mes98_03182614492143216_Lab.txt` | RPDR Labs (ALB, CRE, HGB, PLT, GHBA1C) |
 | `mes98_03182614492143216_Med.txt` | RPDR Medications |
 
 # Key Variables
 
+## Exposure
+
 | Variable | Description |
 |---|---|
-| `cr_cys_7` | Primary exposure: Cr/CysC ratio < 0.7 |
+| `cr_cys` | Raw ratio: baseline creatinine / cystatin C |
+| `cr_cys_7` | Primary exposure: 1 if ratio < 0.7 |
 | `cr_cys_cat` | Categorical: <0.5 / 0.5-0.7 / 0.7-0.9 / >=0.9 |
+
+## eGFR & Kidney Function
+
+| Variable | Description |
+|---|---|
 | `baseline_cre_egfr` | CKD-EPI eGFR from creatinine |
 | `baseline_cys_c_egfr` | CKD-EPI eGFR from cystatin C |
+| `ckd_epi_gfr_cre_cys` | CKD-EPI combined creatinine-cystatin C eGFR |
 | `cockcroft` | Cockcroft-Gault creatinine clearance |
 | `ckd_stage_cg` | CKD stage from Cockcroft-Gault |
-| `score` / `cci` | Charlson comorbidity index |
+
+## Pre-baseline Labs (closest value within 45 days before baseline)
+
+| Variable | RPDR Group_Id |
+|---|---|
+| `pre_CRE_45days` | CRE |
+| `pre_HGB_45days` | HGB |
+| `pre_PLT_45days` | PLT |
+| `pre_ALB_45days` | ALB |
+| `pre_GHBA1C_45days` | GHBA1C |
+
+## Comorbidities & Treatment
+
+| Variable | Description |
+|---|---|
+| `score` / `cci` | Charlson comorbidity index (from RPDR ICD codes) |
+| `thyroid` | Thyroid disease (RPDR diagnosis + medication) |
+| `hiv_rpdr` | HIV from RPDR diagnoses + medications |
 | `dose_1` | High-dose platinum flag |
-| `grade_2_aes` / `grade_3_aes` | Composite AE outcomes |
+| `cancer_type_cat_7` | Cancer type (7 categories) |
+| `ici` | Immune checkpoint inhibitor use |
+
+## Competing Risk Variables
+
+| Pattern | Description |
+|---|---|
+| `cmp_time_<outcome>` | Time for competing risk model |
+| `cmp_status_<outcome>` | 0 = censored, 1 = event, 2 = death |
 
 # Key Conventions
 
@@ -72,3 +128,4 @@ This study investigates whether the baseline **creatinine-to-cystatin C ratio** 
 - **Competing risks:** Death coded as event = 2; `tidycmprsk::crr()` used instead of standard Cox
 - **Pre-baseline labs:** Closest value within 45 days before baseline
 - **eGFR formulas:** CKD-EPI 2021 (creatinine, cystatin C, combined) and Cockcroft-Gault
+- **RPDR lab groups:** ALB, CRE, HGB, PLT, GHBA1C (electrolyte labs K/MG/NA and WBC not included)
