@@ -3,7 +3,8 @@ project:
   output-dir: docs
   render:
     - index.qmd
-    - analysis_2026-03-19.qmd
+    - data_management.qmd
+    - analysis.qmd
 
 website:
   title: "Cystatin C / Creatinine Ratio – Platinum AE"
@@ -11,7 +12,9 @@ website:
     left:
       - href: index.qmd
         text: Summary
-      - href: analysis_2026-03-19.qmd
+      - href: data_management.qmd
+        text: Data Management
+      - href: analysis.qmd
         text: Analysis
 
 format:
