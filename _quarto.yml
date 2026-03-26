@@ -1,0 +1,27 @@
+project:
+  type: website
+  output-dir: docs
+  render:
+    - index.qmd
+    - analysis_2026-03-19.qmd
+
+website:
+  title: "Cystatin C / Creatinine Ratio – Platinum AE"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Summary
+      - href: analysis_2026-03-19.qmd
+        text: Analysis
+
+format:
+  html:
+    theme: lumen
+    toc: true
+    toc-depth: 4
+    code-fold: true
+
+execute:
+  eval: false
+  warning: false
+  message: false
