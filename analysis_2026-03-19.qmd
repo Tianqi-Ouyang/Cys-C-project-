@@ -1,21 +1,7 @@
 ---
-title: "Cystatin C / Creatinine Ratio – Platinum Chemotherapy AE Analysis"
+title: "Analysis"
 author: "Meg"
 date: "2026-03-19"
-format:
-  html:
-    theme: lumen
-    toc: true
-    toc-float: true
-    toc-depth: 4
-    code-fold: true
-  pdf:
-    toc: true
-    toc-depth: 4
-execute:
-  eval: false
-  warning: false
-  message: false
 ---
 
 # 1 Variable Name Dictionary

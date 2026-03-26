@@ -1,0 +1,74 @@
+---
+title: "CysC / Creatinine Ratio – Project Summary"
+author: "Tianqi Ouyang"
+date: "2026-03-26"
+---
+
+# Project Overview
+
+This study investigates whether the baseline **creatinine-to-cystatin C ratio** predicts adverse events in cancer patients receiving platinum-based chemotherapy (cisplatin or carboplatin). A low ratio (< 0.7) suggests sarcopenia independent of GFR.
+
+- **Primary exposure:** `cr_cys_7` — binary indicator for creatinine / cystatin C ratio < 0.7
+- **Cohort:** ~877 patients (after exclusions) from REDCap + RPDR
+- **Follow-up:** 90 days from baseline sample date
+- **Framework:** Competing risks (death as competing event for non-fatal outcomes)
+
+# Study Design
+
+| | Details |
+|---|---|
+| **Data sources** | REDCap export (880 pts, ~150 vars) + RPDR (Dia, Lab, Med, Dem) |
+| **RPDR path** | `Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216` |
+| **RPDR labs** | ALB, CRE, HGB, PLT, GHBA1C |
+| **Platinum types** | Cisplatin and Carboplatin |
+| **High dose** | Cisplatin >= 70 mg/m² or Carboplatin AUC >= 5 |
+| **CKD staging** | Cockcroft-Gault eGFR from pre-baseline creatinine |
+
+# Outcomes
+
+## Grade 2/3 Adverse Events (within 90 days)
+
+| Outcome | Definition |
+|---|---|
+| Anemia grade 2 | HGB < 10 g/dL |
+| Anemia grade 3 | HGB < 8 g/dL |
+| Thrombocytopenia grade 2 | PLT < 75 x10^9/L |
+| Thrombocytopenia grade 3 | PLT < 50 x10^9/L |
+| AKI grade 2 | Post-baseline CRE > 1.5x pre-baseline CRE |
+| AKI grade 3 | Post-baseline CRE > 3.0x pre-baseline CRE |
+
+## Other Outcomes
+
+- Hospitalizations (11 categories, reasons 1-7 = platinum-related side effects)
+- ED visits (7 categories)
+- 90-day mortality
+
+# Input Files
+
+| File | Description |
+|---|---|
+| `CystatinCInPatientsO_DATA_2025-07-24_1327.csv` | REDCap export |
+| `mes98_03182614492143216_Dia.txt` | RPDR Diagnoses |
+| `mes98_03182614492143216_Lab.txt` | RPDR Labs (ALB, CRE, HGB, PLT, GHBA1C) |
+| `mes98_03182614492143216_Med.txt` | RPDR Medications |
+
+# Key Variables
+
+| Variable | Description |
+|---|---|
+| `cr_cys_7` | Primary exposure: Cr/CysC ratio < 0.7 |
+| `cr_cys_cat` | Categorical: <0.5 / 0.5-0.7 / 0.7-0.9 / >=0.9 |
+| `baseline_cre_egfr` | CKD-EPI eGFR from creatinine |
+| `baseline_cys_c_egfr` | CKD-EPI eGFR from cystatin C |
+| `cockcroft` | Cockcroft-Gault creatinine clearance |
+| `ckd_stage_cg` | CKD stage from Cockcroft-Gault |
+| `score` / `cci` | Charlson comorbidity index |
+| `dose_1` | High-dose platinum flag |
+| `grade_2_aes` / `grade_3_aes` | Composite AE outcomes |
+
+# Key Conventions
+
+- **Time anchor:** All outcomes measured from `baseline_sample_date`
+- **Competing risks:** Death coded as event = 2; `tidycmprsk::crr()` used instead of standard Cox
+- **Pre-baseline labs:** Closest value within 45 days before baseline
+- **eGFR formulas:** CKD-EPI 2021 (creatinine, cystatin C, combined) and Cockcroft-Gault
