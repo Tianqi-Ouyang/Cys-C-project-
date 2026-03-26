@@ -9,7 +9,7 @@
 <meta name="author" content="Meg">
 <meta name="dcterms.date" content="2026-03-19">
 
-<title>Analysis – Cystatin C / Creatinine Ratio – Platinum AE</title>
+<title>Data Management – Cystatin C / Creatinine Ratio – Platinum AE</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -133,7 +133,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Summary</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./analysis_2026-03-19.html" aria-current="page"> 
+    <a class="nav-link active" href="./data_management.html" aria-current="page"> 
+<span class="menu-text">Data Management</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./analysis.html"> 
 <span class="menu-text">Analysis</span></a>
   </li>  
 </ul>
@@ -154,22 +158,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#variable-name-dictionary" id="toc-variable-name-dictionary" class="nav-link active" data-scroll-target="#variable-name-dictionary">1 Variable Name Dictionary</a>
   <ul>
-  <li><a href="#identifiers-demographics" id="toc-identifiers-demographics" class="nav-link" data-scroll-target="#identifiers-demographics">1.1 Identifiers &amp; Demographics</a></li>
-  <li><a href="#cancer-treatment" id="toc-cancer-treatment" class="nav-link" data-scroll-target="#cancer-treatment">1.2 Cancer &amp; Treatment</a></li>
-  <li><a href="#dates" id="toc-dates" class="nav-link" data-scroll-target="#dates">1.3 Dates</a></li>
-  <li><a href="#baseline-lab-values-redcap" id="toc-baseline-lab-values-redcap" class="nav-link" data-scroll-target="#baseline-lab-values-redcap">1.4 Baseline Lab Values (REDCap)</a></li>
-  <li><a href="#computed-egfr-variables-from-cleaned_master" id="toc-computed-egfr-variables-from-cleaned_master" class="nav-link" data-scroll-target="#computed-egfr-variables-from-cleaned_master">1.5 Computed eGFR Variables (from cleaned_master)</a></li>
-  <li><a href="#rpdr-pre-baseline-lab-values-within-45-days" id="toc-rpdr-pre-baseline-lab-values-within-45-days" class="nav-link" data-scroll-target="#rpdr-pre-baseline-lab-values-within-45-days">1.6 RPDR Pre-baseline Lab Values (within 45 days)</a></li>
-  <li><a href="#ed-visit-variables" id="toc-ed-visit-variables" class="nav-link" data-scroll-target="#ed-visit-variables">1.7 ED Visit Variables</a></li>
-  <li><a href="#hospitalization-variables" id="toc-hospitalization-variables" class="nav-link" data-scroll-target="#hospitalization-variables">1.8 Hospitalization Variables</a></li>
-  <li><a href="#adverse-event-outcome-variables-from-cleaned_master" id="toc-adverse-event-outcome-variables-from-cleaned_master" class="nav-link" data-scroll-target="#adverse-event-outcome-variables-from-cleaned_master">1.9 Adverse Event Outcome Variables (from cleaned_master)</a></li>
-  <li><a href="#electrolyte-outcomes" id="toc-electrolyte-outcomes" class="nav-link" data-scroll-target="#electrolyte-outcomes">1.10 Electrolyte Outcomes</a></li>
-  <li><a href="#mortality" id="toc-mortality" class="nav-link" data-scroll-target="#mortality">1.11 Mortality</a></li>
-  <li><a href="#exposure-variables" id="toc-exposure-variables" class="nav-link" data-scroll-target="#exposure-variables">1.12 Exposure Variables</a></li>
-  <li><a href="#comorbidities-medications" id="toc-comorbidities-medications" class="nav-link" data-scroll-target="#comorbidities-medications">1.13 Comorbidities &amp; Medications</a></li>
-  <li><a href="#platinum-dosing-variables" id="toc-platinum-dosing-variables" class="nav-link" data-scroll-target="#platinum-dosing-variables">1.14 Platinum Dosing Variables</a></li>
-  <li><a href="#drug-indicators-from-create_drug_indicators" id="toc-drug-indicators-from-create_drug_indicators" class="nav-link" data-scroll-target="#drug-indicators-from-create_drug_indicators">1.15 Drug Indicators (from <code>create_drug_indicators()</code>)</a></li>
-  <li><a href="#competing-risk-variables" id="toc-competing-risk-variables" class="nav-link" data-scroll-target="#competing-risk-variables">1.16 Competing Risk Variables</a></li>
+  <li><a href="#renamed-variables" id="toc-renamed-variables" class="nav-link" data-scroll-target="#renamed-variables">1.1 Renamed Variables</a></li>
+  <li><a href="#derived-egfr-kidney-function" id="toc-derived-egfr-kidney-function" class="nav-link" data-scroll-target="#derived-egfr-kidney-function">1.2 Derived — eGFR &amp; Kidney Function</a></li>
+  <li><a href="#derived-rpdr-pre-baseline-labs-within-45-days" id="toc-derived-rpdr-pre-baseline-labs-within-45-days" class="nav-link" data-scroll-target="#derived-rpdr-pre-baseline-labs-within-45-days">1.3 Derived — RPDR Pre-baseline Labs (within 45 days)</a></li>
+  <li><a href="#derived-exposure" id="toc-derived-exposure" class="nav-link" data-scroll-target="#derived-exposure">1.4 Derived — Exposure</a></li>
+  <li><a href="#derived-adverse-events-within-90-days" id="toc-derived-adverse-events-within-90-days" class="nav-link" data-scroll-target="#derived-adverse-events-within-90-days">1.5 Derived — Adverse Events (within 90 days)</a></li>
+  <li><a href="#derived-hospitalizations-ed" id="toc-derived-hospitalizations-ed" class="nav-link" data-scroll-target="#derived-hospitalizations-ed">1.6 Derived — Hospitalizations &amp; ED</a></li>
+  <li><a href="#derived-mortality" id="toc-derived-mortality" class="nav-link" data-scroll-target="#derived-mortality">1.7 Derived — Mortality</a></li>
+  <li><a href="#derived-comorbidities-categories" id="toc-derived-comorbidities-categories" class="nav-link" data-scroll-target="#derived-comorbidities-categories">1.8 Derived — Comorbidities &amp; Categories</a></li>
+  <li><a href="#derived-platinum-dosing" id="toc-derived-platinum-dosing" class="nav-link" data-scroll-target="#derived-platinum-dosing">1.9 Derived — Platinum Dosing</a></li>
+  <li><a href="#derived-drug-indicators-competing-risk" id="toc-derived-drug-indicators-competing-risk" class="nav-link" data-scroll-target="#derived-drug-indicators-competing-risk">1.10 Derived — Drug Indicators &amp; Competing Risk</a></li>
   </ul></li>
   <li><a href="#setup-libraries" id="toc-setup-libraries" class="nav-link" data-scroll-target="#setup-libraries">2 Setup &amp; Libraries</a></li>
   <li><a href="#functions-all-from-copy-709" id="toc-functions-all-from-copy-709" class="nav-link" data-scroll-target="#functions-all-from-copy-709">3 Functions (all from Copy 709)</a>
@@ -200,35 +198,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#censor-hospitalization-time-variables-at-90-days" id="toc-censor-hospitalization-time-variables-at-90-days" class="nav-link" data-scroll-target="#censor-hospitalization-time-variables-at-90-days">5.2 Censor hospitalization time variables at 90 days</a></li>
   <li><a href="#adverse-event-outcome-variables-from-rpdr-pipeline" id="toc-adverse-event-outcome-variables-from-rpdr-pipeline" class="nav-link" data-scroll-target="#adverse-event-outcome-variables-from-rpdr-pipeline">5.3 Adverse event outcome variables (from RPDR pipeline)</a></li>
   <li><a href="#exclusion-filter-missing-cystatin-c-or-platinum-type" id="toc-exclusion-filter-missing-cystatin-c-or-platinum-type" class="nav-link" data-scroll-target="#exclusion-filter-missing-cystatin-c-or-platinum-type">5.4 Exclusion filter: missing cystatin C or platinum type</a></li>
-  <li><a href="#exposure-variables-1" id="toc-exposure-variables-1" class="nav-link" data-scroll-target="#exposure-variables-1">5.5 Exposure variables</a></li>
+  <li><a href="#exposure-variables" id="toc-exposure-variables" class="nav-link" data-scroll-target="#exposure-variables">5.5 Exposure variables</a></li>
   <li><a href="#bmi-age-categories-ici-ckd-stage" id="toc-bmi-age-categories-ici-ckd-stage" class="nav-link" data-scroll-target="#bmi-age-categories-ici-ckd-stage">5.6 BMI, age categories, ICI, CKD stage</a></li>
   <li><a href="#cancer-type-categories-7-groups" id="toc-cancer-type-categories-7-groups" class="nav-link" data-scroll-target="#cancer-type-categories-7-groups">5.7 Cancer type categories (7 groups)</a></li>
-  <li><a href="#platinum-dosing-variables-1" id="toc-platinum-dosing-variables-1" class="nav-link" data-scroll-target="#platinum-dosing-variables-1">5.8 Platinum dosing variables</a></li>
+  <li><a href="#platinum-dosing-variables" id="toc-platinum-dosing-variables" class="nav-link" data-scroll-target="#platinum-dosing-variables">5.8 Platinum dosing variables</a></li>
   <li><a href="#rename-baseline-lab-variables-copy-709-convention" id="toc-rename-baseline-lab-variables-copy-709-convention" class="nav-link" data-scroll-target="#rename-baseline-lab-variables-copy-709-convention">5.9 Rename baseline lab variables (Copy 709 convention)</a></li>
   <li><a href="#electrolyte-outcomes-removed" id="toc-electrolyte-outcomes-removed" class="nav-link" data-scroll-target="#electrolyte-outcomes-removed">5.10 Electrolyte outcomes — removed</a></li>
   <li><a href="#thyroid-disease-rpdr-diagnosis-medication" id="toc-thyroid-disease-rpdr-diagnosis-medication" class="nav-link" data-scroll-target="#thyroid-disease-rpdr-diagnosis-medication">5.11 Thyroid disease (RPDR diagnosis + medication)</a></li>
   <li><a href="#hiv-from-rpdr-hiv_rpdr" id="toc-hiv-from-rpdr-hiv_rpdr" class="nav-link" data-scroll-target="#hiv-from-rpdr-hiv_rpdr">5.12 HIV from RPDR (hiv_rpdr)</a></li>
   <li><a href="#charlson-comorbidity-index" id="toc-charlson-comorbidity-index" class="nav-link" data-scroll-target="#charlson-comorbidity-index">5.14 Charlson Comorbidity Index</a></li>
-  <li><a href="#competing-risk-variables-1" id="toc-competing-risk-variables-1" class="nav-link" data-scroll-target="#competing-risk-variables-1">5.15 Competing risk variables</a></li>
+  <li><a href="#competing-risk-variables" id="toc-competing-risk-variables" class="nav-link" data-scroll-target="#competing-risk-variables">5.15 Competing risk variables</a></li>
   </ul></li>
-  <li><a href="#bug-documentation" id="toc-bug-documentation" class="nav-link" data-scroll-target="#bug-documentation">6 Bug Documentation</a>
-  <ul>
-  <li><a href="#bug-pre_lab-wrong-date-column-found-in-jiaxuans-code" id="toc-bug-pre_lab-wrong-date-column-found-in-jiaxuans-code" class="nav-link" data-scroll-target="#bug-pre_lab-wrong-date-column-found-in-jiaxuans-code">6.1 Bug: <code>pre_lab</code> — wrong date column (found in Jiaxuan’s code)</a>
-  <ul class="collapse">
-  <li><a href="#old-code-incorrect-jiaxuans-version" id="toc-old-code-incorrect-jiaxuans-version" class="nav-link" data-scroll-target="#old-code-incorrect-jiaxuans-version">Old code — incorrect (Jiaxuan’s version)</a></li>
-  <li><a href="#fixed-code-correct-copy-709-version-used-in-section-3.5" id="toc-fixed-code-correct-copy-709-version-used-in-section-3.5" class="nav-link" data-scroll-target="#fixed-code-correct-copy-709-version-used-in-section-3.5">Fixed code — correct (Copy 709 version, used in Section 3.5)</a></li>
-  </ul></li>
-  <li><a href="#bug-cmp_variable-wrong-event_status-for-hosp_8-through-hosp_11-found-in-copy-709" id="toc-bug-cmp_variable-wrong-event_status-for-hosp_8-through-hosp_11-found-in-copy-709" class="nav-link" data-scroll-target="#bug-cmp_variable-wrong-event_status-for-hosp_8-through-hosp_11-found-in-copy-709">6.2 Bug: <code>cmp_variable</code> — wrong <code>event_status</code> for hosp_8 through hosp_11 (found in Copy 709)</a>
-  <ul class="collapse">
-  <li><a href="#old-code-incorrect-copy-709" id="toc-old-code-incorrect-copy-709" class="nav-link" data-scroll-target="#old-code-incorrect-copy-709">Old code — incorrect (Copy 709)</a></li>
-  <li><a href="#fixed-code-correct-used-in-section-5.15" id="toc-fixed-code-correct-used-in-section-5.15" class="nav-link" data-scroll-target="#fixed-code-correct-used-in-section-5.15">Fixed code — correct (used in Section 5.15)</a></li>
-  </ul></li>
-  <li><a href="#bug-ckd_epi_cys_gfr-function-referenced-but-never-defined-anywhere" id="toc-bug-ckd_epi_cys_gfr-function-referenced-but-never-defined-anywhere" class="nav-link" data-scroll-target="#bug-ckd_epi_cys_gfr-function-referenced-but-never-defined-anywhere">6.3 Bug: <code>ckd_epi_cys_gfr</code> — function referenced but never defined anywhere</a></li>
-  <li><a href="#note-ckd_epi_cre_cys_gfr-coefficients-verified-against-ckd-epi-2021" id="toc-note-ckd_epi_cre_cys_gfr-coefficients-verified-against-ckd-epi-2021" class="nav-link" data-scroll-target="#note-ckd_epi_cre_cys_gfr-coefficients-verified-against-ckd-epi-2021">6.4 Note: <code>ckd_epi_cre_cys_gfr</code> — coefficients verified against CKD-EPI 2021</a></li>
-  <li><a href="#bug-dia_list_name-in-r-code-summary.rmd-missing-index_date-filter" id="toc-bug-dia_list_name-in-r-code-summary.rmd-missing-index_date-filter" class="nav-link" data-scroll-target="#bug-dia_list_name-in-r-code-summary.rmd-missing-index_date-filter">6.5 Bug: <code>dia_list_name</code> in <code>R code summary.Rmd</code> — missing <code>index_date</code> filter</a></li>
-  <li><a href="#bug-orphaned-fragment-in-r-code-summary.rmd-lines-348380" id="toc-bug-orphaned-fragment-in-r-code-summary.rmd-lines-348380" class="nav-link" data-scroll-target="#bug-orphaned-fragment-in-r-code-summary.rmd-lines-348380">6.6 Bug: Orphaned <code>%&gt;%</code> fragment in <code>R code summary.Rmd</code> (lines 348–380)</a></li>
-  </ul></li>
-  <li><a href="#verification-checks" id="toc-verification-checks" class="nav-link" data-scroll-target="#verification-checks">8 Verification Checks</a></li>
   </ul>
 </nav>
     </div>
@@ -237,7 +217,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Analysis</h1>
+<h1 class="title">Data Management</h1>
 </div>
 
 
@@ -268,202 +248,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="variable-name-dictionary" class="level1">
 <h1>1 Variable Name Dictionary</h1>
-<p><strong>Gold standard = PDF / REDCap CSV column name</strong> (left column). <code>In Code</code> = what this variable is called in the working code. Naming rules applied in this file:</p>
-<ul>
-<li>Sections 1.1 and 1.2: PDF name used directly in code (no rename)</li>
-<li><code>bl_date</code> → <code>baseline_sample_date</code> (lowercase)</li>
-<li><code>fu_date</code> → <code>last_follow_up_date</code> (lowercase)</li>
-<li>New derived variables: all lowercase</li>
-<li>All other Copy 709 variable names kept as-is</li>
-</ul>
-<section id="identifiers-demographics" class="level2">
-<h2 class="anchored" data-anchor-id="identifiers-demographics">1.1 Identifiers &amp; Demographics</h2>
+<p>Variables with the same name as the PDF / REDCap CSV are not listed. Only <strong>renamed</strong> and <strong>newly created</strong> variables are shown.</p>
+<section id="renamed-variables" class="level2">
+<h2 class="anchored" data-anchor-id="renamed-variables">1.1 Renamed Variables</h2>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th>PDF / REDCap</th>
 <th>In Code</th>
-<th>Note</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>record_id</code></td>
-<td><code>record_id</code></td>
-<td></td>
-</tr>
-<tr class="even">
-<td><code>EMPI</code></td>
-<td><code>EMPI</code></td>
-<td>Already uppercase in raw data</td>
-</tr>
-<tr class="odd">
-<td><code>sex</code></td>
-<td><code>sex</code></td>
-<td></td>
-</tr>
-<tr class="even">
-<td><code>height</code></td>
-<td><code>height</code></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><code>weight</code></td>
-<td><code>weight</code></td>
-<td></td>
-</tr>
-<tr class="even">
-<td><code>race</code></td>
-<td><code>race</code></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><code>ethnicity</code></td>
-<td><code>ethnicity</code></td>
-<td></td>
-</tr>
-<tr class="even">
-<td><code>age</code></td>
-<td><code>age</code></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="cancer-treatment" class="level2">
-<h2 class="anchored" data-anchor-id="cancer-treatment">1.2 Cancer &amp; Treatment</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>PDF / REDCap</th>
-<th>In Code</th>
-<th>Note</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>cancer_type</code></td>
-<td><code>cancer_type</code></td>
-<td></td>
-</tr>
-<tr class="even">
-<td><code>tumor_type</code></td>
-<td><code>tumor_type</code></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><code>tumor_stage</code></td>
-<td><code>tumor_stage</code></td>
-<td>Not renamed to <code>cancer_stage</code></td>
-</tr>
-<tr class="even">
-<td><code>treatment_regimen</code></td>
-<td><code>treatment_regimen</code></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><code>regimen_dose</code></td>
-<td><code>regimen_dose</code></td>
-<td>Used by <code>create_drug_indicators()</code></td>
-</tr>
-<tr class="even">
-<td><code>platin_group</code></td>
-<td><code>platin_group</code></td>
-<td>Not renamed to long Copy 709 name</td>
-</tr>
-<tr class="odd">
-<td><code>platin_dose</code></td>
-<td><code>platin_dose</code></td>
-<td>Not renamed to long Copy 709 name</td>
-</tr>
-<tr class="even">
-<td><code>dosage_mg</code></td>
-<td><code>dosage_mg</code></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><code>ecog_score</code></td>
-<td><code>ecog_score</code></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="dates" class="level2">
-<h2 class="anchored" data-anchor-id="dates">1.3 Dates</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>PDF / REDCap</th>
-<th>In Code</th>
-<th>Note</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><code>bl_date</code></td>
 <td><code>baseline_sample_date</code></td>
-<td>Renamed (lowercase)</td>
 </tr>
 <tr class="even">
 <td><code>fu_date</code></td>
 <td><code>last_follow_up_date</code></td>
-<td>Renamed (lowercase)</td>
 </tr>
-<tr class="odd">
-<td>—</td>
-<td><code>days_last_follow_up</code></td>
-<td>Derived: numeric days from baseline to last follow-up</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="baseline-lab-values-redcap" class="level2">
-<h2 class="anchored" data-anchor-id="baseline-lab-values-redcap">1.4 Baseline Lab Values (REDCap)</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>PDF / REDCap</th>
-<th>In Code</th>
-<th>Note</th>
-</tr>
-</thead>
-<tbody>
 <tr class="odd">
 <td><code>baseline_creatinine</code></td>
 <td><code>baseline_cre</code></td>
-<td>Renamed (Copy 709 name)</td>
 </tr>
 <tr class="even">
-<td><code>baseline_cre_egfr</code></td>
-<td><code>baseline_cre_egfr</code></td>
-<td>From REDCap / cleaned_master</td>
-</tr>
-<tr class="odd">
 <td><code>cys_c_baseline</code></td>
 <td><code>baseline_cys_c</code></td>
-<td>Renamed</td>
+</tr>
+<tr class="odd">
+<td><code>er_status_90d</code></td>
+<td><code>ed_status_90d</code></td>
 </tr>
 <tr class="even">
-<td><code>baseline_cys_c_egfr</code></td>
-<td><code>baseline_cys_c_egfr</code></td>
-<td>From REDCap / cleaned_master</td>
+<td><code>er_visit_date</code></td>
+<td><code>ed_visit_date</code></td>
+</tr>
+<tr class="odd">
+<td><code>er_visit_diff</code></td>
+<td><code>ed_visit_diff</code></td>
+</tr>
+<tr class="even">
+<td><code>other_ed_visit</code></td>
+<td><code>other_ed</code></td>
+</tr>
+<tr class="odd">
+<td><code>hosp_visit_diff</code></td>
+<td><code>hosp_visit_0_diff</code></td>
+</tr>
+<tr class="even">
+<td><code>hosp_visit_reason___1–11</code></td>
+<td><code>hosp_visit_0_reason_1–11</code></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="computed-egfr-variables-from-cleaned_master" class="level2">
-<h2 class="anchored" data-anchor-id="computed-egfr-variables-from-cleaned_master">1.5 Computed eGFR Variables (from cleaned_master)</h2>
+<section id="derived-egfr-kidney-function" class="level2">
+<h2 class="anchored" data-anchor-id="derived-egfr-kidney-function">1.2 Derived — eGFR &amp; Kidney Function</h2>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -477,303 +317,63 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Cockcroft-Gault creatinine clearance</td>
 </tr>
 <tr class="even">
+<td><code>ckd_epi_gfr_cre_cys</code></td>
+<td>CKD-EPI combined creatinine-cystatin C eGFR</td>
+</tr>
+<tr class="odd">
 <td><code>ckd_epi_gfr_cre_cys_unindex</code></td>
 <td>Body-adjusted combined CKD-EPI eGFR</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>baseline_cre_egfr_unindexed</code></td>
 <td>Body-adjusted creatinine-based eGFR</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>baseline_cys_c_egfr_unindexed</code></td>
 <td>Body-adjusted cystatin-based eGFR</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>ckd_stage_cg</code></td>
-<td>CKD stage derived from Cockcroft-Gault</td>
+<td>CKD stage from Cockcroft-Gault</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="rpdr-pre-baseline-lab-values-within-45-days" class="level2">
-<h2 class="anchored" data-anchor-id="rpdr-pre-baseline-lab-values-within-45-days">1.6 RPDR Pre-baseline Lab Values (within 45 days)</h2>
+<section id="derived-rpdr-pre-baseline-labs-within-45-days" class="level2">
+<h2 class="anchored" data-anchor-id="derived-rpdr-pre-baseline-labs-within-45-days">1.3 Derived — RPDR Pre-baseline Labs (within 45 days)</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>In Code</th>
 <th>RPDR Group_Id</th>
-<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><code>pre_CRE_45days</code></td>
 <td><code>CRE</code></td>
-<td>Creatinine, closest value ≤ 45 days before baseline</td>
 </tr>
 <tr class="even">
 <td><code>pre_HGB_45days</code></td>
 <td><code>HGB</code></td>
-<td>Hemoglobin</td>
 </tr>
 <tr class="odd">
 <td><code>pre_PLT_45days</code></td>
 <td><code>PLT</code></td>
-<td>Platelet count</td>
 </tr>
 <tr class="even">
 <td><code>pre_ALB_45days</code></td>
 <td><code>ALB</code></td>
-<td>Albumin</td>
 </tr>
 <tr class="odd">
 <td><code>pre_GHBA1C_45days</code></td>
 <td><code>GHBA1C</code></td>
-<td>Hemoglobin A1C</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="ed-visit-variables" class="level2">
-<h2 class="anchored" data-anchor-id="ed-visit-variables">1.7 ED Visit Variables</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>PDF / REDCap</th>
-<th>In Code</th>
-<th>Note</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>er_status_90d</code></td>
-<td><code>ed_status_90d</code></td>
-<td>Renamed by Copy 709</td>
-</tr>
-<tr class="even">
-<td><code>er_visit_date</code></td>
-<td><code>ed_visit_date</code></td>
-<td>Renamed by Copy 709</td>
-</tr>
-<tr class="odd">
-<td><code>er_visit_diff</code></td>
-<td><code>ed_visit_diff</code></td>
-<td>Renamed by Copy 709</td>
-</tr>
-<tr class="even">
-<td><code>other_ed_visit</code></td>
-<td><code>other_ed</code></td>
-<td>Renamed by Copy 709</td>
-</tr>
-<tr class="odd">
-<td>—</td>
-<td><code>extra_ed_n</code></td>
-<td>Derived: count of extra ED visits</td>
-</tr>
-<tr class="even">
-<td>—</td>
-<td><code>ed_visit_0_diff</code>, <code>ed_visit_0_reason_1–11</code></td>
-<td>Renamed from <code>ed_visit_*</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="hospitalization-variables" class="level2">
-<h2 class="anchored" data-anchor-id="hospitalization-variables">1.8 Hospitalization Variables</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>PDF / REDCap</th>
-<th>In Code</th>
-<th>Note</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>hosp_status_90d</code></td>
-<td><code>hosp_status_90d</code></td>
-<td></td>
-</tr>
-<tr class="even">
-<td><code>hosp_visit_date</code></td>
-<td><code>hosp_visit_date</code></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><code>hosp_visit_diff</code></td>
-<td><code>hosp_visit_0_diff</code></td>
-<td>Renamed (baseline visit)</td>
-</tr>
-<tr class="even">
-<td><code>hosp_visit_reason___1–11</code></td>
-<td><code>hosp_visit_0_reason_1–11</code></td>
-<td>Renamed</td>
-</tr>
-<tr class="odd">
-<td><code>other_hosp</code></td>
-<td><code>other_hosp</code></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>—</td>
-<td><code>extra_hosp_n</code></td>
-<td>Derived: count of extra hospitalizations</td>
-</tr>
-<tr class="odd">
-<td>—</td>
-<td><code>event_hosp_1–11</code></td>
-<td>Derived by <code>create_events_and_times_1_11()</code></td>
-</tr>
-<tr class="even">
-<td>—</td>
-<td><code>time_to_event_hosp_1–11</code></td>
-<td>Derived (days from baseline)</td>
-</tr>
-<tr class="odd">
-<td>—</td>
-<td><code>side_effect</code></td>
-<td>Hosp reasons 1–7 (platinum-related), any = 1</td>
-</tr>
-<tr class="even">
-<td>—</td>
-<td><code>time_to_side_effect</code></td>
-<td>Time to first platinum-related hosp (90 if none)</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="adverse-event-outcome-variables-from-cleaned_master" class="level2">
-<h2 class="anchored" data-anchor-id="adverse-event-outcome-variables-from-cleaned_master">1.9 Adverse Event Outcome Variables (from cleaned_master)</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>In Code</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>post_Anemia_2_cutpoint_90days</code></td>
-<td>Lab value at first grade ≥ 2 anemia event</td>
-</tr>
-<tr class="even">
-<td><code>post_Anemia_2_cutpoint_90days_date</code></td>
-<td>Date of that event</td>
-</tr>
-<tr class="odd">
-<td><code>Anemia_g2_90days</code></td>
-<td>Binary: 1 if grade ≥ 2 anemia within 90 days</td>
-</tr>
-<tr class="even">
-<td><code>Anemia_g3_90days</code></td>
-<td>Binary: 1 if grade ≥ 3 anemia</td>
-</tr>
-<tr class="odd">
-<td><code>Throm_g2_90days</code></td>
-<td>Binary: 1 if grade ≥ 2 thrombocytopenia</td>
-</tr>
-<tr class="even">
-<td><code>Throm_g3_90days</code></td>
-<td>Binary: 1 if grade ≥ 3 thrombocytopenia</td>
-</tr>
-<tr class="odd">
-<td><code>AKI_g2_90days</code></td>
-<td>Binary: 1 if grade ≥ 2 AKI</td>
-</tr>
-<tr class="even">
-<td><code>AKI_g3_90days</code></td>
-<td>Binary: 1 if grade ≥ 3 AKI</td>
-</tr>
-<tr class="odd">
-<td><code>grade_2_aes</code></td>
-<td>Composite: any of anemia/throm/AKI grade 2</td>
-</tr>
-<tr class="even">
-<td><code>grade_3_aes</code></td>
-<td>Composite: any of anemia/throm/AKI grade 3</td>
-</tr>
-<tr class="odd">
-<td><code>time_to_anemia_2</code> … <code>time_to_aki_3</code></td>
-<td>Days to each AE (90 if none)</td>
-</tr>
-<tr class="even">
-<td><code>cmp_time_anemia_2</code>, <code>cmp_status_anemia_2</code> …</td>
-<td>Competing risk variables (from cleaned_master)</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="electrolyte-outcomes" class="level2">
-<h2 class="anchored" data-anchor-id="electrolyte-outcomes">1.10 Electrolyte Outcomes</h2>
-<blockquote class="blockquote">
-<p><strong>Removed</strong>: Hypokalemia, Hypomagnesemia, Hyponatremia outcomes — K, MG, NA not in current RPDR lab pull.</p>
-</blockquote>
-</section>
-<section id="mortality" class="level2">
-<h2 class="anchored" data-anchor-id="mortality">1.11 Mortality</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>PDF / REDCap</th>
-<th>In Code</th>
-<th>Note</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>pt_status</code></td>
-<td><code>pt_status</code></td>
-<td>PDF name kept; decoded to “Alive”/“On Hospice”/“Dead”</td>
-</tr>
-<tr class="even">
-<td>—</td>
-<td><code>days_last_follow_up</code></td>
-<td>Numeric days from baseline to last follow-up</td>
-</tr>
-<tr class="odd">
-<td>—</td>
-<td><code>death_90</code></td>
-<td>1 if died within 90 days</td>
-</tr>
-<tr class="even">
-<td>—</td>
-<td><code>time_to_death_90</code></td>
-<td>Days to death (capped at 90)</td>
-</tr>
-<tr class="odd">
-<td>—</td>
-<td><code>time_to_death_90_status</code></td>
-<td>0=censored/alive, 2=dead (competing-risk coding)</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="exposure-variables" class="level2">
-<h2 class="anchored" data-anchor-id="exposure-variables">1.12 Exposure Variables</h2>
+<section id="derived-exposure" class="level2">
+<h2 class="anchored" data-anchor-id="derived-exposure">1.4 Derived — Exposure</h2>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -788,7 +388,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><code>cr_cys_7</code></td>
-<td>Binary: 1 if cr_cys &lt; 0.7 (primary exposure)</td>
+<td>Binary: 1 if ratio &lt; 0.7 (primary exposure)</td>
 </tr>
 <tr class="odd">
 <td><code>cr_cys_cat</code></td>
@@ -813,8 +413,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </section>
-<section id="comorbidities-medications" class="level2">
-<h2 class="anchored" data-anchor-id="comorbidities-medications">1.13 Comorbidities &amp; Medications</h2>
+<section id="derived-adverse-events-within-90-days" class="level2">
+<h2 class="anchored" data-anchor-id="derived-adverse-events-within-90-days">1.5 Derived — Adverse Events (within 90 days)</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>In Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Anemia_g2_90days</code> / <code>Anemia_g3_90days</code></td>
+<td>Grade ≥ 2/3 anemia</td>
+</tr>
+<tr class="even">
+<td><code>Throm_g2_90days</code> / <code>Throm_g3_90days</code></td>
+<td>Grade ≥ 2/3 thrombocytopenia</td>
+</tr>
+<tr class="odd">
+<td><code>AKI_g2_90days</code> / <code>AKI_g3_90days</code></td>
+<td>Grade ≥ 2/3 AKI</td>
+</tr>
+<tr class="even">
+<td><code>grade_2_aes</code> / <code>grade_3_aes</code></td>
+<td>Composite: any AE grade 2/3</td>
+</tr>
+<tr class="odd">
+<td><code>time_to_anemia_2</code> … <code>time_to_aki_3</code></td>
+<td>Days to each AE (90 if none)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="derived-hospitalizations-ed" class="level2">
+<h2 class="anchored" data-anchor-id="derived-hospitalizations-ed">1.6 Derived — Hospitalizations &amp; ED</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -828,50 +461,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>score</code></td>
-<td>Charlson comorbidity score (RPDR ICD-9/10)</td>
+<td><code>event_hosp_1–11</code></td>
+<td>Hospitalization by reason</td>
 </tr>
 <tr class="even">
-<td><code>cci</code></td>
-<td>“mild” / “moderate” / “severe”</td>
+<td><code>time_to_event_hosp_1–11</code></td>
+<td>Days from baseline</td>
 </tr>
 <tr class="odd">
-<td><code>thyroid</code></td>
-<td>Thyroid disease (RPDR diagnosis + medication)</td>
+<td><code>side_effect</code></td>
+<td>Hosp reasons 1–7 (platinum-related), any = 1</td>
 </tr>
 <tr class="even">
-<td><code>hiv</code></td>
-<td>HIV from RPDR (Copy 709 uses <code>hiv</code>; Jiaxuan used <code>hiv_new</code>)</td>
+<td><code>time_to_side_effect</code></td>
+<td>Time to first platinum-related hosp (90 if none)</td>
 </tr>
 <tr class="odd">
-<td><code>dm</code>, <code>htn</code>, <code>cirrhosis</code>, <code>cad</code></td>
-<td>Comorbidity flags (REDCap)</td>
-</tr>
-<tr class="even">
-<td><code>ppi</code>, <code>ace_arb</code>, <code>diu</code>, <code>steroids</code>, <code>statins</code>, <code>nsaids</code>, <code>smoking</code></td>
-<td>Medication/lifestyle flags (REDCap)</td>
-</tr>
-<tr class="odd">
-<td><code>bmi</code></td>
-<td>weight / (height/100)²</td>
-</tr>
-<tr class="even">
-<td><code>bmi_cat</code></td>
-<td>1=underweight, 2=normal, 3=overweight, 4=obese</td>
-</tr>
-<tr class="odd">
-<td><code>age_cat</code></td>
-<td>1=≤65, 2=66–80, 3=&gt;80</td>
-</tr>
-<tr class="even">
-<td><code>ici</code></td>
-<td>1 if Atezolizumab OR Pembrolizumab OR Durvalumab</td>
+<td><code>extra_ed_n</code> / <code>extra_hosp_n</code></td>
+<td>Count of extra ED visits / hospitalizations</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="platinum-dosing-variables" class="level2">
-<h2 class="anchored" data-anchor-id="platinum-dosing-variables">1.14 Platinum Dosing Variables</h2>
+<section id="derived-mortality" class="level2">
+<h2 class="anchored" data-anchor-id="derived-mortality">1.7 Derived — Mortality</h2>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -881,20 +494,82 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>carbo</code></td>
-<td>1 = Carboplatin</td>
+<td><code>days_last_follow_up</code></td>
+<td>Days from baseline to last follow-up</td>
 </tr>
 <tr class="even">
-<td><code>cis</code></td>
-<td>1 = Cisplatin</td>
+<td><code>death_90</code></td>
+<td>1 if died within 90 days</td>
 </tr>
 <tr class="odd">
-<td><code>carbo_AUC</code></td>
-<td>Carboplatin AUC value</td>
+<td><code>time_to_death_90</code></td>
+<td>Days to death (capped at 90)</td>
 </tr>
 <tr class="even">
-<td><code>carbo_dose</code></td>
-<td>Same as carbo_AUC (alternate name for table)</td>
+<td><code>time_to_death_90_status</code></td>
+<td>0=censored, 2=dead</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="derived-comorbidities-categories" class="level2">
+<h2 class="anchored" data-anchor-id="derived-comorbidities-categories">1.8 Derived — Comorbidities &amp; Categories</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>In Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>score</code> / <code>cci</code></td>
+<td>Charlson comorbidity index (RPDR ICD codes)</td>
+</tr>
+<tr class="even">
+<td><code>thyroid</code></td>
+<td>Thyroid disease (RPDR diagnosis + medication)</td>
+</tr>
+<tr class="odd">
+<td><code>hiv_rpdr</code></td>
+<td>HIV from RPDR</td>
+</tr>
+<tr class="even">
+<td><code>bmi</code> / <code>bmi_cat</code></td>
+<td>BMI and category</td>
+</tr>
+<tr class="odd">
+<td><code>age_cat</code></td>
+<td>1=≤65, 2=66–80, 3=&gt;80</td>
+</tr>
+<tr class="even">
+<td><code>ici</code></td>
+<td>Immune checkpoint inhibitor use</td>
+</tr>
+<tr class="odd">
+<td><code>cancer_type_cat_7</code></td>
+<td>Cancer type (7 categories)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="derived-platinum-dosing" class="level2">
+<h2 class="anchored" data-anchor-id="derived-platinum-dosing">1.9 Derived — Platinum Dosing</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>In Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>carbo</code> / <code>cis</code></td>
+<td>Binary: Carboplatin / Cisplatin</td>
+</tr>
+<tr class="even">
+<td><code>carbo_AUC</code> / <code>carbo_dose</code></td>
+<td>Carboplatin AUC</td>
 </tr>
 <tr class="odd">
 <td><code>cis_dose</code> / <code>cis_recommend</code></td>
@@ -905,56 +580,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>High-dose: carbo AUC ≥ 5 OR cisplatin ≥ 75 mg/m²</td>
 </tr>
 <tr class="odd">
-<td><code>carbo_AUC_cat</code></td>
-<td>1=AUC≤4, 2=AUC≥5, 0=not carboplatin</td>
-</tr>
-<tr class="even">
-<td><code>cis_dose_cat</code></td>
-<td>1=&lt;75 mg/m², 2=≥75 mg/m², 0=not cisplatin</td>
-</tr>
-<tr class="odd">
-<td><code>cis_group</code></td>
-<td>1=&lt;40, 2=40–60, 3=≥60 mg/m²</td>
+<td><code>carbo_AUC_cat</code> / <code>cis_dose_cat</code> / <code>cis_group</code></td>
+<td>Dose categories</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="drug-indicators-from-create_drug_indicators" class="level2">
-<h2 class="anchored" data-anchor-id="drug-indicators-from-create_drug_indicators">1.15 Drug Indicators (from <code>create_drug_indicators()</code>)</h2>
-<p>All parsed from <code>regimen_dose</code> text: <code>Bevacizumab</code>, <code>Paclitaxel</code>, <code>Pemetrexed</code>, <code>Durvalumab</code>, <code>Doxorubicin</code>, <code>Pembrolizumab</code>, <code>Etoposide</code>, <code>Gemcitabine</code>, <code>Atezolizumab</code>, <code>Pertuzumab</code>, <code>Trastuzumab</code>, <code>Docetaxel</code>, <code>Fluorouracil</code>, <code>Methotrexate</code>, <code>Vinblastine</code>, <code>Administered_alone</code></p>
-</section>
-<section id="competing-risk-variables" class="level2">
-<h2 class="anchored" data-anchor-id="competing-risk-variables">1.16 Competing Risk Variables</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Pattern</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>cmp_time_&lt;outcome&gt;</code></td>
-<td>Time for competing risk model</td>
-</tr>
-<tr class="even">
-<td><code>cmp_status_&lt;outcome&gt;</code></td>
-<td>0=censored, 1=event, 2=death</td>
-</tr>
-<tr class="odd">
-<td>AE outcomes (anemia, throm, aki, grade_2_aes, grade_3_aes)</td>
-<td>Pre-computed in <code>cleaned_master</code> (master_709.xlsx)</td>
-</tr>
-<tr class="even">
-<td>New outcomes (side_effect, hosp_1–11)</td>
-<td>Computed with <code>cmp_variable()</code> in this code</td>
-</tr>
-</tbody>
-</table>
+<section id="derived-drug-indicators-competing-risk" class="level2">
+<h2 class="anchored" data-anchor-id="derived-drug-indicators-competing-risk">1.10 Derived — Drug Indicators &amp; Competing Risk</h2>
+<p>Drug indicators parsed from <code>regimen_dose</code> by <code>create_drug_indicators()</code>: <code>Bevacizumab</code>, <code>Paclitaxel</code>, <code>Pemetrexed</code>, <code>Durvalumab</code>, <code>Doxorubicin</code>, <code>Pembrolizumab</code>, <code>Etoposide</code>, <code>Gemcitabine</code>, <code>Atezolizumab</code>, <code>Pertuzumab</code>, <code>Trastuzumab</code>, <code>Docetaxel</code>, <code>Fluorouracil</code>, <code>Methotrexate</code>, <code>Vinblastine</code>, <code>Administered_alone</code></p>
+<p>Competing risk: <code>cmp_time_&lt;outcome&gt;</code> / <code>cmp_status_&lt;outcome&gt;</code> (0=censored, 1=event, 2=death)</p>
 <hr>
 </section>
 </section>
@@ -1514,9 +1149,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
-<p><strong>Bug check — <code>Cockcroft</code>:</strong> Standard formula; female correction (× 0.85) applied correctly. No bug.</p>
-<p><strong>Bug check — CKD-EPI functions:</strong> Scalar implementations via <code>mapply()</code>. <code>min(c(x,1))</code> and <code>max(c(x,1))</code> are correct for scalar inputs. No bug.</p>
-<p><strong>Bug check — AKI computation:</strong> <code>filter(Result &gt; 1.5 * pre_CRE_45days)</code> compares each row to the patient-specific pre-baseline CRE carried in by <code>merge()</code>. This is correct — each patient’s post-baseline CRE is compared to their own reference. No bug.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -1826,8 +1458,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="exposure-variables-1" class="level2">
-<h2 class="anchored" data-anchor-id="exposure-variables-1">5.5 Exposure variables</h2>
+<section id="exposure-variables" class="level2">
+<h2 class="anchored" data-anchor-id="exposure-variables">5.5 Exposure variables</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -1939,8 +1571,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="platinum-dosing-variables-1" class="level2">
-<h2 class="anchored" data-anchor-id="platinum-dosing-variables-1">5.8 Platinum dosing variables</h2>
+<section id="platinum-dosing-variables" class="level2">
+<h2 class="anchored" data-anchor-id="platinum-dosing-variables">5.8 Platinum dosing variables</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -2191,8 +1823,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="competing-risk-variables-1" class="level2">
-<h2 class="anchored" data-anchor-id="competing-risk-variables-1">5.15 Competing risk variables</h2>
+<section id="competing-risk-variables" class="level2">
+<h2 class="anchored" data-anchor-id="competing-risk-variables">5.15 Competing risk variables</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -2214,7 +1846,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master,</span>
 <span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_time =</span> time_to_side_effect, <span class="at">event_status =</span> side_effect, <span class="at">name =</span> <span class="st">"side_effect"</span>)</span>
 <span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Hospitalization by reason 1–11 (see Section 6.2 for the hosp_8–11 bug fix)</span></span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Hospitalization by reason 1–11</span></span>
 <span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_1,  <span class="at">event_status =</span> event_hosp_1,  <span class="at">name =</span> <span class="st">"hosp_1"</span>)</span>
 <span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_2,  <span class="at">event_status =</span> event_hosp_2,  <span class="at">name =</span> <span class="st">"hosp_2"</span>)</span>
 <span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_3,  <span class="at">event_status =</span> event_hosp_3,  <span class="at">name =</span> <span class="st">"hosp_3"</span>)</span>
@@ -2222,7 +1854,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_5,  <span class="at">event_status =</span> event_hosp_5,  <span class="at">name =</span> <span class="st">"hosp_5"</span>)</span>
 <span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_6,  <span class="at">event_status =</span> event_hosp_6,  <span class="at">name =</span> <span class="st">"hosp_6"</span>)</span>
 <span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_7,  <span class="at">event_status =</span> event_hosp_7,  <span class="at">name =</span> <span class="st">"hosp_7"</span>)</span>
-<span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a><span class="co"># hosp_8–11 use their own event_status (FIXED — see Section 6.2)</span></span>
+<span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a><span class="co"># hosp_8–11 use their own event_status</span></span>
 <span id="cb37-28"><a href="#cb37-28" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_8,  <span class="at">event_status =</span> event_hosp_8,  <span class="at">name =</span> <span class="st">"hosp_8"</span>)</span>
 <span id="cb37-29"><a href="#cb37-29" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_9,  <span class="at">event_status =</span> event_hosp_9,  <span class="at">name =</span> <span class="st">"hosp_9"</span>)</span>
 <span id="cb37-30"><a href="#cb37-30" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_10, <span class="at">event_status =</span> event_hosp_10, <span class="at">name =</span> <span class="st">"hosp_10"</span>)</span>
@@ -2231,252 +1863,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb37-33"><a href="#cb37-33" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb37-34"><a href="#cb37-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert all cmp_status_* columns to factor (required by tidycmprsk)</span></span>
 <span id="cb37-35"><a href="#cb37-35" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb37-36"><a href="#cb37-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"cmp_status_"</span>), as.factor))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-<hr>
-</section>
-</section>
-<section id="bug-documentation" class="level1">
-<h1>6 Bug Documentation</h1>
-<section id="bug-pre_lab-wrong-date-column-found-in-jiaxuans-code" class="level2">
-<h2 class="anchored" data-anchor-id="bug-pre_lab-wrong-date-column-found-in-jiaxuans-code">6.1 Bug: <code>pre_lab</code> — wrong date column (found in Jiaxuan’s code)</h2>
-<section id="old-code-incorrect-jiaxuans-version" class="level3">
-<h3 class="anchored" data-anchor-id="old-code-incorrect-jiaxuans-version">Old code — incorrect (Jiaxuan’s version)</h3>
-<p>The filter and sort used <code>Baseline_sample_Date</code> (the patient’s fixed index date) instead of <code>Seq_Date_Time</code> (the actual lab collection date). Because <code>Baseline_sample_Date</code> is the same value for every lab row of a given patient, the date-window filter is always <code>TRUE</code>, and <code>desc()</code> sorting is meaningless — <code>distinct()</code> returns an arbitrary row rather than the most recent lab.</p>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — from Jiaxuan's final code Rmd</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>pre_lab_JIAXUAN_BUG <span class="ot">&lt;-</span> <span class="cf">function</span>(data, month, time, index_date, Group_ID, Group_ID_name) {</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  index_date <span class="ot">&lt;-</span> <span class="fu">enquo</span>(index_date)</span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (month) { time_value <span class="ot">&lt;-</span> time <span class="sc">*</span> <span class="dv">30</span> } <span class="cf">else</span> { time_value <span class="ot">&lt;-</span> time }</span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  lab_name      <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"pre_"</span>, Group_ID_name, <span class="st">"_"</span>, time_value, <span class="st">"days"</span>)</span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  lab_date_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"pre_"</span>, Group_ID_name, <span class="st">"_"</span>, time_value, <span class="st">"days_date"</span>)</span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(Group_Id <span class="sc">%in%</span> Group_ID) <span class="sc">%&gt;%</span></span>
-<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"^[&gt;&lt;]?</span><span class="sc">\\</span><span class="st">d+</span><span class="sc">\\</span><span class="st">.?</span><span class="sc">\\</span><span class="st">d* ?$"</span>, Result)) <span class="sc">%&gt;%</span></span>
-<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Result =</span> <span class="fu">as.numeric</span>(<span class="fu">parse_number</span>(Result))) <span class="sc">%&gt;%</span></span>
-<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Result)) <span class="sc">%&gt;%</span></span>
-<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">BUG</span><span class="co">: filters on Baseline_sample_Date (the index date itself, same for all lab rows)</span></span>
-<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># → window is always TRUE; no actual date filtering happens</span></span>
-<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(Baseline_sample_Date <span class="sc">&gt;=</span> (<span class="sc">!!</span>index_date) <span class="sc">-</span> time_value,</span>
-<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>           Baseline_sample_Date <span class="sc">&lt;=</span> <span class="sc">!!</span>index_date) <span class="sc">%&gt;%</span></span>
-<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">BUG</span><span class="co">: sorts by Baseline_sample_Date (constant per patient) not the lab date</span></span>
-<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># → desc() has no effect; "closest" is arbitrary</span></span>
-<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(EMPI, <span class="fu">desc</span>(Baseline_sample_Date)) <span class="sc">%&gt;%</span></span>
-<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>(EMPI, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="sc">!!</span><span class="at">lab_name :=</span> Result, <span class="sc">!!</span><span class="at">lab_date_name :=</span> Baseline_sample_Date) <span class="sc">%&gt;%</span></span>
-<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(EMPI, <span class="sc">!!</span>lab_name, <span class="sc">!!</span>lab_date_name)</span>
-<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
-<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-</section>
-<section id="fixed-code-correct-copy-709-version-used-in-section-3.5" class="level3">
-<h3 class="anchored" data-anchor-id="fixed-code-correct-copy-709-version-used-in-section-3.5">Fixed code — correct (Copy 709 version, used in Section 3.5)</h3>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — from Copy 709; also defined in Section 3.5 above</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>pre_lab_FIXED <span class="ot">&lt;-</span> <span class="cf">function</span>(data, month, time, index_date, Group_Id) {</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  index_date <span class="ot">&lt;-</span> <span class="fu">enquo</span>(index_date)</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (month) { time_value <span class="ot">&lt;-</span> time <span class="sc">*</span> <span class="dv">30</span> } <span class="cf">else</span> { time_value <span class="ot">&lt;-</span> time }</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  lab_name      <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"pre_"</span>, Group_Id, <span class="st">"_"</span>, time_value, <span class="st">"days"</span>)</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  lab_date_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"pre_"</span>, Group_Id, <span class="st">"_"</span>, time_value, <span class="st">"days_date"</span>)</span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(Group_Id <span class="sc">==</span> <span class="sc">!!</span>Group_Id, <span class="fu">grepl</span>(<span class="st">"^</span><span class="sc">\\</span><span class="st">d+</span><span class="sc">\\</span><span class="st">.</span><span class="sc">\\</span><span class="st">d+$"</span>, Result)) <span class="sc">%&gt;%</span></span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Result)) <span class="sc">%&gt;%</span></span>
-<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Result =</span> <span class="fu">as.numeric</span>(Result)) <span class="sc">%&gt;%</span></span>
-<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># FIXED: filter on Seq_Date_Time (actual lab collection date)</span></span>
-<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(Seq_Date_Time <span class="sc">&gt;=</span> (<span class="sc">!!</span>index_date) <span class="sc">-</span> time_value,</span>
-<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>           Seq_Date_Time <span class="sc">&lt;=</span> <span class="sc">!!</span>index_date) <span class="sc">%&gt;%</span></span>
-<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># FIXED: sort by Seq_Date_Time descending → closest lab before baseline comes first</span></span>
-<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(EMPI, <span class="fu">desc</span>(Seq_Date_Time)) <span class="sc">%&gt;%</span></span>
-<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>(EMPI, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="sc">!!</span><span class="at">lab_name :=</span> Result, <span class="sc">!!</span><span class="at">lab_date_name :=</span> Seq_Date_Time) <span class="sc">%&gt;%</span></span>
-<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(EMPI, <span class="sc">!!</span>lab_name, <span class="sc">!!</span>lab_date_name)</span>
-<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(result)</span>
-<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-<hr>
-</section>
-</section>
-<section id="bug-cmp_variable-wrong-event_status-for-hosp_8-through-hosp_11-found-in-copy-709" class="level2">
-<h2 class="anchored" data-anchor-id="bug-cmp_variable-wrong-event_status-for-hosp_8-through-hosp_11-found-in-copy-709">6.2 Bug: <code>cmp_variable</code> — wrong <code>event_status</code> for hosp_8 through hosp_11 (found in Copy 709)</h2>
-<section id="old-code-incorrect-copy-709" class="level3">
-<h3 class="anchored" data-anchor-id="old-code-incorrect-copy-709">Old code — incorrect (Copy 709)</h3>
-<p><code>event_hosp_7</code> was pasted in for all four calls instead of the matching reason number. This made <code>cmp_status_hosp_8</code> through <code>cmp_status_hosp_11</code> identical to <code>cmp_status_hosp_7</code>.</p>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — from Copy 709 (all four use event_hosp_7 as the event status)</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_8,</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">event_status =</span> event_hosp_7, <span class="at">name =</span> <span class="st">"hosp_8"</span>)   <span class="co"># should be event_hosp_8</span></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_9,</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>                             <span class="at">event_status =</span> event_hosp_7, <span class="at">name =</span> <span class="st">"hosp_9"</span>)   <span class="co"># should be event_hosp_9</span></span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_10,</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>                             <span class="at">event_status =</span> event_hosp_7, <span class="at">name =</span> <span class="st">"hosp_10"</span>)  <span class="co"># should be event_hosp_10</span></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_11,</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>                             <span class="at">event_status =</span> event_hosp_7, <span class="at">name =</span> <span class="st">"hosp_11"</span>)  <span class="co"># should be event_hosp_11</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-</section>
-<section id="fixed-code-correct-used-in-section-5.15" class="level3">
-<h3 class="anchored" data-anchor-id="fixed-code-correct-used-in-section-5.15">Fixed code — correct (used in Section 5.15)</h3>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — each call uses its own matching event_status column</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_8,</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">event_status =</span> event_hosp_8,  <span class="at">name =</span> <span class="st">"hosp_8"</span>)</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_9,</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>                             <span class="at">event_status =</span> event_hosp_9,  <span class="at">name =</span> <span class="st">"hosp_9"</span>)</span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_10,</span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>                             <span class="at">event_status =</span> event_hosp_10, <span class="at">name =</span> <span class="st">"hosp_10"</span>)</span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_11,</span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>                             <span class="at">event_status =</span> event_hosp_11, <span class="at">name =</span> <span class="st">"hosp_11"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-<hr>
-</section>
-</section>
-<section id="bug-ckd_epi_cys_gfr-function-referenced-but-never-defined-anywhere" class="level2">
-<h2 class="anchored" data-anchor-id="bug-ckd_epi_cys_gfr-function-referenced-but-never-defined-anywhere">6.3 Bug: <code>ckd_epi_cys_gfr</code> — function referenced but never defined anywhere</h2>
-<p><code>prospective cys.Rmd</code> calls <code>mapply(ckd_epi_cys_gfr, ...)</code> but this function is not defined in that file, in <code>R code summary.Rmd</code>, in <code>Copy 709.Rmd</code>, or in the primary analysis Rmd. It does not exist in any file in the project.</p>
-<p><strong>Resolution:</strong> Section 4.8 uses the published CKD-EPI 2012 CysC formula (Inker 2012): <code>133 × min(cys/0.8, 1)^(−0.499) × max(cys/0.8, 1)^(−1.328) × 0.996^age × female(0.932)</code>. The original source for the version used in <code>prospective cys.Rmd</code> is unknown.</p>
-<hr>
-</section>
-<section id="note-ckd_epi_cre_cys_gfr-coefficients-verified-against-ckd-epi-2021" class="level2">
-<h2 class="anchored" data-anchor-id="note-ckd_epi_cre_cys_gfr-coefficients-verified-against-ckd-epi-2021">6.4 Note: <code>ckd_epi_cre_cys_gfr</code> — coefficients verified against CKD-EPI 2021</h2>
-<p>The combined creatinine + cystatin C function in <code>R code summary.Rmd</code> and Section 4.8 uses:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Parameter</th>
-<th>Code</th>
-<th>Official CKD-EPI 2021 Cr+CysC (NKF)</th>
-<th>Match?</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Multiplier</td>
-<td>135</td>
-<td>135</td>
-<td>✓</td>
-</tr>
-<tr class="even">
-<td><code>a</code> (male)</td>
-<td>−0.144</td>
-<td>−0.144</td>
-<td>✓</td>
-</tr>
-<tr class="odd">
-<td><code>a</code> (female)</td>
-<td>−0.219</td>
-<td>−0.219</td>
-<td>✓</td>
-</tr>
-<tr class="even">
-<td>Max-Cr exponent</td>
-<td>−0.544</td>
-<td>−0.544</td>
-<td>✓</td>
-</tr>
-<tr class="odd">
-<td>Min-CysC exponent</td>
-<td>−0.323</td>
-<td>−0.323</td>
-<td>✓</td>
-</tr>
-<tr class="even">
-<td>Max-CysC exponent</td>
-<td>−0.778</td>
-<td>−0.778</td>
-<td>✓</td>
-</tr>
-<tr class="odd">
-<td>Age exponent</td>
-<td>0.9961</td>
-<td>0.9961</td>
-<td>✓</td>
-</tr>
-<tr class="even">
-<td>Female multiplier</td>
-<td>0.963</td>
-<td>0.963</td>
-<td>✓</td>
-</tr>
-</tbody>
-</table>
-<p><strong><code>ckd_epi_cre_cys_gfr</code> matches the official NKF CKD-EPI 2021 Creatinine-Cystatin C equation exactly.</strong> An earlier note in this file (now corrected) incorrectly stated the coefficients were non-standard.</p>
-<hr>
-</section>
-<section id="bug-dia_list_name-in-r-code-summary.rmd-missing-index_date-filter" class="level2">
-<h2 class="anchored" data-anchor-id="bug-dia_list_name-in-r-code-summary.rmd-missing-index_date-filter">6.5 Bug: <code>dia_list_name</code> in <code>R code summary.Rmd</code> — missing <code>index_date</code> filter</h2>
-<p>The version of <code>dia_list_name</code> in <code>R code summary.Rmd</code> lacks the <code>index_date</code> parameter and the <code>filter(Date &lt;= index_date)</code> step. This means it returns all diagnoses regardless of when they were recorded — including diagnoses after the baseline date.</p>
-<p><strong>Resolution:</strong> The version from <code>Copy 709.Rmd</code> (used in Section 3.7 of this file) is correct: it accepts <code>index_date</code> and filters <code>Date &lt;= index_date</code> before any name matching.</p>
-<hr>
-</section>
-<section id="bug-orphaned-fragment-in-r-code-summary.rmd-lines-348380" class="level2">
-<h2 class="anchored" data-anchor-id="bug-orphaned-fragment-in-r-code-summary.rmd-lines-348380">6.6 Bug: Orphaned <code>%&gt;%</code> fragment in <code>R code summary.Rmd</code> (lines 348–380)</h2>
-<p>Lines 348–380 of <code>R code summary.Rmd</code> begin with <code>%&gt;%</code> and have no left-hand assignment, making the block unparseable as standalone R code. Running or sourcing that file as-is will throw a parse error. The fragment appears to be a detached pipeline that was accidentally cut from its parent expression. It has no effect on the analysis in this file since <code>R code summary.Rmd</code> is referenced only for function definitions, not sourced.</p>
-<hr>
-</section>
-</section>
-<section id="verification-checks" class="level1">
-<h1>8 Verification Checks</h1>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Primary exposure distribution</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>cr_cys_7)</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>cr_cys_cat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># AE outcomes by exposure group</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>cr_cys_7, final_master<span class="sc">$</span>grade_2_aes)</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>cr_cys_7, final_master<span class="sc">$</span>grade_3_aes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify pre_lab date window: lab date should be within 45 days before baseline</span></span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>pre_HGB_45days <span class="sc">%&gt;%</span></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(final_master <span class="sc">%&gt;%</span> <span class="fu">select</span>(EMPI, baseline_sample_date), <span class="at">by =</span> <span class="st">"EMPI"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">days_before_baseline =</span> <span class="fu">as.numeric</span>(baseline_sample_date <span class="sc">-</span> pre_HGB_45days_date)) <span class="sc">%&gt;%</span></span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">min_days  =</span> <span class="fu">min</span>(days_before_baseline, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),   <span class="co"># must be ≥ 0</span></span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">max_days  =</span> <span class="fu">max</span>(days_before_baseline, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),   <span class="co"># must be ≤ 45</span></span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_days =</span> <span class="fu">mean</span>(days_before_baseline, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_missing =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(days_before_baseline))</span>
-<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cmp_status_* must only contain 0, 1, 2</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grep</span>(<span class="st">"cmp_status_"</span>, <span class="fu">names</span>(final_master), <span class="at">value =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(col) <span class="fu">table</span>(final_master[[col]])</span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb37-36"><a href="#cb37-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"cmp_status_"</span>), as.factor))</span>
+<span id="cb37-37"><a href="#cb37-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-38"><a href="#cb37-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Save final_master for use by analysis.qmd</span></span>
+<span id="cb37-39"><a href="#cb37-39" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_master, <span class="st">"final_master.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

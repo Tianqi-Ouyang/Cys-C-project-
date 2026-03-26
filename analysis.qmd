@@ -1,0 +1,194 @@
+---
+title: "Analysis"
+author: "Meg"
+date: "2026-03-26"
+execute:
+  eval: false
+  warning: false
+  message: false
+---
+
+# 1 Setup
+
+```{r}
+#| label: setup-analysis
+library(tidyverse)
+library(scales)
+library(ggplot2)
+library(tidycmprsk)
+library(ggsurvfit)
+
+# Load final_master from data management output
+final_master <- readRDS("final_master.rds")
+```
+
+# 2 Derived Variables for Plots
+
+```{r}
+#| label: derived-vars
+# Hospitalization binary (from REDCap hosp_status_90d)
+final_master <- final_master %>%
+  mutate(
+    hosp_90 = case_when(
+      hosp_status_90d == "Yes" ~ 1,
+      hosp_status_90d == "No"  ~ 0,
+      TRUE ~ NA_real_
+    ),
+    platinum_related_hosp = ifelse(side_effect == 1, 1, 0),
+    cc_percentile = ntile(cr_cys, 100),
+    cc_decile     = ntile(cr_cys, 10)
+  )
+```
+
+```{r}
+#| label: decile-rates
+# Compute event rates by decile
+final_master <- final_master %>%
+  group_by(cc_decile) %>%
+  mutate(
+    anemia_2_rate_decile              = mean(Anemia_g2_90days, na.rm = TRUE),
+    anemia_3_rate_decile              = mean(Anemia_g3_90days, na.rm = TRUE),
+    throm_2_rate_decile               = mean(Throm_g2_90days, na.rm = TRUE),
+    throm_3_rate_decile               = mean(Throm_g3_90days, na.rm = TRUE),
+    aki_2_rate_decile                 = mean(AKI_g2_90days, na.rm = TRUE),
+    aki_3_rate_decile                 = mean(AKI_g3_90days, na.rm = TRUE),
+    hos_rate_decile                   = mean(hosp_90, na.rm = TRUE),
+    platinum_related_hos_rate_decile  = mean(platinum_related_hosp, na.rm = TRUE),
+    death_rate_decile                 = mean(death_90, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(cc_decile = as.numeric(cc_decile))
+```
+
+```{r}
+#| label: decile-summary
+# Summarize cr_cys ratio by decile
+summary_by_decile <- final_master %>%
+  group_by(cc_decile) %>%
+  summarise(
+    n      = n(),
+    min    = min(cr_cys, na.rm = TRUE),
+    q1     = quantile(cr_cys, 0.25, na.rm = TRUE),
+    median = median(cr_cys, na.rm = TRUE),
+    mean   = mean(cr_cys, na.rm = TRUE),
+    q3     = quantile(cr_cys, 0.75, na.rm = TRUE),
+    max    = max(cr_cys, na.rm = TRUE),
+    sd     = sd(cr_cys, na.rm = TRUE)
+  )
+```
+
+# 3 LOESS Plot Function
+
+```{r}
+#| label: fn-loess-plot
+loess_plot <- function(data, x, y, x_point, y_point, title, xlab, ylab) {
+  ggplot(data, aes(x = {{x}}, y = {{y}})) +
+    geom_point(aes(x = {{x_point}}, y = {{y_point}}),
+               size = 6, color = "black", shape = 19) +
+    geom_smooth(method = "loess", se = TRUE, span = 0.75, color = "blue", linewidth = 2) +
+    scale_x_continuous(breaks = seq(0, 100, by = 10)) +
+    scale_y_continuous(labels = percent_format(accuracy = 1)) +
+    labs(title = title, x = xlab, y = ylab) +
+    theme_minimal() +
+    theme(
+      axis.title.x  = element_text(size = 20),
+      axis.title.y  = element_text(size = 20),
+      axis.text.x   = element_text(size = 16),
+      axis.text.y   = element_text(size = 16),
+      plot.title     = element_text(size = 24, face = "bold")
+    ) +
+    annotate("rect", xmin = 1, xmax = 25, ymin = -Inf, ymax = Inf,
+             alpha = 0.2, fill = "yellow")
+}
+```
+
+# 4 LOESS Plots by Percentile
+
+## 4.1 Grade 2 Anemia
+
+```{r}
+#| label: plot-anemia-2
+loess_plot(
+  data = final_master, x = cc_percentile, y = Anemia_g2_90days,
+  x_point = cc_decile * 10, y_point = anemia_2_rate_decile,
+  title = "Grade >= 2 Anemia",
+  xlab = "Percentile of SCR/CYS Ratio", ylab = "Grade >= 2 Anemia"
+)
+```
+
+## 4.2 Grade 3 Thrombocytopenia
+
+```{r}
+#| label: plot-throm-3
+loess_plot(
+  data = final_master, x = cc_percentile, y = Throm_g3_90days,
+  x_point = cc_decile * 10, y_point = throm_3_rate_decile,
+  title = "Grade >= 3 Thrombocytopenia",
+  xlab = "Percentile of SCR/CYS Ratio", ylab = "Grade >= 3 Thrombocytopenia"
+)
+```
+
+## 4.3 Grade 3 AKI (Creatinine Increased)
+
+```{r}
+#| label: plot-aki-3
+loess_plot(
+  data = final_master, x = cc_percentile, y = AKI_g3_90days,
+  x_point = cc_decile * 10, y_point = aki_3_rate_decile,
+  title = "Grade >= 3 Creatinine Increased",
+  xlab = "Percentile of SCR/CYS Ratio", ylab = "Grade >= 3 Creatinine Increased"
+)
+```
+
+## 4.4 Overall Hospitalization
+
+```{r}
+#| label: plot-hosp
+loess_plot(
+  data = final_master, x = cc_percentile, y = hosp_90,
+  x_point = cc_decile * 10, y_point = hos_rate_decile,
+  title = "Overall Hospitalization",
+  xlab = "Percentile of SCR/CYS Ratio", ylab = "Overall Hospitalization"
+)
+```
+
+## 4.5 Platinum-Related Hospitalization
+
+```{r}
+#| label: plot-platinum-hosp
+loess_plot(
+  data = final_master, x = cc_percentile, y = platinum_related_hosp,
+  x_point = cc_decile * 10, y_point = platinum_related_hos_rate_decile,
+  title = "Hospitalization for Platinum-Associated AEs",
+  xlab = "Percentile of SCR/CYS Ratio", ylab = "Hospitalization for Platinum-Associated AEs"
+)
+```
+
+# 5 Cumulative Incidence Plots
+
+## 5.1 Platinum-Related Hospitalization (Side Effect)
+
+```{r}
+#| label: cuminc-side-effect
+fit_side_effect <- cuminc(
+  Surv(cmp_time_side_effect, cmp_status_side_effect) ~ cr_cys_7,
+  data = final_master
+)
+
+ggcuminc(fit_side_effect) +
+  labs(
+    title = "Platinum-Related Hospitalization",
+    x = "Follow-up Time (Days)",
+    y = "Cumulative Incidence"
+  ) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme_classic(base_size = 14) +
+  theme(
+    plot.title    = element_text(face = "bold", size = 16),
+    axis.title    = element_text(size = 14),
+    axis.text     = element_text(size = 12),
+    legend.title  = element_blank(),
+    legend.text   = element_text(size = 12)
+  ) +
+  scale_color_manual(values = c("red", "blue"))
+```
