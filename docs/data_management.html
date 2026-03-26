@@ -922,12 +922,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/CystatinCInPatientsO_DATA_2026-03-25_1158.csv'</span>) </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/CystatinCInPatientsO_DATA_2026-03-25_1158.csv'</span>) </span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>list <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/list.csv'</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>list <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">'data/list.xlsx'</span>)</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep only patients whose EMPI appears in the list</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> master <span class="sc">%&gt;%</span> <span class="fu">filter</span>(EMPI <span class="sc">%in%</span> list<span class="sc">$</span>EMPI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename empi to EMPI (uppercase for RPDR compatibility)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> master <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">EMPI =</span> empi)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep only patients whose EMPI appears in the list</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> master <span class="sc">%&gt;%</span> <span class="fu">filter</span>(EMPI <span class="sc">%in%</span> list<span class="sc">$</span>EMPI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -1267,15 +1270,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Uses PDF names baseline_creatinine and cys_c_baseline (renamed in section 5.8).</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cre_egfr            =</span> <span class="fu">mapply</span>(ckd_epi_gfr, baseline_creatinine, male, age),</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cys_c_egfr          =</span> <span class="fu">mapply</span>(ckd_epi_cys_gfr, cys_c_baseline, male, age),</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">ckd_epi_gfr_cre_cys          =</span> <span class="fu">mapply</span>(ckd_epi_cre_cys_gfr,</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>                                          baseline_creatinine, cys_c_baseline, male, age),</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">cockcroft                    =</span> <span class="fu">mapply</span>(Cockcroft, age, weight, male, baseline_creatinine),</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cre_egfr_unindexed  =</span> <span class="fu">mapply</span>(unindex, baseline_cre_egfr, BSA),</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cys_c_egfr_unindexed =</span> <span class="fu">mapply</span>(unindex, baseline_cys_c_egfr, BSA),</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">ckd_epi_gfr_cre_cys_unindex  =</span> <span class="fu">mapply</span>(unindex, ckd_epi_gfr_cre_cys, BSA)</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">cys_c_baseline      =</span> <span class="fu">as.numeric</span>(cys_c_baseline),</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_creatinine =</span> <span class="fu">as.numeric</span>(baseline_creatinine),</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cre_egfr            =</span> <span class="fu">mapply</span>(ckd_epi_gfr, baseline_creatinine, male, age),</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cys_c_egfr          =</span> <span class="fu">mapply</span>(ckd_epi_cys_gfr, cys_c_baseline, male, age),</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">ckd_epi_gfr_cre_cys          =</span> <span class="fu">mapply</span>(ckd_epi_cre_cys_gfr,</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>                                          baseline_creatinine, cys_c_baseline, male, age),</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">cockcroft                    =</span> <span class="fu">mapply</span>(Cockcroft, age, weight, male, baseline_creatinine),</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cre_egfr_unindexed  =</span> <span class="fu">mapply</span>(unindex, baseline_cre_egfr, BSA),</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cys_c_egfr_unindexed =</span> <span class="fu">mapply</span>(unindex, baseline_cys_c_egfr, BSA),</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">ckd_epi_gfr_cre_cys_unindex  =</span> <span class="fu">mapply</span>(unindex, ckd_epi_gfr_cre_cys, BSA)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
@@ -1564,7 +1571,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>      cancer_type <span class="sc">==</span> <span class="dv">8</span>             <span class="sc">~</span> <span class="dv">6</span>,   <span class="co"># HEENT</span></span>
 <span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>      cancer_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">9</span>)    <span class="sc">~</span> <span class="dv">7</span>,   <span class="co"># Other (Mesothelioma + Other)</span></span>
 <span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
-<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>    ), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Thoracic"</span>, <span class="st">"Breast"</span>, <span class="st">"GI"</span>, <span class="st">"GU"</span>, <span class="st">"GYN"</span>, <span class="st">"HEENT"</span>, <span class="st">"Other"</span>))</span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>    ), <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Thoracic"</span>, <span class="st">"Breast"</span>, <span class="st">"GI"</span>, <span class="st">"GU"</span>, <span class="st">"GYN"</span>, <span class="st">"HEENT"</span>, <span class="st">"Other"</span>))</span>
 <span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>cancer_type_cat_7)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

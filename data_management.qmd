@@ -452,9 +452,12 @@ dia_list_name <- function(data, listed_names, index_date, excluded_names = NULL,
 
 ```{r}
 #| label: load-redcap
-master <- read_csv('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/CystatinCInPatientsO_DATA_2026-03-25_1158.csv') 
+master <- read_csv('data/CystatinCInPatientsO_DATA_2026-03-25_1158.csv') 
 
-list <- read_csv('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/list.csv')
+list <- read_excel('data/list.xlsx')
+
+# Rename empi to EMPI (uppercase for RPDR compatibility)
+master <- master %>% rename(EMPI = empi)
 
 # Keep only patients whose EMPI appears in the list
 master <- master %>% filter(EMPI %in% list$EMPI)
@@ -717,6 +720,10 @@ final_master <- final_master %>%
 # All eGFR variables computed via mapply() (scalar functions over rows).
 # Uses PDF names baseline_creatinine and cys_c_baseline (renamed in section 5.8).
 final_master <- final_master %>%
+  mutate(
+    cys_c_baseline      = as.numeric(cys_c_baseline),
+    baseline_creatinine = as.numeric(baseline_creatinine),
+  ) %>%
   mutate(
     baseline_cre_egfr            = mapply(ckd_epi_gfr, baseline_creatinine, male, age),
     baseline_cys_c_egfr          = mapply(ckd_epi_cys_gfr, cys_c_baseline, male, age),
@@ -1000,7 +1007,7 @@ final_master <- final_master %>%
       cancer_type == 8             ~ 6,   # HEENT
       cancer_type %in% c(6, 9)    ~ 7,   # Other (Mesothelioma + Other)
       TRUE ~ NA_real_
-    ), labels = c("Thoracic", "Breast", "GI", "GU", "GYN", "HEENT", "Other"))
+    ), levels = 1:7, labels = c("Thoracic", "Breast", "GI", "GU", "GYN", "HEENT", "Other"))
   )
 
 table(final_master$cancer_type_cat_7)
