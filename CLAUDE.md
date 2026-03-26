@@ -1,6 +1,9 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Do not read or upload any .txt file to server to model, ask premisson. Do not access any personal inforamtion, like EMPI.
+Do not change .Rmd files 
+when summay, summary in tables should including: import files with name,address. new variables, defination (like time before/after index date), new outcome variables( include each level labels), models used and covariates. 
 
 ## Project Overview
 

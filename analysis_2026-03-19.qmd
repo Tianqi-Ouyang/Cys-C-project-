@@ -93,9 +93,7 @@ Naming rules applied in this file:
 | `pre_PLT_45days` | `PLT` | Platelet count |
 | `pre_ALB_45days` | `ALB` | Albumin |
 | `pre_WBC_45days` | `WBC` | WBC |
-| `pre_K_45days` | `K` | Potassium |
-| `pre_MG_45days` | `MG` | Magnesium |
-| `pre_NA_45days` | `NA` | Sodium |
+| `pre_GHBA1C_45days` | `GHBA1C` | Hemoglobin A1C |
 
 ## 1.7 ED Visit Variables
 
@@ -140,19 +138,9 @@ Naming rules applied in this file:
 | `time_to_anemia_2` … `time_to_aki_3` | Days to each AE (90 if none) |
 | `cmp_time_anemia_2`, `cmp_status_anemia_2` … | Competing risk variables (from cleaned_master) |
 
-## 1.10 Electrolyte Outcomes (new, Copy 709)
+## 1.10 Electrolyte Outcomes
 
-| In Code | Description |
-|---|---|
-| `post_Hypokalemia_cutpoint_90days` | First K value < 3.0 mEq/L post-baseline |
-| `Hypokalemia_90days` | Binary: 1 if K < 3.0 within 90 days |
-| `time_to_Hypokalemia` | Days to event (90 if none) |
-| `post_Hypomagnesemia_cutpoint_90days` | First Mg value < 0.9 mg/dL post-baseline |
-| `Hypomagnesemia_90days` | Binary: 1 if Mg < 0.9 within 90 days |
-| `time_to_Hypomagnesemia` | Days to event |
-| `post_Hyponatremia_cutpoint_90days` | First Na value < 125 mEq/L post-baseline |
-| `Hyponatremia_90days` | Binary: 1 if Na < 125 within 90 days |
-| `time_to_Hyponatremia` | Days to event |
+> **Removed**: Hypokalemia, Hypomagnesemia, Hyponatremia outcomes — K, MG, NA not in current RPDR lab pull.
 
 ## 1.11 Mortality
 
@@ -220,7 +208,7 @@ All parsed from `regimen_dose` text:
 | `cmp_time_<outcome>` | Time for competing risk model |
 | `cmp_status_<outcome>` | 0=censored, 1=event, 2=death |
 | AE outcomes (anemia, throm, aki, grade_2_aes, grade_3_aes) | Pre-computed in `cleaned_master` (master_709.xlsx) |
-| New outcomes (side_effect, hosp_1–11, electrolytes) | Computed with `cmp_variable()` in this code |
+| New outcomes (side_effect, hosp_1–11) | Computed with `cmp_variable()` in this code |
 
 ---
 
@@ -475,7 +463,7 @@ pre_lab <- function(data, month, time, index_date, Group_Id) {
 ## 3.6 post_lab_less_than_cutpoint
 
 Finds the **first post-baseline lab value below a clinical cutpoint** within `days`.
-Used for Hypokalemia, Hypomagnesemia, Hyponatremia outcomes.
+Used for post-baseline lab cutpoint outcomes.
 
 ```{r}
 #| label: fn-post-lab-less-than-cutpoint
@@ -813,23 +801,12 @@ pre_PLT_45days <- pre_lab(master_lab, month = FALSE, time = 45,
 pre_ALB_45days <- pre_lab(master_lab, month = FALSE, time = 45,
                            index_date = baseline_sample_date, Group_Id = "ALB")
 
-# Electrolyte pre-baseline labs
-pre_K_45days  <- pre_lab(master_lab, month = FALSE, time = 45,
-                          index_date = baseline_sample_date, Group_Id = "K")
-pre_MG_45days <- pre_lab(master_lab, month = FALSE, time = 45,
-                          index_date = baseline_sample_date, Group_Id = "MG")
-pre_NA_45days <- pre_lab(master_lab, month = FALSE, time = 45,
-                          index_date = baseline_sample_date, Group_Id = "NA")
-
 # Merge all pre-baseline labs into final_master
 final_master <- final_master %>%
   merge(pre_CRE_45days, by = "EMPI", all.x = TRUE) %>%
   merge(pre_HGB_45days, by = "EMPI", all.x = TRUE) %>%
   merge(pre_PLT_45days, by = "EMPI", all.x = TRUE) %>%
-  merge(pre_ALB_45days, by = "EMPI", all.x = TRUE) %>%
-  merge(pre_K_45days,   by = "EMPI", all.x = TRUE) %>%
-  merge(pre_MG_45days,  by = "EMPI", all.x = TRUE) %>%
-  merge(pre_NA_45days,  by = "EMPI", all.x = TRUE)
+  merge(pre_ALB_45days, by = "EMPI", all.x = TRUE)
 ```
 
 ```{r}
@@ -1182,50 +1159,10 @@ final_master <- final_master %>%
   )
 ```
 
-## 5.10 Post-baseline electrolyte outcomes (Hypokalemia / Hypomagnesemia / Hyponatremia)
+## 5.10 Electrolyte outcomes — removed
 
-```{r}
-#| label: clean-electrolyte-outcomes
-final_master$baseline_sample_date <- as.Date(final_master$baseline_sample_date)
-
-# Hypokalemia: first K < 3.0 mEq/L within 90 days post-baseline
-Hypokalemia_value <- post_lab_less_than_cutpoint(
-  data = master_lab, days = 90, index_date = baseline_sample_date,
-  Group_ID = "K", Group_ID_name = "Hypokalemia", cutpoint = 3
-)
-
-# Hypomagnesemia: first Mg < 0.9 mg/dL within 90 days post-baseline
-Hypomagnesemia_value <- post_lab_less_than_cutpoint(
-  data = master_lab, days = 90, index_date = baseline_sample_date,
-  Group_ID = "MG", Group_ID_name = "Hypomagnesemia", cutpoint = 0.9
-)
-
-# Hyponatremia: first Na < 125 mEq/L within 90 days post-baseline
-Hyponatremia_value <- post_lab_less_than_cutpoint(
-  data = master_lab, days = 90, index_date = baseline_sample_date,
-  Group_ID = "NA", Group_ID_name = "Hyponatremia", cutpoint = 125
-)
-
-final_master <- final_master %>% merge(Hypokalemia_value,    by = "EMPI", all.x = TRUE)
-final_master <- final_master %>% merge(Hypomagnesemia_value, by = "EMPI", all.x = TRUE)
-final_master <- final_master %>% merge(Hyponatremia_value,   by = "EMPI", all.x = TRUE)
-
-# Binary outcome flags and time-to-event (days); 90 if no event occurred
-final_master <- final_master %>%
-  mutate(
-    time_to_Hypomagnesemia = post_Hypomagnesemia_cutpoint_90days_date - baseline_sample_date,
-    time_to_Hypokalemia    = post_Hypokalemia_cutpoint_90days_date    - baseline_sample_date,
-    time_to_Hyponatremia   = post_Hyponatremia_cutpoint_90days_date   - baseline_sample_date,
-    Hypomagnesemia_90days  = ifelse(!is.na(post_Hypomagnesemia_cutpoint_90days), 1, 0),
-    Hypokalemia_90days     = ifelse(!is.na(post_Hypokalemia_cutpoint_90days),    1, 0),
-    Hyponatremia_90days    = ifelse(!is.na(post_Hyponatremia_cutpoint_90days),   1, 0)
-  ) %>%
-  mutate(
-    time_to_Hypomagnesemia = ifelse(is.na(time_to_Hypomagnesemia), 90, time_to_Hypomagnesemia),
-    time_to_Hypokalemia    = ifelse(is.na(time_to_Hypokalemia),    90, time_to_Hypokalemia),
-    time_to_Hyponatremia   = ifelse(is.na(time_to_Hyponatremia),   90, time_to_Hyponatremia)
-  )
-```
+> K, MG, NA not in current RPDR lab pull (only ALB, CRE, HGB, PLT, GHBA1C).
+> Hypokalemia, Hypomagnesemia, Hyponatremia outcomes removed.
 
 ## 5.11 Thyroid disease (RPDR diagnosis + medication)
 
@@ -1450,10 +1387,6 @@ final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_9,  e
 final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_10, event_status = event_hosp_10, name = "hosp_10")
 final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_11, event_status = event_hosp_11, name = "hosp_11")
 
-# Electrolyte outcomes
-final_master <- cmp_variable(final_master, event_time = time_to_Hypomagnesemia, event_status = Hypomagnesemia_90days, name = "Hypomagnesemia")
-final_master <- cmp_variable(final_master, event_time = time_to_Hypokalemia,    event_status = Hypokalemia_90days,    name = "Hypokalemia")
-final_master <- cmp_variable(final_master, event_time = time_to_Hyponatremia,   event_status = Hyponatremia_90days,   name = "Hyponatremia")
 
 # Convert all cmp_status_* columns to factor (required by tidycmprsk)
 final_master <- final_master %>%
@@ -1627,44 +1560,6 @@ making the block unparseable as standalone R code. Running or sourcing that file
 throw a parse error. The fragment appears to be a detached pipeline that was accidentally
 cut from its parent expression. It has no effect on the analysis in this file since
 `R code summary.Rmd` is referenced only for function definitions, not sourced.
-
----
-
-# 7 Pipeline Summary & Plot
-
-## 7.1 Data pipeline summary
-
-| Section | Step | Key output |
-|---|---|---|
-| 4.1–4.4 | REDCap load, hosp events, side_effect | `master`, `side_effect` |
-| 4.5 | Merge side_effect + drug indicators | `final_master` base |
-| 4.6 | Rename dates (empi→EMPI, bl_date→baseline_sample_date) | — |
-| 4.7 | Load RPDR (lab, dia, med) → master_lab/dia/med | — |
-| 4.8 | Define eGFR functions (Cockcroft, CKD-EPI cre/cys/combined) | — |
-| 4.9 | Pre-labs (CRE, HGB, PLT, ALB, K, MG, NA), eGFR vars, AE labs | Merged into `final_master` |
-| 5.1 | Mortality, time_to_death_90 | — |
-| 5.2 | Censor hosp times at 90 days | — |
-| 5.3 | AE binary flags + time-to-AE | Anemia/Throm/AKI grade 2/3 |
-| 5.4 | Exclusion filter (missing cystatin C / platinum) | Cohort = ~877 pts |
-| 5.5–5.6 | Exposure, BMI/age/ICI/CKD stage | cr_cys_7, ckd_stage_cg, etc. |
-| 5.7 | Cancer type categories | `cancer_type_cat_7` (7 levels) |
-| 5.8 | Platinum dosing | dose_1, carbo_dose, cis_dose, etc. |
-| 5.9 | Rename baseline labs (PDF → Copy 709 names) | baseline_cre, baseline_cys_c |
-| 5.10 | Electrolyte outcomes (Hypokalemia/Hypomagnesemia/Hyponatremia) | — |
-| 5.11 | Thyroid (RPDR) | `thyroid` |
-| 5.12 | HIV from RPDR | `hiv_rpdr` |
-| 5.13 | pre_WBC_45days — NOT available (WBC not in RPDR pulls) | — |
-| 5.14 | Charlson CCI | `score`, `cci` |
-| 5.15 | Competing risk variables — all outcomes | cmp_time_* / cmp_status_* |
-
-## 7.2 Pipeline plot
-
-```{r}
-#| label: pipeline-plot
-#| fig-width: 14
-#| fig-height: 9
-source("/Users/to909/Desktop/Meg/Cystain C redcap/pipeline_plot.R")
-```
 
 ---
 
