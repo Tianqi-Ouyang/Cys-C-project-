@@ -1097,9 +1097,6 @@ table(final_master$cancer_type_cat_7)
 #| label: clean-platinum
 # carbo / cis: binary platinum type (platin_group is now a labeled factor)
 # carbo_dose: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²
-# NOTE: 3 carboplatin records (758, 786, 836) appear to have platin_dose and
-# dosage_mg swapped — platin_dose contains total mg (139, 539.4, 802.8) while
-# dosage_mg contains the AUC (2, 5, 6). These need manual review in REDCap.
 # cis_group: cisplatin dose tier (1=<40, 2=40–60, 3=≥60 mg/m²)
 # dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)
 # carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin

@@ -32,10 +32,12 @@ final_master <- readRDS("final_master.rds")
 ##dose_1: carbo-AUC ≥ 5 mg/mL/min, or cisplatin ≥ 75 mg/m2
 table_one_cc_ratio <- final_master %>%
   dplyr::select(age, age_cat, sex, race, ethnicity, tumor_stage, cancer_type_cat_7,
-                platin_group, cis_dose, cis_dose_cat, carbo_dose, carbo_AUC_cat, dose_1,
+                carbo_dose, carbo_AUC_cat, dose_1,
                 ici, Bevacizumab, Paclitaxel, Pemetrexed, Doxorubicin, Etoposide, Gemcitabine, Pertuzumab, Trastuzumab, Docetaxel, Fluorouracil, Methotrexate, Vinblastine, Administered_alone,
                 hiv_rpdr, thyroid,
-                score, ecog_score, bmi, bmi_cat, pre_HGB_45days, pre_PLT_45days, pre_ALB_45days, baseline_cys_c, baseline_cre, cockcroft, baseline_cre_egfr, baseline_cys_c_egfr, ckd_epi_gfr_cre_cys, baseline_cre_egfr_unindexed, baseline_cys_c_egfr_unindexed, ckd_epi_gfr_cre_cys_unindex, ckd_stage_cg, cr_cys, cr_cys_7) %>%
+                score, ecog_score, bmi, bmi_cat, pre_HGB_45days, pre_PLT_45days, pre_ALB_45days, baseline_cys_c, baseline_cre, cockcroft, baseline_cre_egfr, baseline_cys_c_egfr, ckd_epi_gfr_cre_cys, baseline_cre_egfr_unindexed, baseline_cys_c_egfr_unindexed, ckd_epi_gfr_cre_cys_unindex, ckd_stage_cg, cr_cys,
+                carbo_dose_cg, carbo_dose_cys, dose_discrepancy, dose_diff_pct,
+                cr_cys_7) %>%
   tbl_summary(statistic = list(age ~ "{mean} ({sd})"),
               by = cr_cys_7) %>%
   add_overall() %>%
