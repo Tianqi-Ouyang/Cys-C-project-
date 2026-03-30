@@ -52,43 +52,43 @@
     "objectID": "analysis.html#actual-redcap-vs-predicted-ckd-epi-cr-cys-dose-scatter",
     "href": "analysis.html#actual-redcap-vs-predicted-ckd-epi-cr-cys-dose-scatter",
     "title": "Analysis",
-    "section": "6.1 Actual (REDCap) vs Predicted (CKD-EPI Cr-Cys) Dose Scatter",
-    "text": "6.1 Actual (REDCap) vs Predicted (CKD-EPI Cr-Cys) Dose Scatter\n\n\nCode\nggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap)) +\n  geom_point(alpha = 0.6, color = \"black\") +\n  geom_abline(intercept = 0, slope = 1, linetype = \"solid\", color = \"red\") +\n  labs(x = \"Predicted Dose — CKD-EPI Cr-Cys (mg)\",\n       y = \"Actual Dose — REDCap (mg)\",\n       title = \"Actual vs Predicted Carboplatin Dose\") +\n  theme_bw() + theme(panel.grid.minor = element_blank())"
+    "section": "7.1 Actual (REDCap) vs Predicted (CKD-EPI Cr-Cys) Dose Scatter",
+    "text": "7.1 Actual (REDCap) vs Predicted (CKD-EPI Cr-Cys) Dose Scatter\n\n\nCode\nggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap)) +\n  geom_point(alpha = 0.6, color = \"black\") +\n  geom_abline(intercept = 0, slope = 1, linetype = \"solid\", color = \"red\") +\n  labs(x = \"Predicted Dose — CKD-EPI Cr-Cys (mg)\",\n       y = \"Actual Dose — REDCap (mg)\",\n       title = \"Actual vs Predicted Carboplatin Dose\") +\n  theme_bw() + theme(panel.grid.minor = element_blank())"
   },
   {
     "objectID": "analysis.html#dose-discrepancy-distribution",
     "href": "analysis.html#dose-discrepancy-distribution",
     "title": "Analysis",
-    "section": "6.2 Dose Discrepancy Distribution",
-    "text": "6.2 Dose Discrepancy Distribution\n\n\nCode\nggplot(final_master, aes(x = dose_discrepancy)) +\n  geom_histogram(color = \"black\", fill = \"#1F78B4\", alpha = 0.7, bins = 40) +\n  geom_vline(xintercept = 0, linetype = \"dashed\", color = \"red\", linewidth = 0.8) +\n  labs(title = \"Dose Discrepancy: Actual (REDCap) - Predicted (CKD-EPI Cr-Cys)\",\n       x = \"Dose Discrepancy (mg)\",\n       y = \"Number of Patients\",\n       subtitle = \"Positive = patient received more than Cr-Cys predicts\") +\n  theme_minimal(base_size = 14)"
+    "section": "7.2 Dose Discrepancy Distribution",
+    "text": "7.2 Dose Discrepancy Distribution\n\n\nCode\nggplot(final_master, aes(x = dose_discrepancy)) +\n  geom_histogram(color = \"black\", fill = \"#1F78B4\", alpha = 0.7, bins = 40) +\n  geom_vline(xintercept = 0, linetype = \"dashed\", color = \"red\", linewidth = 0.8) +\n  labs(title = \"Dose Discrepancy: Actual (REDCap) - Predicted (CKD-EPI Cr-Cys)\",\n       x = \"Dose Discrepancy (mg)\",\n       y = \"Number of Patients\",\n       subtitle = \"Positive = patient received more than Cr-Cys predicts\") +\n  theme_minimal(base_size = 14)"
   },
   {
     "objectID": "analysis.html#scatter-by-sex",
     "href": "analysis.html#scatter-by-sex",
     "title": "Analysis",
-    "section": "6.3 Scatter by Sex",
-    "text": "6.3 Scatter by Sex\n\n\nCode\nggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = sex)) +\n  geom_point(alpha = 0.6) +\n  geom_abline(intercept = 0, slope = 1, linetype = \"solid\", color = \"grey50\") +\n  scale_color_manual(values = c(\"Male\" = \"black\", \"Female\" = \"red\"), name = \"Sex\") +\n  labs(x = \"Predicted Dose — CKD-EPI Cr-Cys (mg)\",\n       y = \"Actual Dose — REDCap (mg)\",\n       title = \"Actual vs Predicted Dose by Sex\") +\n  theme_bw() + theme(panel.grid.minor = element_blank())"
+    "section": "7.3 Scatter by Sex",
+    "text": "7.3 Scatter by Sex\n\n\nCode\nggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = sex)) +\n  geom_point(alpha = 0.6) +\n  geom_abline(intercept = 0, slope = 1, linetype = \"solid\", color = \"grey50\") +\n  scale_color_manual(values = c(\"Male\" = \"black\", \"Female\" = \"red\"), name = \"Sex\") +\n  labs(x = \"Predicted Dose — CKD-EPI Cr-Cys (mg)\",\n       y = \"Actual Dose — REDCap (mg)\",\n       title = \"Actual vs Predicted Dose by Sex\") +\n  theme_bw() + theme(panel.grid.minor = element_blank())"
   },
   {
     "objectID": "analysis.html#scatter-by-bmi",
     "href": "analysis.html#scatter-by-bmi",
     "title": "Analysis",
-    "section": "6.4 Scatter by BMI",
-    "text": "6.4 Scatter by BMI\n\n\nCode\nggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = bmi_30)) +\n  geom_point(alpha = 0.6) +\n  geom_abline(intercept = 0, slope = 1, linetype = \"solid\", color = \"grey50\") +\n  scale_color_manual(values = c(\"&lt;30\" = \"black\", \"&gt;=30\" = \"red\"), name = \"BMI\") +\n  labs(x = \"Predicted Dose — CKD-EPI Cr-Cys (mg)\",\n       y = \"Actual Dose — REDCap (mg)\",\n       title = \"Actual vs Predicted Dose by BMI\") +\n  theme_bw() + theme(panel.grid.minor = element_blank())"
+    "section": "7.4 Scatter by BMI",
+    "text": "7.4 Scatter by BMI\n\n\nCode\nggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = bmi_30)) +\n  geom_point(alpha = 0.6) +\n  geom_abline(intercept = 0, slope = 1, linetype = \"solid\", color = \"grey50\") +\n  scale_color_manual(values = c(\"&lt;30\" = \"black\", \"&gt;=30\" = \"red\"), name = \"BMI\") +\n  labs(x = \"Predicted Dose — CKD-EPI Cr-Cys (mg)\",\n       y = \"Actual Dose — REDCap (mg)\",\n       title = \"Actual vs Predicted Dose by BMI\") +\n  theme_bw() + theme(panel.grid.minor = element_blank())"
   },
   {
     "objectID": "analysis.html#scatter-by-age",
     "href": "analysis.html#scatter-by-age",
     "title": "Analysis",
-    "section": "6.5 Scatter by Age",
-    "text": "6.5 Scatter by Age\n\n\nCode\nggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = age_70)) +\n  geom_point(alpha = 0.6) +\n  geom_abline(intercept = 0, slope = 1, linetype = \"solid\", color = \"grey50\") +\n  scale_color_manual(values = c(\"&lt;70\" = \"black\", \"&gt;=70\" = \"red\"), name = \"Age\") +\n  labs(x = \"Predicted Dose — CKD-EPI Cr-Cys (mg)\",\n       y = \"Actual Dose — REDCap (mg)\",\n       title = \"Actual vs Predicted Dose by Age\") +\n  theme_bw() + theme(panel.grid.minor = element_blank())"
+    "section": "7.5 Scatter by Age",
+    "text": "7.5 Scatter by Age\n\n\nCode\nggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = age_70)) +\n  geom_point(alpha = 0.6) +\n  geom_abline(intercept = 0, slope = 1, linetype = \"solid\", color = \"grey50\") +\n  scale_color_manual(values = c(\"&lt;70\" = \"black\", \"&gt;=70\" = \"red\"), name = \"Age\") +\n  labs(x = \"Predicted Dose — CKD-EPI Cr-Cys (mg)\",\n       y = \"Actual Dose — REDCap (mg)\",\n       title = \"Actual vs Predicted Dose by Age\") +\n  theme_bw() + theme(panel.grid.minor = element_blank())"
   },
   {
     "objectID": "analysis.html#platinum-related-hospitalization-side-effect",
     "href": "analysis.html#platinum-related-hospitalization-side-effect",
     "title": "Analysis",
-    "section": "7.1 Platinum-Related Hospitalization (Side Effect)",
-    "text": "7.1 Platinum-Related Hospitalization (Side Effect)\n\n\nCode\nfit_side_effect &lt;- cuminc(\n  Surv(cmp_time_side_effect, cmp_status_side_effect) ~ cr_cys_7,\n  data = final_master\n)\n\nggcuminc(fit_side_effect) +\n  labs(\n    title = \"Platinum-Related Hospitalization\",\n    x = \"Follow-up Time (Days)\",\n    y = \"Cumulative Incidence\"\n  ) +\n  scale_y_continuous(labels = percent_format(accuracy = 1)) +\n  theme_classic(base_size = 14) +\n  theme(\n    plot.title    = element_text(face = \"bold\", size = 16),\n    axis.title    = element_text(size = 14),\n    axis.text     = element_text(size = 12),\n    legend.title  = element_blank(),\n    legend.text   = element_text(size = 12)\n  ) +\n  scale_color_manual(values = c(\"red\", \"blue\"))"
+    "section": "8.1 Platinum-Related Hospitalization (Side Effect)",
+    "text": "8.1 Platinum-Related Hospitalization (Side Effect)\n\n\nCode\nfit_side_effect &lt;- cuminc(\n  Surv(cmp_time_side_effect, cmp_status_side_effect) ~ cr_cys_7,\n  data = final_master\n)\n\nggcuminc(fit_side_effect) +\n  labs(\n    title = \"Platinum-Related Hospitalization\",\n    x = \"Follow-up Time (Days)\",\n    y = \"Cumulative Incidence\"\n  ) +\n  scale_y_continuous(labels = percent_format(accuracy = 1)) +\n  theme_classic(base_size = 14) +\n  theme(\n    plot.title    = element_text(face = \"bold\", size = 16),\n    axis.title    = element_text(size = 14),\n    axis.text     = element_text(size = 12),\n    legend.title  = element_blank(),\n    legend.text   = element_text(size = 12)\n  ) +\n  scale_color_manual(values = c(\"red\", \"blue\"))"
   },
   {
     "objectID": "index.html",
@@ -495,5 +495,40 @@
     "title": "Analysis",
     "section": "4.2 Actual vs Predicted Dose (Side by Side)",
     "text": "4.2 Actual vs Predicted Dose (Side by Side)\n\n\nCode\nggplot(dose_long, aes(x = dose_mg, fill = dose_type)) +\n  geom_histogram(color = \"black\", alpha = 0.7, bins = 40) +\n  facet_wrap(~ dose_type) +\n  geom_vline(\n    data = dose_long %&gt;% group_by(dose_type) %&gt;%\n      summarise(grp_mean = mean(dose_mg, na.rm = TRUE)),\n    aes(xintercept = grp_mean), color = \"red\", linetype = \"dashed\", linewidth = 0.8\n  ) +\n  scale_fill_manual(values = c(\"Actual (REDCap)\" = \"#E31A1C\",\n                                \"Predicted (CKD-EPI Cr-Cys)\" = \"#1F78B4\")) +\n  labs(title = \"Carboplatin Dose Distribution\",\n       x = \"Dose (mg)\", y = \"Number of Patients\") +\n  theme_minimal(base_size = 14) +\n  theme(legend.position = \"none\")\n\n\n\n\n\n\n\n\n\n\n\nCode\nfinal_master &lt;- final_master %&gt;%\n  group_by(dd_decile) %&gt;%\n  mutate(\n    anemia_2_rate_decile              = mean(Anemia_g2_90days, na.rm = TRUE),\n    anemia_3_rate_decile              = mean(Anemia_g3_90days, na.rm = TRUE),\n    throm_2_rate_decile               = mean(Throm_g2_90days, na.rm = TRUE),\n    throm_3_rate_decile               = mean(Throm_g3_90days, na.rm = TRUE),\n    aki_2_rate_decile                 = mean(AKI_g2_90days, na.rm = TRUE),\n    aki_3_rate_decile                 = mean(AKI_g3_90days, na.rm = TRUE),\n    hos_rate_decile                   = mean(hosp_90, na.rm = TRUE),\n    platinum_related_hos_rate_decile  = mean(platinum_related_hosp, na.rm = TRUE),\n    death_rate_decile                 = mean(death_90, na.rm = TRUE)\n  ) %&gt;%\n  ungroup() %&gt;%\n  mutate(dd_decile = as.numeric(dd_decile))"
+  },
+  {
+    "objectID": "analysis.html#grade-2-anemia-1",
+    "href": "analysis.html#grade-2-anemia-1",
+    "title": "Analysis",
+    "section": "6.1 Grade 2 Anemia",
+    "text": "6.1 Grade 2 Anemia\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = Anemia_g2_90days,\n  title = \"Grade &gt;= 2 Anemia\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Anemia\"\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-3-thrombocytopenia-1",
+    "href": "analysis.html#grade-3-thrombocytopenia-1",
+    "title": "Analysis",
+    "section": "6.2 Grade 3 Thrombocytopenia",
+    "text": "6.2 Grade 3 Thrombocytopenia\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = Throm_g3_90days,\n  title = \"Grade &gt;= 3 Thrombocytopenia\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Thrombocytopenia\"\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-3-aki-1",
+    "href": "analysis.html#grade-3-aki-1",
+    "title": "Analysis",
+    "section": "6.3 Grade 3 AKI",
+    "text": "6.3 Grade 3 AKI\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = AKI_g3_90days,\n  title = \"Grade &gt;= 3 Creatinine Increased\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Creatinine Increased\"\n)"
+  },
+  {
+    "objectID": "analysis.html#overall-hospitalization-1",
+    "href": "analysis.html#overall-hospitalization-1",
+    "title": "Analysis",
+    "section": "6.4 Overall Hospitalization",
+    "text": "6.4 Overall Hospitalization\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = hosp_90,\n  title = \"Overall Hospitalization\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Overall Hospitalization\"\n)"
+  },
+  {
+    "objectID": "analysis.html#platinum-related-hospitalization-1",
+    "href": "analysis.html#platinum-related-hospitalization-1",
+    "title": "Analysis",
+    "section": "6.5 Platinum-Related Hospitalization",
+    "text": "6.5 Platinum-Related Hospitalization\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = platinum_related_hosp,\n  title = \"Hospitalization for Platinum-Associated AEs\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Hospitalization for Platinum-Associated AEs\"\n)"
   }
 ]
