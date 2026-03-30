@@ -166,7 +166,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#incidence-outcomes-by-creatininecystatin-c-ratio" id="toc-incidence-outcomes-by-creatininecystatin-c-ratio" class="nav-link" data-scroll-target="#incidence-outcomes-by-creatininecystatin-c-ratio">3.1 Incidence Outcomes by Creatinine/Cystatin C Ratio</a></li>
   </ul></li>
   <li><a href="#loess-plot-function" id="toc-loess-plot-function" class="nav-link" data-scroll-target="#loess-plot-function">4 LOESS Plot Function</a></li>
-  <li><a href="#loess-plots-by-percentile" id="toc-loess-plots-by-percentile" class="nav-link" data-scroll-target="#loess-plots-by-percentile">5 LOESS Plots by Percentile</a>
+  <li><a href="#loess-plots-by-dose-discrepancy-percentile" id="toc-loess-plots-by-dose-discrepancy-percentile" class="nav-link" data-scroll-target="#loess-plots-by-dose-discrepancy-percentile">5 LOESS Plots by Dose Discrepancy Percentile</a>
   <ul>
   <li><a href="#grade-2-anemia" id="toc-grade-2-anemia" class="nav-link" data-scroll-target="#grade-2-anemia">5.1 Grade 2 Anemia</a></li>
   <li><a href="#grade-3-thrombocytopenia" id="toc-grade-3-thrombocytopenia" class="nav-link" data-scroll-target="#grade-3-thrombocytopenia">5.2 Grade 3 Thrombocytopenia</a></li>
@@ -174,9 +174,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#overall-hospitalization" id="toc-overall-hospitalization" class="nav-link" data-scroll-target="#overall-hospitalization">5.4 Overall Hospitalization</a></li>
   <li><a href="#platinum-related-hospitalization" id="toc-platinum-related-hospitalization" class="nav-link" data-scroll-target="#platinum-related-hospitalization">5.5 Platinum-Related Hospitalization</a></li>
   </ul></li>
-  <li><a href="#cumulative-incidence-plots" id="toc-cumulative-incidence-plots" class="nav-link" data-scroll-target="#cumulative-incidence-plots">6 Cumulative Incidence Plots</a>
+  <li><a href="#dose-discrepancy-plots" id="toc-dose-discrepancy-plots" class="nav-link" data-scroll-target="#dose-discrepancy-plots">6 Dose Discrepancy Plots</a>
   <ul>
-  <li><a href="#platinum-related-hospitalization-side-effect" id="toc-platinum-related-hospitalization-side-effect" class="nav-link" data-scroll-target="#platinum-related-hospitalization-side-effect">6.1 Platinum-Related Hospitalization (Side Effect)</a></li>
+  <li><a href="#ckd-epi-vs-cockcroft-gault-scatter" id="toc-ckd-epi-vs-cockcroft-gault-scatter" class="nav-link" data-scroll-target="#ckd-epi-vs-cockcroft-gault-scatter">6.1 CKD-EPI vs Cockcroft-Gault Scatter</a></li>
+  <li><a href="#gfr-distribution-cg-vs-ckd-epi" id="toc-gfr-distribution-cg-vs-ckd-epi" class="nav-link" data-scroll-target="#gfr-distribution-cg-vs-ckd-epi">6.2 GFR Distribution: CG vs CKD-EPI</a></li>
+  <li><a href="#carboplatin-dose-discrepancy-distribution" id="toc-carboplatin-dose-discrepancy-distribution" class="nav-link" data-scroll-target="#carboplatin-dose-discrepancy-distribution">6.3 Carboplatin Dose Discrepancy Distribution</a></li>
+  <li><a href="#scatter-by-sex" id="toc-scatter-by-sex" class="nav-link" data-scroll-target="#scatter-by-sex">6.4 Scatter by Sex</a></li>
+  <li><a href="#scatter-by-bmi" id="toc-scatter-by-bmi" class="nav-link" data-scroll-target="#scatter-by-bmi">6.5 Scatter by BMI</a></li>
+  <li><a href="#scatter-by-age" id="toc-scatter-by-age" class="nav-link" data-scroll-target="#scatter-by-age">6.6 Scatter by Age</a></li>
+  </ul></li>
+  <li><a href="#cumulative-incidence-plots" id="toc-cumulative-incidence-plots" class="nav-link" data-scroll-target="#cumulative-incidence-plots">7 Cumulative Incidence Plots</a>
+  <ul>
+  <li><a href="#platinum-related-hospitalization-side-effect" id="toc-platinum-related-hospitalization-side-effect" class="nav-link" data-scroll-target="#platinum-related-hospitalization-side-effect">7.1 Platinum-Related Hospitalization (Side Effect)</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -257,23 +266,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>table_one_cc_ratio</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="xgmgyloibb" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#xgmgyloibb table {
+<div id="xvcdlexkkf" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#xvcdlexkkf table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#xgmgyloibb thead, #xgmgyloibb tbody, #xgmgyloibb tfoot, #xgmgyloibb tr, #xgmgyloibb td, #xgmgyloibb th {
+#xvcdlexkkf thead, #xvcdlexkkf tbody, #xvcdlexkkf tfoot, #xvcdlexkkf tr, #xvcdlexkkf td, #xvcdlexkkf th {
   border-style: none;
 }
 
-#xgmgyloibb p {
+#xvcdlexkkf p {
   margin: 0;
   padding: 0;
 }
 
-#xgmgyloibb .gt_table {
+#xvcdlexkkf .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -299,12 +308,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-left-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_caption {
+#xvcdlexkkf .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#xgmgyloibb .gt_title {
+#xvcdlexkkf .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -316,7 +325,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-width: 0;
 }
 
-#xgmgyloibb .gt_subtitle {
+#xvcdlexkkf .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -328,7 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-width: 0;
 }
 
-#xgmgyloibb .gt_heading {
+#xvcdlexkkf .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -340,13 +349,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_bottom_border {
+#xvcdlexkkf .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_col_headings {
+#xvcdlexkkf .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -361,7 +370,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_col_heading {
+#xvcdlexkkf .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -381,7 +390,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#xgmgyloibb .gt_column_spanner_outer {
+#xvcdlexkkf .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -393,15 +402,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 4px;
 }
 
-#xgmgyloibb .gt_column_spanner_outer:first-child {
+#xvcdlexkkf .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#xgmgyloibb .gt_column_spanner_outer:last-child {
+#xvcdlexkkf .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#xgmgyloibb .gt_column_spanner {
+#xvcdlexkkf .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -413,11 +422,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   width: 100%;
 }
 
-#xgmgyloibb .gt_spanner_row {
+#xvcdlexkkf .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#xgmgyloibb .gt_group_heading {
+#xvcdlexkkf .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -443,7 +452,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   text-align: left;
 }
 
-#xgmgyloibb .gt_empty_group_heading {
+#xvcdlexkkf .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -458,15 +467,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: middle;
 }
 
-#xgmgyloibb .gt_from_md > :first-child {
+#xvcdlexkkf .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#xgmgyloibb .gt_from_md > :last-child {
+#xvcdlexkkf .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#xgmgyloibb .gt_row {
+#xvcdlexkkf .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -485,7 +494,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#xgmgyloibb .gt_stub {
+#xvcdlexkkf .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -498,7 +507,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#xgmgyloibb .gt_stub_row_group {
+#xvcdlexkkf .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -512,15 +521,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: top;
 }
 
-#xgmgyloibb .gt_row_group_first td {
+#xvcdlexkkf .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#xgmgyloibb .gt_row_group_first th {
+#xvcdlexkkf .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#xgmgyloibb .gt_summary_row {
+#xvcdlexkkf .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -530,16 +539,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#xgmgyloibb .gt_first_summary_row {
+#xvcdlexkkf .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_first_summary_row.thick {
+#xvcdlexkkf .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#xgmgyloibb .gt_last_summary_row {
+#xvcdlexkkf .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -549,7 +558,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_grand_summary_row {
+#xvcdlexkkf .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -559,7 +568,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#xgmgyloibb .gt_first_grand_summary_row {
+#xvcdlexkkf .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -569,7 +578,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_last_grand_summary_row_top {
+#xvcdlexkkf .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -579,11 +588,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_striped {
+#xvcdlexkkf .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#xgmgyloibb .gt_table_body {
+#xvcdlexkkf .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -592,7 +601,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_footnotes {
+#xvcdlexkkf .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -606,7 +615,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_footnote {
+#xvcdlexkkf .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -615,7 +624,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#xgmgyloibb .gt_sourcenotes {
+#xvcdlexkkf .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -629,7 +638,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#xgmgyloibb .gt_sourcenote {
+#xvcdlexkkf .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -637,72 +646,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#xgmgyloibb .gt_left {
+#xvcdlexkkf .gt_left {
   text-align: left;
 }
 
-#xgmgyloibb .gt_center {
+#xvcdlexkkf .gt_center {
   text-align: center;
 }
 
-#xgmgyloibb .gt_right {
+#xvcdlexkkf .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#xgmgyloibb .gt_font_normal {
+#xvcdlexkkf .gt_font_normal {
   font-weight: normal;
 }
 
-#xgmgyloibb .gt_font_bold {
+#xvcdlexkkf .gt_font_bold {
   font-weight: bold;
 }
 
-#xgmgyloibb .gt_font_italic {
+#xvcdlexkkf .gt_font_italic {
   font-style: italic;
 }
 
-#xgmgyloibb .gt_super {
+#xvcdlexkkf .gt_super {
   font-size: 65%;
 }
 
-#xgmgyloibb .gt_footnote_marks {
+#xvcdlexkkf .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#xgmgyloibb .gt_asterisk {
+#xvcdlexkkf .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#xgmgyloibb .gt_indent_1 {
+#xvcdlexkkf .gt_indent_1 {
   text-indent: 5px;
 }
 
-#xgmgyloibb .gt_indent_2 {
+#xvcdlexkkf .gt_indent_2 {
   text-indent: 10px;
 }
 
-#xgmgyloibb .gt_indent_3 {
+#xvcdlexkkf .gt_indent_3 {
   text-indent: 15px;
 }
 
-#xgmgyloibb .gt_indent_4 {
+#xvcdlexkkf .gt_indent_4 {
   text-indent: 20px;
 }
 
-#xgmgyloibb .gt_indent_5 {
+#xvcdlexkkf .gt_indent_5 {
   text-indent: 25px;
 }
 
-#xgmgyloibb .katex-display {
+#xvcdlexkkf .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#xgmgyloibb div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#xvcdlexkkf div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -740,7 +749,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </td>
 <td class="gt_row gt_center" headers="stat_2"><br>
 </td>
-<td class="gt_row gt_center" headers="p.value">0.11</td>
+<td class="gt_row gt_center" headers="p.value">0.10</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
@@ -774,7 +783,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </td>
 <td class="gt_row gt_center" headers="stat_2"><br>
 </td>
-<td class="gt_row gt_center" headers="p.value">0.002</td>
+<td class="gt_row gt_center" headers="p.value">&lt;0.001</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Male</td>
@@ -884,7 +893,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </td>
 <td class="gt_row gt_center" headers="stat_2"><br>
 </td>
-<td class="gt_row gt_center" headers="p.value">0.012</td>
+<td class="gt_row gt_center" headers="p.value">0.020</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Local/Early</td>
@@ -1030,7 +1039,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </td>
 <td class="gt_row gt_center" headers="stat_2"><br>
 </td>
-<td class="gt_row gt_center" headers="p.value">0.001</td>
+<td class="gt_row gt_center" headers="p.value">&lt;0.001</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;1.5</td>
@@ -1096,7 +1105,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </td>
 <td class="gt_row gt_center" headers="stat_2"><br>
 </td>
-<td class="gt_row gt_center" headers="p.value">0.063</td>
+<td class="gt_row gt_center" headers="p.value">0.060</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
@@ -1122,7 +1131,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </td>
 <td class="gt_row gt_center" headers="stat_2"><br>
 </td>
-<td class="gt_row gt_center" headers="p.value">0.062</td>
+<td class="gt_row gt_center" headers="p.value">0.071</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;0</td>
@@ -1145,7 +1154,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td class="gt_row gt_center" headers="stat_0">119 (20%)</td>
 <td class="gt_row gt_center" headers="stat_1">76 (18%)</td>
 <td class="gt_row gt_center" headers="stat_2">43 (26%)</td>
-<td class="gt_row gt_center" headers="p.value">0.030</td>
+<td class="gt_row gt_center" headers="p.value">0.026</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="label">Bevacizumab</td>
@@ -1180,7 +1189,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td class="gt_row gt_center" headers="stat_0">42 (7.1%)</td>
 <td class="gt_row gt_center" headers="stat_1">35 (8.1%)</td>
 <td class="gt_row gt_center" headers="stat_2">7 (4.2%)</td>
-<td class="gt_row gt_center" headers="p.value">0.11</td>
+<td class="gt_row gt_center" headers="p.value">0.12</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="label">Gemcitabine</td>
@@ -1478,7 +1487,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </td>
 <td class="gt_row gt_center" headers="stat_2"><br>
 </td>
-<td class="gt_row gt_center" headers="p.value">&lt;0.001</td>
+<td class="gt_row gt_center" headers="p.value">0.002</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
@@ -1541,17 +1550,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hospitalization binary (from REDCap hosp_status_90d)</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">hosp_90 =</span> <span class="fu">case_when</span>(</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      hosp_status_90d <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      hosp_status_90d <span class="sc">==</span> <span class="dv">2</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">platinum_related_hosp =</span> <span class="fu">ifelse</span>(side_effect <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">cc_percentile =</span> <span class="fu">ntile</span>(cr_cys, <span class="dv">100</span>),</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">cc_decile     =</span> <span class="fu">ntile</span>(cr_cys, <span class="dv">10</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Dose discrepancy percentile: based on carbo_dose_cys / carbo_dose_cg ratio</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">hosp_90 =</span> <span class="fu">case_when</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      hosp_status_90d <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>      hosp_status_90d <span class="sc">==</span> <span class="dv">2</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">platinum_related_hosp =</span> <span class="fu">ifelse</span>(side_effect <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">dd_percentile =</span> <span class="fu">ntile</span>(dose_discrepancy, <span class="dv">100</span>),</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">dd_decile     =</span> <span class="fu">ntile</span>(dose_discrepancy, <span class="dv">10</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <section id="incidence-outcomes-by-creatininecystatin-c-ratio" class="level2">
@@ -1576,23 +1586,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>table_one_incidence</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="shfhahjucl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#shfhahjucl table {
+<div id="mkpdgcxqtl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mkpdgcxqtl table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#shfhahjucl thead, #shfhahjucl tbody, #shfhahjucl tfoot, #shfhahjucl tr, #shfhahjucl td, #shfhahjucl th {
+#mkpdgcxqtl thead, #mkpdgcxqtl tbody, #mkpdgcxqtl tfoot, #mkpdgcxqtl tr, #mkpdgcxqtl td, #mkpdgcxqtl th {
   border-style: none;
 }
 
-#shfhahjucl p {
+#mkpdgcxqtl p {
   margin: 0;
   padding: 0;
 }
 
-#shfhahjucl .gt_table {
+#mkpdgcxqtl .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1618,12 +1628,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-left-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_caption {
+#mkpdgcxqtl .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#shfhahjucl .gt_title {
+#mkpdgcxqtl .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1635,7 +1645,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-width: 0;
 }
 
-#shfhahjucl .gt_subtitle {
+#mkpdgcxqtl .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1647,7 +1657,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-width: 0;
 }
 
-#shfhahjucl .gt_heading {
+#mkpdgcxqtl .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1659,13 +1669,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_bottom_border {
+#mkpdgcxqtl .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_col_headings {
+#mkpdgcxqtl .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1680,7 +1690,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_col_heading {
+#mkpdgcxqtl .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1700,7 +1710,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#shfhahjucl .gt_column_spanner_outer {
+#mkpdgcxqtl .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1712,15 +1722,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 4px;
 }
 
-#shfhahjucl .gt_column_spanner_outer:first-child {
+#mkpdgcxqtl .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#shfhahjucl .gt_column_spanner_outer:last-child {
+#mkpdgcxqtl .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#shfhahjucl .gt_column_spanner {
+#mkpdgcxqtl .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1732,11 +1742,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   width: 100%;
 }
 
-#shfhahjucl .gt_spanner_row {
+#mkpdgcxqtl .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#shfhahjucl .gt_group_heading {
+#mkpdgcxqtl .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1762,7 +1772,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   text-align: left;
 }
 
-#shfhahjucl .gt_empty_group_heading {
+#mkpdgcxqtl .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1777,15 +1787,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: middle;
 }
 
-#shfhahjucl .gt_from_md > :first-child {
+#mkpdgcxqtl .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#shfhahjucl .gt_from_md > :last-child {
+#mkpdgcxqtl .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#shfhahjucl .gt_row {
+#mkpdgcxqtl .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1804,7 +1814,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#shfhahjucl .gt_stub {
+#mkpdgcxqtl .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1817,7 +1827,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#shfhahjucl .gt_stub_row_group {
+#mkpdgcxqtl .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1831,15 +1841,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: top;
 }
 
-#shfhahjucl .gt_row_group_first td {
+#mkpdgcxqtl .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#shfhahjucl .gt_row_group_first th {
+#mkpdgcxqtl .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#shfhahjucl .gt_summary_row {
+#mkpdgcxqtl .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1849,16 +1859,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#shfhahjucl .gt_first_summary_row {
+#mkpdgcxqtl .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_first_summary_row.thick {
+#mkpdgcxqtl .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#shfhahjucl .gt_last_summary_row {
+#mkpdgcxqtl .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1868,7 +1878,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_grand_summary_row {
+#mkpdgcxqtl .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1878,7 +1888,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#shfhahjucl .gt_first_grand_summary_row {
+#mkpdgcxqtl .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1888,7 +1898,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_last_grand_summary_row_top {
+#mkpdgcxqtl .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1898,11 +1908,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_striped {
+#mkpdgcxqtl .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#shfhahjucl .gt_table_body {
+#mkpdgcxqtl .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1911,7 +1921,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_footnotes {
+#mkpdgcxqtl .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1925,7 +1935,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_footnote {
+#mkpdgcxqtl .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1934,7 +1944,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#shfhahjucl .gt_sourcenotes {
+#mkpdgcxqtl .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1948,7 +1958,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#shfhahjucl .gt_sourcenote {
+#mkpdgcxqtl .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1956,72 +1966,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#shfhahjucl .gt_left {
+#mkpdgcxqtl .gt_left {
   text-align: left;
 }
 
-#shfhahjucl .gt_center {
+#mkpdgcxqtl .gt_center {
   text-align: center;
 }
 
-#shfhahjucl .gt_right {
+#mkpdgcxqtl .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#shfhahjucl .gt_font_normal {
+#mkpdgcxqtl .gt_font_normal {
   font-weight: normal;
 }
 
-#shfhahjucl .gt_font_bold {
+#mkpdgcxqtl .gt_font_bold {
   font-weight: bold;
 }
 
-#shfhahjucl .gt_font_italic {
+#mkpdgcxqtl .gt_font_italic {
   font-style: italic;
 }
 
-#shfhahjucl .gt_super {
+#mkpdgcxqtl .gt_super {
   font-size: 65%;
 }
 
-#shfhahjucl .gt_footnote_marks {
+#mkpdgcxqtl .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#shfhahjucl .gt_asterisk {
+#mkpdgcxqtl .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#shfhahjucl .gt_indent_1 {
+#mkpdgcxqtl .gt_indent_1 {
   text-indent: 5px;
 }
 
-#shfhahjucl .gt_indent_2 {
+#mkpdgcxqtl .gt_indent_2 {
   text-indent: 10px;
 }
 
-#shfhahjucl .gt_indent_3 {
+#mkpdgcxqtl .gt_indent_3 {
   text-indent: 15px;
 }
 
-#shfhahjucl .gt_indent_4 {
+#mkpdgcxqtl .gt_indent_4 {
   text-indent: 20px;
 }
 
-#shfhahjucl .gt_indent_5 {
+#mkpdgcxqtl .gt_indent_5 {
   text-indent: 25px;
 }
 
-#shfhahjucl .katex-display {
+#mkpdgcxqtl .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#shfhahjucl div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#mkpdgcxqtl div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -2080,9 +2090,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute event rates by decile</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute event rates by dose discrepancy decile</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cc_decile) <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dd_decile) <span class="sc">%&gt;%</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">anemia_2_rate_decile              =</span> <span class="fu">mean</span>(Anemia_g2_90days, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">anemia_3_rate_decile              =</span> <span class="fu">mean</span>(Anemia_g3_90days, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
@@ -2095,24 +2105,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">death_rate_decile                 =</span> <span class="fu">mean</span>(death_90, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cc_decile =</span> <span class="fu">as.numeric</span>(cc_decile))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dd_decile =</span> <span class="fu">as.numeric</span>(dd_decile))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize cr_cys ratio by decile</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize dose discrepancy by decile</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>summary_by_decile <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cc_decile) <span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dd_decile) <span class="sc">%&gt;%</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">n      =</span> <span class="fu">n</span>(),</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">min    =</span> <span class="fu">min</span>(cr_cys, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">q1     =</span> <span class="fu">quantile</span>(cr_cys, <span class="fl">0.25</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="fu">median</span>(cr_cys, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean   =</span> <span class="fu">mean</span>(cr_cys, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">q3     =</span> <span class="fu">quantile</span>(cr_cys, <span class="fl">0.75</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">max    =</span> <span class="fu">max</span>(cr_cys, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd     =</span> <span class="fu">sd</span>(cr_cys, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">min    =</span> <span class="fu">min</span>(dose_discrepancy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">q1     =</span> <span class="fu">quantile</span>(dose_discrepancy, <span class="fl">0.25</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="fu">median</span>(dose_discrepancy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean   =</span> <span class="fu">mean</span>(dose_discrepancy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">q3     =</span> <span class="fu">quantile</span>(dose_discrepancy, <span class="fl">0.75</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">max    =</span> <span class="fu">max</span>(dose_discrepancy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">sd     =</span> <span class="fu">sd</span>(dose_discrepancy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
@@ -2145,18 +2155,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="loess-plots-by-percentile" class="level1">
-<h1>5 LOESS Plots by Percentile</h1>
+<section id="loess-plots-by-dose-discrepancy-percentile" class="level1">
+<h1>5 LOESS Plots by Dose Discrepancy Percentile</h1>
 <section id="grade-2-anemia" class="level2">
 <h2 class="anchored" data-anchor-id="grade-2-anemia">5.1 Grade 2 Anemia</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">loess_plot</span>(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master, <span class="at">x =</span> cc_percentile, <span class="at">y =</span> Anemia_g2_90days,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_point =</span> cc_decile <span class="sc">*</span> <span class="dv">10</span>, <span class="at">y_point =</span> anemia_2_rate_decile,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master, <span class="at">x =</span> dd_percentile, <span class="at">y =</span> Anemia_g2_90days,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_point =</span> dd_decile <span class="sc">*</span> <span class="dv">10</span>, <span class="at">y_point =</span> anemia_2_rate_decile,</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Grade &gt;= 2 Anemia"</span>,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Percentile of SCR/CYS Ratio"</span>, <span class="at">ylab =</span> <span class="st">"Grade &gt;= 2 Anemia"</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Percentile of Dose Discrepancy (CKD-EPI/CG)"</span>, <span class="at">ylab =</span> <span class="st">"Grade &gt;= 2 Anemia"</span></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
@@ -2174,10 +2184,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">loess_plot</span>(</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master, <span class="at">x =</span> cc_percentile, <span class="at">y =</span> Throm_g3_90days,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_point =</span> cc_decile <span class="sc">*</span> <span class="dv">10</span>, <span class="at">y_point =</span> throm_3_rate_decile,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master, <span class="at">x =</span> dd_percentile, <span class="at">y =</span> Throm_g3_90days,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_point =</span> dd_decile <span class="sc">*</span> <span class="dv">10</span>, <span class="at">y_point =</span> throm_3_rate_decile,</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Grade &gt;= 3 Thrombocytopenia"</span>,</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Percentile of SCR/CYS Ratio"</span>, <span class="at">ylab =</span> <span class="st">"Grade &gt;= 3 Thrombocytopenia"</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Percentile of Dose Discrepancy (CKD-EPI/CG)"</span>, <span class="at">ylab =</span> <span class="st">"Grade &gt;= 3 Thrombocytopenia"</span></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
@@ -2195,10 +2205,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">loess_plot</span>(</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master, <span class="at">x =</span> cc_percentile, <span class="at">y =</span> AKI_g3_90days,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_point =</span> cc_decile <span class="sc">*</span> <span class="dv">10</span>, <span class="at">y_point =</span> aki_3_rate_decile,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master, <span class="at">x =</span> dd_percentile, <span class="at">y =</span> AKI_g3_90days,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_point =</span> dd_decile <span class="sc">*</span> <span class="dv">10</span>, <span class="at">y_point =</span> aki_3_rate_decile,</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Grade &gt;= 3 Creatinine Increased"</span>,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Percentile of SCR/CYS Ratio"</span>, <span class="at">ylab =</span> <span class="st">"Grade &gt;= 3 Creatinine Increased"</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Percentile of Dose Discrepancy (CKD-EPI/CG)"</span>, <span class="at">ylab =</span> <span class="st">"Grade &gt;= 3 Creatinine Increased"</span></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
@@ -2216,10 +2226,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">loess_plot</span>(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master, <span class="at">x =</span> cc_percentile, <span class="at">y =</span> hosp_90,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_point =</span> cc_decile <span class="sc">*</span> <span class="dv">10</span>, <span class="at">y_point =</span> hos_rate_decile,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master, <span class="at">x =</span> dd_percentile, <span class="at">y =</span> hosp_90,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_point =</span> dd_decile <span class="sc">*</span> <span class="dv">10</span>, <span class="at">y_point =</span> hos_rate_decile,</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Overall Hospitalization"</span>,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Percentile of SCR/CYS Ratio"</span>, <span class="at">ylab =</span> <span class="st">"Overall Hospitalization"</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Percentile of Dose Discrepancy (CKD-EPI/CG)"</span>, <span class="at">ylab =</span> <span class="st">"Overall Hospitalization"</span></span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
@@ -2237,10 +2247,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">loess_plot</span>(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master, <span class="at">x =</span> cc_percentile, <span class="at">y =</span> platinum_related_hosp,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_point =</span> cc_decile <span class="sc">*</span> <span class="dv">10</span>, <span class="at">y_point =</span> platinum_related_hos_rate_decile,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master, <span class="at">x =</span> dd_percentile, <span class="at">y =</span> platinum_related_hosp,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_point =</span> dd_decile <span class="sc">*</span> <span class="dv">10</span>, <span class="at">y_point =</span> platinum_related_hos_rate_decile,</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Hospitalization for Platinum-Associated AEs"</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Percentile of SCR/CYS Ratio"</span>, <span class="at">ylab =</span> <span class="st">"Hospitalization for Platinum-Associated AEs"</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Percentile of Dose Discrepancy (CKD-EPI/CG)"</span>, <span class="at">ylab =</span> <span class="st">"Hospitalization for Platinum-Associated AEs"</span></span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
@@ -2253,34 +2263,201 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="cumulative-incidence-plots" class="level1">
-<h1>6 Cumulative Incidence Plots</h1>
-<section id="platinum-related-hospitalization-side-effect" class="level2">
-<h2 class="anchored" data-anchor-id="platinum-related-hospitalization-side-effect">6.1 Platinum-Related Hospitalization (Side Effect)</h2>
+<section id="dose-discrepancy-plots" class="level1">
+<h1>6 Dose Discrepancy Plots</h1>
+<section id="ckd-epi-vs-cockcroft-gault-scatter" class="level2">
+<h2 class="anchored" data-anchor-id="ckd-epi-vs-cockcroft-gault-scatter">6.1 CKD-EPI vs Cockcroft-Gault Scatter</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fit_side_effect <span class="ot">&lt;-</span> <span class="fu">cuminc</span>(</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Surv</span>(cmp_time_side_effect, cmp_status_side_effect) <span class="sc">~</span> cr_cys_7,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggcuminc</span>(fit_side_effect) <span class="sc">+</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Platinum-Related Hospitalization"</span>,</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Follow-up Time (Days)"</span>,</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Cumulative Incidence"</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">percent_format</span>(<span class="at">accuracy =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title    =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">16</span>),</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title    =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>),</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text     =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title  =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text   =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>)</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(final_master, <span class="fu">aes</span>(<span class="at">x =</span> cockcroft, <span class="at">y =</span> ckd_epi_gfr_cre_cys_unindex)) <span class="sc">+</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"solid"</span>, <span class="at">color =</span> <span class="st">"grey50"</span>) <span class="sc">+</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">225</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">225</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Cockcroft-Gault (mL/min)"</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"CKD-EPI Cr-Cys Unindexed (mL/min)"</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Cockcroft-Gault vs CKD-EPI Cr-Cys"</span>) <span class="sc">+</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/plot-scatter-gfr-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="gfr-distribution-cg-vs-ckd-epi" class="level2">
+<h2 class="anchored" data-anchor-id="gfr-distribution-cg-vs-ckd-epi">6.2 GFR Distribution: CG vs CKD-EPI</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>plot_data_long <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(record_id, cockcroft, ckd_epi_gfr_cre_cys_unindex) <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">c</span>(cockcroft, ckd_epi_gfr_cre_cys_unindex),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"measure_type"</span>, <span class="at">values_to =</span> <span class="st">"gfr_value"</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(gfr_value)) <span class="sc">%&gt;%</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">measure_type =</span> <span class="fu">case_match</span>(measure_type,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cockcroft"</span>                    <span class="sc">~</span> <span class="st">"Cockcroft-Gault"</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ckd_epi_gfr_cre_cys_unindex"</span> <span class="sc">~</span> <span class="st">"CKD-EPI (Cr-Cys) Unindexed"</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(plot_data_long, <span class="fu">aes</span>(<span class="at">x =</span> gfr_value, <span class="at">fill =</span> measure_type)) <span class="sc">+</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">bins =</span> <span class="dv">30</span>, <span class="at">position =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> measure_type) <span class="sc">+</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> plot_data_long <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(measure_type) <span class="sc">%&gt;%</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summarise</span>(<span class="at">grp_mean =</span> <span class="fu">mean</span>(gfr_value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">xintercept =</span> grp_mean), <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.8</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#1F78B4"</span>, <span class="st">"#33A02C"</span>)) <span class="sc">+</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Renal Function Distribution"</span>,</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Comparing Absolute GFR (mL/min)"</span>,</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"GFR (mL/min)"</span>, <span class="at">y =</span> <span class="st">"Number of Patients"</span>) <span class="sc">+</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/plot-gfr-hist-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="carboplatin-dose-discrepancy-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="carboplatin-dose-discrepancy-distribution">6.3 Carboplatin Dose Discrepancy Distribution</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(final_master, <span class="fu">aes</span>(<span class="at">x =</span> dose_diff_pct)) <span class="sc">+</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color =</span> <span class="st">"black"</span>, <span class="at">fill =</span> <span class="st">"#1F78B4"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">bins =</span> <span class="dv">40</span>) <span class="sc">+</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"red"</span>, <span class="at">linewidth =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Carboplatin Dose Difference: CKD-EPI Cr-Cys vs Cockcroft-Gault"</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Dose Difference (%)"</span>, <span class="at">y =</span> <span class="st">"Number of Patients"</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Positive = CKD-EPI recommends higher dose"</span>) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/plot-dose-diff-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="scatter-by-sex" class="level2">
+<h2 class="anchored" data-anchor-id="scatter-by-sex">6.4 Scatter by Sex</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(final_master, <span class="fu">aes</span>(<span class="at">x =</span> cockcroft, <span class="at">y =</span> ckd_epi_gfr_cre_cys_unindex, <span class="at">color =</span> sex)) <span class="sc">+</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"solid"</span>, <span class="at">color =</span> <span class="st">"grey50"</span>) <span class="sc">+</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">225</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">225</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Male"</span> <span class="ot">=</span> <span class="st">"black"</span>, <span class="st">"Female"</span> <span class="ot">=</span> <span class="st">"red"</span>),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">name =</span> <span class="st">"Sex"</span>) <span class="sc">+</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Cockcroft-Gault (mL/min)"</span>,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"CKD-EPI Cr-Cys Unindexed (mL/min)"</span>,</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"CG vs CKD-EPI by Sex"</span>) <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/plot-scatter-sex-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="scatter-by-bmi" class="level2">
+<h2 class="anchored" data-anchor-id="scatter-by-bmi">6.5 Scatter by BMI</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(final_master, <span class="fu">aes</span>(<span class="at">x =</span> cockcroft, <span class="at">y =</span> ckd_epi_gfr_cre_cys_unindex, <span class="at">color =</span> bmi_30)) <span class="sc">+</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"solid"</span>, <span class="at">color =</span> <span class="st">"grey50"</span>) <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">225</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">225</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"&lt;30"</span> <span class="ot">=</span> <span class="st">"black"</span>, <span class="st">"&gt;=30"</span> <span class="ot">=</span> <span class="st">"red"</span>), <span class="at">name =</span> <span class="st">"BMI"</span>) <span class="sc">+</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Cockcroft-Gault (mL/min)"</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"CKD-EPI Cr-Cys Unindexed (mL/min)"</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"CG vs CKD-EPI by BMI"</span>) <span class="sc">+</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/plot-scatter-bmi-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="scatter-by-age" class="level2">
+<h2 class="anchored" data-anchor-id="scatter-by-age">6.6 Scatter by Age</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(final_master, <span class="fu">aes</span>(<span class="at">x =</span> cockcroft, <span class="at">y =</span> ckd_epi_gfr_cre_cys_unindex, <span class="at">color =</span> age_70)) <span class="sc">+</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"solid"</span>, <span class="at">color =</span> <span class="st">"grey50"</span>) <span class="sc">+</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">225</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">225</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"&lt;70"</span> <span class="ot">=</span> <span class="st">"black"</span>, <span class="st">"&gt;=70"</span> <span class="ot">=</span> <span class="st">"red"</span>), <span class="at">name =</span> <span class="st">"Age"</span>) <span class="sc">+</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Cockcroft-Gault (mL/min)"</span>,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"CKD-EPI Cr-Cys Unindexed (mL/min)"</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"CG vs CKD-EPI by Age"</span>) <span class="sc">+</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/plot-scatter-age-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="cumulative-incidence-plots" class="level1">
+<h1>7 Cumulative Incidence Plots</h1>
+<section id="platinum-related-hospitalization-side-effect" class="level2">
+<h2 class="anchored" data-anchor-id="platinum-related-hospitalization-side-effect">7.1 Platinum-Related Hospitalization (Side Effect)</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fit_side_effect <span class="ot">&lt;-</span> <span class="fu">cuminc</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Surv</span>(cmp_time_side_effect, cmp_status_side_effect) <span class="sc">~</span> cr_cys_7,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> final_master</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggcuminc</span>(fit_side_effect) <span class="sc">+</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Platinum-Related Hospitalization"</span>,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Follow-up Time (Days)"</span>,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Cumulative Incidence"</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">percent_format</span>(<span class="at">accuracy =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title    =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">16</span>),</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title    =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>),</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text     =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title  =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text   =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>)</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div>

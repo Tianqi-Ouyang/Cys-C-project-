@@ -168,7 +168,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#derived-mortality" id="toc-derived-mortality" class="nav-link" data-scroll-target="#derived-mortality">1.8 Derived — Mortality</a></li>
   <li><a href="#derived-comorbidities-categories" id="toc-derived-comorbidities-categories" class="nav-link" data-scroll-target="#derived-comorbidities-categories">1.9 Derived — Comorbidities &amp; Categories</a></li>
   <li><a href="#derived-platinum-dosing" id="toc-derived-platinum-dosing" class="nav-link" data-scroll-target="#derived-platinum-dosing">1.10 Derived — Platinum Dosing</a></li>
-  <li><a href="#derived-drug-indicators-competing-risk" id="toc-derived-drug-indicators-competing-risk" class="nav-link" data-scroll-target="#derived-drug-indicators-competing-risk">1.11 Derived — Drug Indicators &amp; Competing Risk</a></li>
+  <li><a href="#derived-carboplatin-dose-discrepancy" id="toc-derived-carboplatin-dose-discrepancy" class="nav-link" data-scroll-target="#derived-carboplatin-dose-discrepancy">1.11 Derived — Carboplatin Dose Discrepancy</a></li>
+  <li><a href="#derived-drug-indicators-competing-risk" id="toc-derived-drug-indicators-competing-risk" class="nav-link" data-scroll-target="#derived-drug-indicators-competing-risk">1.12 Derived — Drug Indicators &amp; Competing Risk</a></li>
   </ul></li>
   <li><a href="#setup-libraries" id="toc-setup-libraries" class="nav-link" data-scroll-target="#setup-libraries">2 Setup &amp; Libraries</a></li>
   <li><a href="#functions-all-from-copy-709" id="toc-functions-all-from-copy-709" class="nav-link" data-scroll-target="#functions-all-from-copy-709">3 Functions (all from Copy 709)</a>
@@ -204,7 +205,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#label-redcap-coded-variables" id="toc-label-redcap-coded-variables" class="nav-link" data-scroll-target="#label-redcap-coded-variables">5.7 Label REDCap coded variables</a></li>
   <li><a href="#cancer-type-categories-7-groups" id="toc-cancer-type-categories-7-groups" class="nav-link" data-scroll-target="#cancer-type-categories-7-groups">5.8 Cancer type categories (7 groups)</a></li>
   <li><a href="#platinum-dosing-variables" id="toc-platinum-dosing-variables" class="nav-link" data-scroll-target="#platinum-dosing-variables">5.8 Platinum dosing variables</a></li>
-  <li><a href="#rename-baseline-lab-variables-copy-709-convention" id="toc-rename-baseline-lab-variables-copy-709-convention" class="nav-link" data-scroll-target="#rename-baseline-lab-variables-copy-709-convention">5.9 Rename baseline lab variables (Copy 709 convention)</a></li>
+  <li><a href="#carboplatin-dose-discrepancy-variables-from-leyre-dose.rmd" id="toc-carboplatin-dose-discrepancy-variables-from-leyre-dose.rmd" class="nav-link" data-scroll-target="#carboplatin-dose-discrepancy-variables-from-leyre-dose.rmd">5.9 Carboplatin dose discrepancy variables (from Leyre dose.Rmd)</a></li>
+  <li><a href="#rename-baseline-lab-variables-copy-709-convention" id="toc-rename-baseline-lab-variables-copy-709-convention" class="nav-link" data-scroll-target="#rename-baseline-lab-variables-copy-709-convention">5.10 Rename baseline lab variables (Copy 709 convention)</a></li>
   <li><a href="#electrolyte-outcomes-removed" id="toc-electrolyte-outcomes-removed" class="nav-link" data-scroll-target="#electrolyte-outcomes-removed">5.10 Electrolyte outcomes — removed</a></li>
   <li><a href="#thyroid-disease-rpdr-diagnosis-medication" id="toc-thyroid-disease-rpdr-diagnosis-medication" class="nav-link" data-scroll-target="#thyroid-disease-rpdr-diagnosis-medication">5.11 Thyroid disease (RPDR diagnosis + medication)</a></li>
   <li><a href="#hiv-from-rpdr-hiv_rpdr" id="toc-hiv-from-rpdr-hiv_rpdr" class="nav-link" data-scroll-target="#hiv-from-rpdr-hiv_rpdr">5.12 HIV from RPDR (hiv_rpdr)</a></li>
@@ -709,8 +711,54 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </section>
+<section id="derived-carboplatin-dose-discrepancy" class="level2">
+<h2 class="anchored" data-anchor-id="derived-carboplatin-dose-discrepancy">1.11 Derived — Carboplatin Dose Discrepancy</h2>
+<p>Carboplatin is dosed via the <strong>Calvert formula</strong>: Dose(mg) = target AUC × (GFR + 25). Standard practice uses Cockcroft-Gault for GFR. CKD-EPI Cr-Cys may give a different GFR, leading to a different recommended dose.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>In Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>carbo_dose_cg</code></td>
+<td>Recommended carboplatin dose (mg) using Cockcroft-Gault: AUC × (CG + 25)</td>
+</tr>
+<tr class="even">
+<td><code>carbo_dose_cys</code></td>
+<td>Recommended carboplatin dose (mg) using CKD-EPI Cr-Cys unindexed: AUC × (eGFR + 25)</td>
+</tr>
+<tr class="odd">
+<td><code>dose_discrepancy</code></td>
+<td>Ratio: <code>carbo_dose_cys / carbo_dose_cg</code> (&gt;1 = CKD-EPI suggests higher dose)</td>
+</tr>
+<tr class="even">
+<td><code>dose_diff_pct</code></td>
+<td>Percentage difference: (CKD-EPI dose − CG dose) / CG dose × 100</td>
+</tr>
+<tr class="odd">
+<td><code>ecog_score_cat2</code></td>
+<td>ECOG binary: “0” vs “&gt;=1”</td>
+</tr>
+<tr class="even">
+<td><code>bmi_30</code></td>
+<td>BMI binary: “&lt;30” vs “&gt;=30”</td>
+</tr>
+<tr class="odd">
+<td><code>age_70</code></td>
+<td>Age binary: “&lt;70” vs “&gt;=70”</td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="derived-drug-indicators-competing-risk" class="level2">
-<h2 class="anchored" data-anchor-id="derived-drug-indicators-competing-risk">1.11 Derived — Drug Indicators &amp; Competing Risk</h2>
+<h2 class="anchored" data-anchor-id="derived-drug-indicators-competing-risk">1.12 Derived — Drug Indicators &amp; Competing Risk</h2>
 <p>Drug indicators (binary 0/1) parsed from <code>regimen_dose</code> text by <code>create_drug_indicators()</code>: <code>Bevacizumab</code>, <code>Paclitaxel</code>, <code>Pemetrexed</code>, <code>Durvalumab</code>, <code>Doxorubicin</code>, <code>Pembrolizumab</code>, <code>Etoposide</code>, <code>Gemcitabine</code>, <code>Atezolizumab</code>, <code>Pertuzumab</code>, <code>Trastuzumab</code>, <code>Docetaxel</code>, <code>Fluorouracil</code>, <code>Methotrexate</code>, <code>Vinblastine</code>, <code>Administered_alone</code> (1 if no co-administered drugs detected)</p>
 <p>Competing risk variables: <code>cmp_time_&lt;outcome&gt;</code> / <code>cmp_status_&lt;outcome&gt;</code> for each outcome. Status coding: 0=censored (alive, no event by 90 days), 1=event occurred, 2=death (competing event)</p>
 <hr>
@@ -1791,19 +1839,47 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 </div>
 </div>
 </section>
-<section id="rename-baseline-lab-variables-copy-709-convention" class="level2">
-<h2 class="anchored" data-anchor-id="rename-baseline-lab-variables-copy-709-convention">5.9 Rename baseline lab variables (Copy 709 convention)</h2>
+<section id="carboplatin-dose-discrepancy-variables-from-leyre-dose.rmd" class="level2">
+<h2 class="anchored" data-anchor-id="carboplatin-dose-discrepancy-variables-from-leyre-dose.rmd">5.9 Carboplatin dose discrepancy variables (from Leyre dose.Rmd)</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># baseline_cre: from baseline_creatinine (PDF name)</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co"># baseline_cre: from baseline_creatinine (PDF name)</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co"># baseline_cys_c: from cys_c_baseline (PDF name)</span></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cre   =</span> baseline_creatinine,</span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cys_c =</span> cys_c_baseline</span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carboplatin is dosed via Calvert formula: Dose(mg) = target AUC × (GFR + 25)</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Standard practice uses Cockcroft-Gault for GFR. If CKD-EPI Cr-Cys gives a</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co"># different GFR, the recommended carboplatin dose would differ.</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_dose_cg:  Calvert dose using Cockcroft-Gault (standard)</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_dose_cys: Calvert dose using CKD-EPI Cr-Cys unindexed</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="co"># dose_discrepancy: ratio of CKD-EPI dose / Cockcroft dose (&gt;1 = higher dose</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   recommended by CKD-EPI; &lt;1 = lower dose recommended)</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="co"># dose_diff_pct: percentage difference (positive = CKD-EPI suggests higher dose)</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose_cg  =</span> carbo_dose <span class="sc">*</span> (cockcroft <span class="sc">+</span> <span class="dv">25</span>),</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose_cys =</span> carbo_dose <span class="sc">*</span> (ckd_epi_gfr_cre_cys_unindex <span class="sc">+</span> <span class="dv">25</span>),</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_discrepancy =</span> carbo_dose_cys <span class="sc">/</span> carbo_dose_cg,</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_diff_pct    =</span> (carbo_dose_cys <span class="sc">-</span> carbo_dose_cg) <span class="sc">/</span> carbo_dose_cg <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">ecog_score_cat2  =</span> <span class="fu">ifelse</span>(ecog_score <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"0"</span>, <span class="st">"&gt;=1"</span>),</span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">bmi_30 =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(bmi <span class="sc">&lt;</span> <span class="dv">30</span>, <span class="st">"&lt;30"</span>, <span class="st">"&gt;=30"</span>)),</span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_70 =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(age <span class="sc">&lt;</span> <span class="dv">70</span>, <span class="st">"&lt;70"</span>, <span class="st">"&gt;=70"</span>))</span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="rename-baseline-lab-variables-copy-709-convention" class="level2">
+<h2 class="anchored" data-anchor-id="rename-baseline-lab-variables-copy-709-convention">5.10 Rename baseline lab variables (Copy 709 convention)</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># baseline_cre: from baseline_creatinine (PDF name)</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co"># baseline_cre: from baseline_creatinine (PDF name)</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co"># baseline_cys_c: from cys_c_baseline (PDF name)</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cre   =</span> baseline_creatinine,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline_cys_c =</span> cys_c_baseline</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -1818,22 +1894,22 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>thyroid <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"hypothyroidism"</span>, <span class="st">"hyperthyroidism"</span>, <span class="st">"thyroiditis"</span>)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>thyroid_med_list <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Methimazole"</span>, <span class="st">"Tapazole"</span>, <span class="st">"Propylthiouracil"</span>, <span class="st">"Potassium Iodide"</span>,</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"Radioactive Iodine "</span>, <span class="st">"levothyroxine"</span>, <span class="st">"Euthyrox"</span>, <span class="st">"Synthroid"</span>,</span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"Eltroxin"</span>, <span class="st">"Desiccated Thyroid Extract"</span>, <span class="st">"Armour Thyroid"</span>)</span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>thyroid_final <span class="ot">&lt;-</span> <span class="fu">dia_list_name</span>(</span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  master_dia,</span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">listed_names =</span> thyroid,</span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">med_data     =</span> master_med,</span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">med_names    =</span> thyroid_med_list,</span>
-<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_date   =</span> baseline_sample_date</span>
-<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a><span class="co"># thyroid: 1 if diagnosed or treated for thyroid disease before baseline</span></span>
-<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">thyroid =</span> <span class="fu">ifelse</span>(EMPI <span class="sc">%in%</span> thyroid_final<span class="sc">$</span>EMPI, <span class="dv">1</span>, <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>thyroid <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"hypothyroidism"</span>, <span class="st">"hyperthyroidism"</span>, <span class="st">"thyroiditis"</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>thyroid_med_list <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Methimazole"</span>, <span class="st">"Tapazole"</span>, <span class="st">"Propylthiouracil"</span>, <span class="st">"Potassium Iodide"</span>,</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"Radioactive Iodine "</span>, <span class="st">"levothyroxine"</span>, <span class="st">"Euthyrox"</span>, <span class="st">"Synthroid"</span>,</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"Eltroxin"</span>, <span class="st">"Desiccated Thyroid Extract"</span>, <span class="st">"Armour Thyroid"</span>)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>thyroid_final <span class="ot">&lt;-</span> <span class="fu">dia_list_name</span>(</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  master_dia,</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">listed_names =</span> thyroid,</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">med_data     =</span> master_med,</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">med_names    =</span> thyroid_med_list,</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_date   =</span> baseline_sample_date</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a><span class="co"># thyroid: 1 if diagnosed or treated for thyroid disease before baseline</span></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">thyroid =</span> <span class="fu">ifelse</span>(EMPI <span class="sc">%in%</span> thyroid_final<span class="sc">$</span>EMPI, <span class="dv">1</span>, <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -1842,63 +1918,63 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># hiv_rpdr: HIV status from RPDR diagnoses + medications (Jiaxuan's pipeline).</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: There is no hiv column in the REDCap CSV. The hiv variable in Copy 709 / cleaned_master</span></span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="co"># was always derived from RPDR. Jiaxuan's final code Rmd used the name hiv_new.</span></span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: dia_list_name with HIV terms, excluding false-positive diagnosis names</span></span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Further exclude patients whose HIV diagnosis co-occurs with hepatitis B/C</span></span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>no_hiv <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"1 - Hives-Oncall"</span>,</span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Contact with and (suspected) exposure to human immunodeficiency virus [hiv]"</span>,</span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Encounter for screening for human immunodeficiency virus [hiv]"</span>,</span>
-<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"counseling"</span>,</span>
-<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Inconclusive laboratory evidence of human immunodeficiency virus [hiv]"</span>,</span>
-<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Asymptomatic human immunodeficiency virus [hiv] infection status"</span>,</span>
-<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Family history of human immunodeficiency virus [hiv] disease"</span>,</span>
-<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"HIV exposure-Oncall"</span></span>
-<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>hiv_terms <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"hiv"</span>, <span class="st">"human immunodeficiency virus"</span>)</span>
-<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>hiv_med_list <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"abacavir"</span>, <span class="st">"ziagen"</span>, <span class="st">"emtricitabine"</span>, <span class="st">"emtriva"</span>, <span class="st">"lamivudine"</span>, <span class="st">"tenofovir"</span>, <span class="st">"viread"</span>,</span>
-<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"zidovudine"</span>, <span class="st">"retrovir"</span>, <span class="st">"doravirine"</span>, <span class="st">"pifeltro"</span>, <span class="st">"efavirenz"</span>, <span class="st">"sustiva"</span>, <span class="st">"etravirine"</span>,</span>
-<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"intelence"</span>, <span class="st">"nevirapine"</span>, <span class="st">"viramune"</span>, <span class="st">"rilpivirine"</span>, <span class="st">"edurant"</span>, <span class="st">"atazanavir"</span>, <span class="st">"reyataz"</span>,</span>
-<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"darunavir"</span>, <span class="st">"prezista"</span>, <span class="st">"fosamprenavir"</span>, <span class="st">"lexiva"</span>, <span class="st">"ritonavir"</span>, <span class="st">"norvir"</span>, <span class="st">"saquinavir"</span>,</span>
-<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"invirase"</span>, <span class="st">"tipranavir"</span>, <span class="st">"aptivus"</span>, <span class="st">"enfuvirtide"</span>, <span class="st">"fuzeon"</span>, <span class="st">"maraviroc"</span>, <span class="st">"selzentry"</span>,</span>
-<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cabotegravir"</span>, <span class="st">"vocabria"</span>, <span class="st">"dolutegravir"</span>, <span class="st">"tivicay"</span>, <span class="st">"raltegravir"</span>, <span class="st">"isentress"</span>, <span class="st">"fostemsavir"</span>,</span>
-<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"rukobia"</span>, <span class="st">"ibalizumab"</span>, <span class="st">"trogarzo"</span>, <span class="st">"lenacapavir"</span>, <span class="st">"sunlenca"</span>,</span>
-<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">"atripla"</span>, <span class="st">"biktarvy"</span>, <span class="st">"cabenuva"</span>, <span class="st">"cimduo"</span>, <span class="st">"combivir"</span>, <span class="st">"complera"</span>, <span class="st">"descovy"</span>, <span class="st">"dovato"</span>,</span>
-<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"epzicom"</span>, <span class="st">"evotaz"</span>, <span class="st">"genvoya"</span>, <span class="st">"juluca"</span>, <span class="st">"kaletra"</span>, <span class="st">"odefsey"</span>, <span class="st">"prezcobix"</span>, <span class="st">"stribild"</span>,</span>
-<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"symtuza"</span>, <span class="st">"triumeq"</span>, <span class="st">"truvada"</span>, <span class="st">"trizivir"</span>,</span>
-<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">"didanosine"</span>, <span class="st">"stavudine"</span>, <span class="st">"videx"</span>, <span class="st">"zerit"</span>, <span class="st">"delavirdine"</span>, <span class="st">"rescriptor"</span>, <span class="st">"indinavir"</span>,</span>
-<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">"crixivan"</span>, <span class="st">"nelfinavir"</span>, <span class="st">"viracept"</span>, <span class="st">"fortovase"</span></span>
-<span id="cb39-34"><a href="#cb39-34" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb39-35"><a href="#cb39-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-36"><a href="#cb39-36" aria-hidden="true" tabindex="-1"></a>hiv_rpdr_initial <span class="ot">&lt;-</span> <span class="fu">dia_list_name</span>(</span>
-<span id="cb39-37"><a href="#cb39-37" aria-hidden="true" tabindex="-1"></a>  master_dia,</span>
-<span id="cb39-38"><a href="#cb39-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">listed_names  =</span> hiv_terms,</span>
-<span id="cb39-39"><a href="#cb39-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">excluded_names =</span> no_hiv,</span>
-<span id="cb39-40"><a href="#cb39-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">med_data       =</span> master_med,</span>
-<span id="cb39-41"><a href="#cb39-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">med_names      =</span> hiv_med_list,</span>
-<span id="cb39-42"><a href="#cb39-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_date     =</span> baseline_sample_date</span>
-<span id="cb39-43"><a href="#cb39-43" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb39-44"><a href="#cb39-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-45"><a href="#cb39-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Further filter — exclude patients whose HIV diagnosis also mentions hepatitis B/C</span></span>
-<span id="cb39-46"><a href="#cb39-46" aria-hidden="true" tabindex="-1"></a>hiv_rpdr_cleaned <span class="ot">&lt;-</span> hiv_rpdr_initial <span class="sc">%&gt;%</span></span>
-<span id="cb39-47"><a href="#cb39-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(master_dia <span class="sc">%&gt;%</span> <span class="fu">select</span>(EMPI, Diagnosis_Name), <span class="at">by =</span> <span class="st">"EMPI"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb39-48"><a href="#cb39-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
-<span id="cb39-49"><a href="#cb39-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(Diagnosis_Name, <span class="fu">regex</span>(<span class="st">"hiv|human immunodeficiency virus"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)),</span>
-<span id="cb39-50"><a href="#cb39-50" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">str_detect</span>(Diagnosis_Name, <span class="fu">regex</span>(<span class="st">"hepatitis B|hepatitis C"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb39-51"><a href="#cb39-51" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb39-52"><a href="#cb39-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(EMPI)</span>
-<span id="cb39-53"><a href="#cb39-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-54"><a href="#cb39-54" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb39-55"><a href="#cb39-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hiv_rpdr =</span> <span class="fu">ifelse</span>(EMPI <span class="sc">%in%</span> hiv_rpdr_cleaned<span class="sc">$</span>EMPI, <span class="dv">1</span>, <span class="dv">0</span>))</span>
-<span id="cb39-56"><a href="#cb39-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-57"><a href="#cb39-57" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>hiv_rpdr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># hiv_rpdr: HIV status from RPDR diagnoses + medications (Jiaxuan's pipeline).</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: There is no hiv column in the REDCap CSV. The hiv variable in Copy 709 / cleaned_master</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="co"># was always derived from RPDR. Jiaxuan's final code Rmd used the name hiv_new.</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: dia_list_name with HIV terms, excluding false-positive diagnosis names</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Further exclude patients whose HIV diagnosis co-occurs with hepatitis B/C</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>no_hiv <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"1 - Hives-Oncall"</span>,</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Contact with and (suspected) exposure to human immunodeficiency virus [hiv]"</span>,</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Encounter for screening for human immunodeficiency virus [hiv]"</span>,</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"counseling"</span>,</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Inconclusive laboratory evidence of human immunodeficiency virus [hiv]"</span>,</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Asymptomatic human immunodeficiency virus [hiv] infection status"</span>,</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Family history of human immunodeficiency virus [hiv] disease"</span>,</span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"HIV exposure-Oncall"</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>hiv_terms <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"hiv"</span>, <span class="st">"human immunodeficiency virus"</span>)</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>hiv_med_list <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"abacavir"</span>, <span class="st">"ziagen"</span>, <span class="st">"emtricitabine"</span>, <span class="st">"emtriva"</span>, <span class="st">"lamivudine"</span>, <span class="st">"tenofovir"</span>, <span class="st">"viread"</span>,</span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"zidovudine"</span>, <span class="st">"retrovir"</span>, <span class="st">"doravirine"</span>, <span class="st">"pifeltro"</span>, <span class="st">"efavirenz"</span>, <span class="st">"sustiva"</span>, <span class="st">"etravirine"</span>,</span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"intelence"</span>, <span class="st">"nevirapine"</span>, <span class="st">"viramune"</span>, <span class="st">"rilpivirine"</span>, <span class="st">"edurant"</span>, <span class="st">"atazanavir"</span>, <span class="st">"reyataz"</span>,</span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"darunavir"</span>, <span class="st">"prezista"</span>, <span class="st">"fosamprenavir"</span>, <span class="st">"lexiva"</span>, <span class="st">"ritonavir"</span>, <span class="st">"norvir"</span>, <span class="st">"saquinavir"</span>,</span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"invirase"</span>, <span class="st">"tipranavir"</span>, <span class="st">"aptivus"</span>, <span class="st">"enfuvirtide"</span>, <span class="st">"fuzeon"</span>, <span class="st">"maraviroc"</span>, <span class="st">"selzentry"</span>,</span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cabotegravir"</span>, <span class="st">"vocabria"</span>, <span class="st">"dolutegravir"</span>, <span class="st">"tivicay"</span>, <span class="st">"raltegravir"</span>, <span class="st">"isentress"</span>, <span class="st">"fostemsavir"</span>,</span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"rukobia"</span>, <span class="st">"ibalizumab"</span>, <span class="st">"trogarzo"</span>, <span class="st">"lenacapavir"</span>, <span class="st">"sunlenca"</span>,</span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">"atripla"</span>, <span class="st">"biktarvy"</span>, <span class="st">"cabenuva"</span>, <span class="st">"cimduo"</span>, <span class="st">"combivir"</span>, <span class="st">"complera"</span>, <span class="st">"descovy"</span>, <span class="st">"dovato"</span>,</span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"epzicom"</span>, <span class="st">"evotaz"</span>, <span class="st">"genvoya"</span>, <span class="st">"juluca"</span>, <span class="st">"kaletra"</span>, <span class="st">"odefsey"</span>, <span class="st">"prezcobix"</span>, <span class="st">"stribild"</span>,</span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"symtuza"</span>, <span class="st">"triumeq"</span>, <span class="st">"truvada"</span>, <span class="st">"trizivir"</span>,</span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">"didanosine"</span>, <span class="st">"stavudine"</span>, <span class="st">"videx"</span>, <span class="st">"zerit"</span>, <span class="st">"delavirdine"</span>, <span class="st">"rescriptor"</span>, <span class="st">"indinavir"</span>,</span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">"crixivan"</span>, <span class="st">"nelfinavir"</span>, <span class="st">"viracept"</span>, <span class="st">"fortovase"</span></span>
+<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-35"><a href="#cb40-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-36"><a href="#cb40-36" aria-hidden="true" tabindex="-1"></a>hiv_rpdr_initial <span class="ot">&lt;-</span> <span class="fu">dia_list_name</span>(</span>
+<span id="cb40-37"><a href="#cb40-37" aria-hidden="true" tabindex="-1"></a>  master_dia,</span>
+<span id="cb40-38"><a href="#cb40-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">listed_names  =</span> hiv_terms,</span>
+<span id="cb40-39"><a href="#cb40-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">excluded_names =</span> no_hiv,</span>
+<span id="cb40-40"><a href="#cb40-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">med_data       =</span> master_med,</span>
+<span id="cb40-41"><a href="#cb40-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">med_names      =</span> hiv_med_list,</span>
+<span id="cb40-42"><a href="#cb40-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">index_date     =</span> baseline_sample_date</span>
+<span id="cb40-43"><a href="#cb40-43" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-44"><a href="#cb40-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-45"><a href="#cb40-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Further filter — exclude patients whose HIV diagnosis also mentions hepatitis B/C</span></span>
+<span id="cb40-46"><a href="#cb40-46" aria-hidden="true" tabindex="-1"></a>hiv_rpdr_cleaned <span class="ot">&lt;-</span> hiv_rpdr_initial <span class="sc">%&gt;%</span></span>
+<span id="cb40-47"><a href="#cb40-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(master_dia <span class="sc">%&gt;%</span> <span class="fu">select</span>(EMPI, Diagnosis_Name), <span class="at">by =</span> <span class="st">"EMPI"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb40-48"><a href="#cb40-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb40-49"><a href="#cb40-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(Diagnosis_Name, <span class="fu">regex</span>(<span class="st">"hiv|human immunodeficiency virus"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb40-50"><a href="#cb40-50" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">str_detect</span>(Diagnosis_Name, <span class="fu">regex</span>(<span class="st">"hepatitis B|hepatitis C"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb40-51"><a href="#cb40-51" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb40-52"><a href="#cb40-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(EMPI)</span>
+<span id="cb40-53"><a href="#cb40-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-54"><a href="#cb40-54" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb40-55"><a href="#cb40-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hiv_rpdr =</span> <span class="fu">ifelse</span>(EMPI <span class="sc">%in%</span> hiv_rpdr_cleaned<span class="sc">$</span>EMPI, <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb40-56"><a href="#cb40-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-57"><a href="#cb40-57" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>hiv_rpdr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -1912,95 +1988,95 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Charlson comorbidity index</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>ici_diag <span class="ot">&lt;-</span> dia <span class="sc">%&gt;%</span> <span class="fu">subset</span>(<span class="at">select =</span> <span class="fu">c</span>(EMPI, Diagnosis_Name, Date, Code, Code_Type))</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>ici_diag <span class="ot">&lt;-</span> ici_diag <span class="sc">%&gt;%</span> <span class="fu">merge</span>(final_master <span class="sc">%&gt;%</span> <span class="fu">select</span>(EMPI, baseline_sample_date),</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>                                <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.y =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>ici_diag<span class="sc">$</span>Date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(ici_diag<span class="sc">$</span>Date, <span class="st">"%m/%d/%Y"</span>)</span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>ici_diag_pre  <span class="ot">&lt;-</span> <span class="fu">subset</span>(ici_diag, Date <span class="sc">&lt;</span> baseline_sample_date)</span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Leukemia and lymphoma must be extracted manually (ICD code map includes them under cancer)</span></span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>leukemia <span class="ot">&lt;-</span> ici_diag_pre[<span class="fu">grep</span>(<span class="st">"leukemia"</span>, ici_diag_pre<span class="sc">$</span>Diagnosis_Name, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>), ]</span>
-<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>leukemia <span class="ot">&lt;-</span> leukemia[<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"lymphoma"</span>, leukemia<span class="sc">$</span>Diagnosis_Name, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>), ]</span>
-<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>leukemia <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">table</span>(leukemia<span class="sc">$</span>EMPI))</span>
-<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(leukemia)[<span class="fu">names</span>(leukemia) <span class="sc">==</span> <span class="st">"Var1"</span>] <span class="ot">&lt;-</span> <span class="st">"EMPI"</span></span>
-<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(leukemia)[<span class="fu">names</span>(leukemia) <span class="sc">==</span> <span class="st">"Freq"</span>] <span class="ot">&lt;-</span> <span class="st">"leukemia"</span></span>
-<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>leukemia<span class="sc">$</span>leukemia[leukemia<span class="sc">$</span>leukemia <span class="sc">&gt;</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>lymphoma <span class="ot">&lt;-</span> ici_diag_pre[<span class="fu">grep</span>(<span class="st">"lymphoma"</span>, ici_diag_pre<span class="sc">$</span>Diagnosis_Name, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>), ]</span>
-<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>lymphoma <span class="ot">&lt;-</span> lymphoma[<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"leukemia"</span>, lymphoma<span class="sc">$</span>Diagnosis_Name, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>), ]</span>
-<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>lymphoma <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">table</span>(lymphoma<span class="sc">$</span>EMPI))</span>
-<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(lymphoma)[<span class="fu">names</span>(lymphoma) <span class="sc">==</span> <span class="st">"Var1"</span>] <span class="ot">&lt;-</span> <span class="st">"EMPI"</span></span>
-<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(lymphoma)[<span class="fu">names</span>(lymphoma) <span class="sc">==</span> <span class="st">"Freq"</span>] <span class="ot">&lt;-</span> <span class="st">"lymphoma"</span></span>
-<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>lymphoma<span class="sc">$</span>lymphoma[lymphoma<span class="sc">$</span>lymphoma <span class="sc">&gt;</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>leuk_lymph <span class="ot">&lt;-</span> <span class="fu">merge</span>(leukemia, lymphoma, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute comorbidity scores separately for ICD-9 and ICD-10</span></span>
-<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>diag_icd9  <span class="ot">&lt;-</span> <span class="fu">subset</span>(ici_diag_pre, Code_Type <span class="sc">==</span> <span class="st">"ICD9"</span>,  <span class="at">select =</span> <span class="fu">c</span>(<span class="st">"EMPI"</span>, <span class="st">"Code"</span>))</span>
-<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>diag_icd10 <span class="ot">&lt;-</span> <span class="fu">subset</span>(ici_diag_pre, Code_Type <span class="sc">==</span> <span class="st">"ICD10"</span>, <span class="at">select =</span> <span class="fu">c</span>(<span class="st">"EMPI"</span>, <span class="st">"Code"</span>))</span>
-<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>diag_icd9  <span class="ot">&lt;-</span> diag_icd9[<span class="sc">!</span>(diag_icd9<span class="sc">$</span>Code <span class="sc">==</span> <span class="st">""</span>), ]</span>
-<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>diag_icd10 <span class="ot">&lt;-</span> diag_icd10[<span class="sc">!</span>(diag_icd10<span class="sc">$</span>Code <span class="sc">==</span> <span class="st">""</span>), ]</span>
-<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>charlson9  <span class="ot">&lt;-</span> <span class="fu">comorbidity</span>(<span class="at">x =</span> diag_icd9,  <span class="at">id =</span> <span class="st">"EMPI"</span>, <span class="at">code =</span> <span class="st">"Code"</span>,</span>
-<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>                           <span class="at">map =</span> <span class="st">"charlson_icd9_quan"</span>,  <span class="at">assign0 =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>charlson10 <span class="ot">&lt;-</span> <span class="fu">comorbidity</span>(<span class="at">x =</span> diag_icd10, <span class="at">id =</span> <span class="st">"EMPI"</span>, <span class="at">code =</span> <span class="st">"Code"</span>,</span>
-<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>                           <span class="at">map =</span> <span class="st">"charlson_icd10_quan"</span>, <span class="at">assign0 =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a>charlson <span class="ot">&lt;-</span> <span class="fu">merge</span>(charlson9, charlson10, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a>charlson[<span class="fu">is.na</span>(charlson)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Take maximum across ICD-9 / ICD-10 for each domain</span></span>
-<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>ami      <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>mi.x,       charlson<span class="sc">$</span>mi.y)</span>
-<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>chf      <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>chf.x,      charlson<span class="sc">$</span>chf.y)</span>
-<span id="cb41-42"><a href="#cb41-42" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>pvd      <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>pvd.x,      charlson<span class="sc">$</span>pvd.y)</span>
-<span id="cb41-43"><a href="#cb41-43" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>cevd     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>cevd.x,     charlson<span class="sc">$</span>cevd.y)</span>
-<span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>dementia <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>dementia.x,  charlson<span class="sc">$</span>dementia.y)</span>
-<span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>copd     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>cpd.x,      charlson<span class="sc">$</span>cpd.y)</span>
-<span id="cb41-46"><a href="#cb41-46" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>rheumd   <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>rheumd.x,   charlson<span class="sc">$</span>rheumd.y)</span>
-<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>pud      <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>pud.x,      charlson<span class="sc">$</span>pud.y)</span>
-<span id="cb41-48"><a href="#cb41-48" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>mld      <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>mld.x,      charlson<span class="sc">$</span>mld.y)</span>
-<span id="cb41-49"><a href="#cb41-49" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>diab     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>diab.x,     charlson<span class="sc">$</span>diab.y)</span>
-<span id="cb41-50"><a href="#cb41-50" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>diabwc   <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>diabwc.x,   charlson<span class="sc">$</span>diabwc.y)</span>
-<span id="cb41-51"><a href="#cb41-51" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>hp       <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>hp.x,       charlson<span class="sc">$</span>hp.y)</span>
-<span id="cb41-52"><a href="#cb41-52" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>rend     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>rend.x,     charlson<span class="sc">$</span>rend.y)</span>
-<span id="cb41-53"><a href="#cb41-53" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>canc     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>canc.x,     charlson<span class="sc">$</span>canc.y)</span>
-<span id="cb41-54"><a href="#cb41-54" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>msld     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>msld.x,     charlson<span class="sc">$</span>msld.y)</span>
-<span id="cb41-55"><a href="#cb41-55" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>metacanc <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>metacanc.x, charlson<span class="sc">$</span>metacanc.y)</span>
-<span id="cb41-56"><a href="#cb41-56" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>aids     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>aids.x,     charlson<span class="sc">$</span>aids.y)</span>
-<span id="cb41-57"><a href="#cb41-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-58"><a href="#cb41-58" aria-hidden="true" tabindex="-1"></a>charlson <span class="ot">&lt;-</span> charlson <span class="sc">%&gt;%</span></span>
-<span id="cb41-59"><a href="#cb41-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">subset</span>(<span class="at">select =</span> <span class="fu">c</span>(EMPI, ami, chf, pvd, cevd, dementia, copd, rheumd, pud, mld,</span>
-<span id="cb41-60"><a href="#cb41-60" aria-hidden="true" tabindex="-1"></a>                    diab, diabwc, hp, rend, canc, msld, metacanc, aids))</span>
-<span id="cb41-61"><a href="#cb41-61" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>canc <span class="ot">&lt;-</span> <span class="dv">1</span>  <span class="co"># all patients have cancer by definition</span></span>
-<span id="cb41-62"><a href="#cb41-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-63"><a href="#cb41-63" aria-hidden="true" tabindex="-1"></a>charlson <span class="ot">&lt;-</span> <span class="fu">merge</span>(charlson, leuk_lymph, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb41-64"><a href="#cb41-64" aria-hidden="true" tabindex="-1"></a>charlson[<span class="fu">is.na</span>(charlson)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb41-65"><a href="#cb41-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-66"><a href="#cb41-66" aria-hidden="true" tabindex="-1"></a>ages <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">subset</span>(<span class="at">select =</span> <span class="fu">c</span>(EMPI, age))</span>
-<span id="cb41-67"><a href="#cb41-67" aria-hidden="true" tabindex="-1"></a>charlson <span class="ot">&lt;-</span> <span class="fu">merge</span>(charlson, ages, <span class="at">by.x =</span> <span class="dv">1</span>, <span class="at">by.y =</span> <span class="dv">1</span>)</span>
-<span id="cb41-68"><a href="#cb41-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-69"><a href="#cb41-69" aria-hidden="true" tabindex="-1"></a><span class="co"># Weighted Charlson score with age adjustment (Quan 2011)</span></span>
-<span id="cb41-70"><a href="#cb41-70" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>score <span class="ot">&lt;-</span></span>
-<span id="cb41-71"><a href="#cb41-71" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>ami <span class="sc">+</span> charlson<span class="sc">$</span>chf <span class="sc">+</span> charlson<span class="sc">$</span>pvd <span class="sc">+</span> charlson<span class="sc">$</span>cevd <span class="sc">+</span></span>
-<span id="cb41-72"><a href="#cb41-72" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>dementia <span class="sc">+</span> charlson<span class="sc">$</span>copd <span class="sc">+</span> charlson<span class="sc">$</span>rheumd <span class="sc">+</span> charlson<span class="sc">$</span>pud <span class="sc">+</span></span>
-<span id="cb41-73"><a href="#cb41-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>mld <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> charlson<span class="sc">$</span>msld <span class="sc">==</span> <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb41-74"><a href="#cb41-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>msld <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb41-75"><a href="#cb41-75" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>diab <span class="sc">+</span> charlson<span class="sc">$</span>diabwc <span class="sc">+</span></span>
-<span id="cb41-76"><a href="#cb41-76" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>hp <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span> charlson<span class="sc">$</span>rend <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span> charlson<span class="sc">$</span>canc <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span></span>
-<span id="cb41-77"><a href="#cb41-77" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>metacanc <span class="sc">*</span> <span class="dv">4</span> <span class="sc">+</span> charlson<span class="sc">$</span>aids <span class="sc">*</span> <span class="dv">6</span> <span class="sc">+</span></span>
-<span id="cb41-78"><a href="#cb41-78" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>leukemia <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span> charlson<span class="sc">$</span>lymphoma <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span></span>
-<span id="cb41-79"><a href="#cb41-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>age <span class="sc">&gt;=</span> <span class="dv">50</span> <span class="sc">&amp;</span> charlson<span class="sc">$</span>age <span class="sc">&lt;</span> <span class="dv">60</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb41-80"><a href="#cb41-80" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>age <span class="sc">&gt;=</span> <span class="dv">60</span> <span class="sc">&amp;</span> charlson<span class="sc">$</span>age <span class="sc">&lt;</span> <span class="dv">70</span>, <span class="dv">2</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb41-81"><a href="#cb41-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>age <span class="sc">&gt;=</span> <span class="dv">70</span> <span class="sc">&amp;</span> charlson<span class="sc">$</span>age <span class="sc">&lt;</span> <span class="dv">80</span>, <span class="dv">3</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb41-82"><a href="#cb41-82" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>age <span class="sc">&gt;=</span> <span class="dv">80</span>, <span class="dv">4</span>, <span class="dv">0</span>)</span>
-<span id="cb41-83"><a href="#cb41-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-84"><a href="#cb41-84" aria-hidden="true" tabindex="-1"></a><span class="co"># cci: categorical severity</span></span>
-<span id="cb41-85"><a href="#cb41-85" aria-hidden="true" tabindex="-1"></a>charlson_sc <span class="ot">&lt;-</span> charlson <span class="sc">%&gt;%</span> <span class="fu">subset</span>(<span class="at">select =</span> <span class="fu">c</span>(EMPI, score))</span>
-<span id="cb41-86"><a href="#cb41-86" aria-hidden="true" tabindex="-1"></a>charlson_sc<span class="sc">$</span>cci <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(charlson_sc<span class="sc">$</span>score <span class="sc">&lt;</span> <span class="dv">3</span>, <span class="st">"mild"</span>,</span>
-<span id="cb41-87"><a href="#cb41-87" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">ifelse</span>(charlson_sc<span class="sc">$</span>score <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">&amp;</span> charlson_sc<span class="sc">$</span>score <span class="sc">&lt;</span> <span class="dv">5</span>, <span class="st">"moderate"</span>, <span class="st">"severe"</span>))</span>
-<span id="cb41-88"><a href="#cb41-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-89"><a href="#cb41-89" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">merge</span>(charlson_sc, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Charlson comorbidity index</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>ici_diag <span class="ot">&lt;-</span> dia <span class="sc">%&gt;%</span> <span class="fu">subset</span>(<span class="at">select =</span> <span class="fu">c</span>(EMPI, Diagnosis_Name, Date, Code, Code_Type))</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>ici_diag <span class="ot">&lt;-</span> ici_diag <span class="sc">%&gt;%</span> <span class="fu">merge</span>(final_master <span class="sc">%&gt;%</span> <span class="fu">select</span>(EMPI, baseline_sample_date),</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>                                <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.y =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>ici_diag<span class="sc">$</span>Date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(ici_diag<span class="sc">$</span>Date, <span class="st">"%m/%d/%Y"</span>)</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>ici_diag_pre  <span class="ot">&lt;-</span> <span class="fu">subset</span>(ici_diag, Date <span class="sc">&lt;</span> baseline_sample_date)</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Leukemia and lymphoma must be extracted manually (ICD code map includes them under cancer)</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>leukemia <span class="ot">&lt;-</span> ici_diag_pre[<span class="fu">grep</span>(<span class="st">"leukemia"</span>, ici_diag_pre<span class="sc">$</span>Diagnosis_Name, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>leukemia <span class="ot">&lt;-</span> leukemia[<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"lymphoma"</span>, leukemia<span class="sc">$</span>Diagnosis_Name, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>leukemia <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">table</span>(leukemia<span class="sc">$</span>EMPI))</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(leukemia)[<span class="fu">names</span>(leukemia) <span class="sc">==</span> <span class="st">"Var1"</span>] <span class="ot">&lt;-</span> <span class="st">"EMPI"</span></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(leukemia)[<span class="fu">names</span>(leukemia) <span class="sc">==</span> <span class="st">"Freq"</span>] <span class="ot">&lt;-</span> <span class="st">"leukemia"</span></span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>leukemia<span class="sc">$</span>leukemia[leukemia<span class="sc">$</span>leukemia <span class="sc">&gt;</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>lymphoma <span class="ot">&lt;-</span> ici_diag_pre[<span class="fu">grep</span>(<span class="st">"lymphoma"</span>, ici_diag_pre<span class="sc">$</span>Diagnosis_Name, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>lymphoma <span class="ot">&lt;-</span> lymphoma[<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"leukemia"</span>, lymphoma<span class="sc">$</span>Diagnosis_Name, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>lymphoma <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">table</span>(lymphoma<span class="sc">$</span>EMPI))</span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(lymphoma)[<span class="fu">names</span>(lymphoma) <span class="sc">==</span> <span class="st">"Var1"</span>] <span class="ot">&lt;-</span> <span class="st">"EMPI"</span></span>
+<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(lymphoma)[<span class="fu">names</span>(lymphoma) <span class="sc">==</span> <span class="st">"Freq"</span>] <span class="ot">&lt;-</span> <span class="st">"lymphoma"</span></span>
+<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>lymphoma<span class="sc">$</span>lymphoma[lymphoma<span class="sc">$</span>lymphoma <span class="sc">&gt;</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>leuk_lymph <span class="ot">&lt;-</span> <span class="fu">merge</span>(leukemia, lymphoma, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute comorbidity scores separately for ICD-9 and ICD-10</span></span>
+<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a>diag_icd9  <span class="ot">&lt;-</span> <span class="fu">subset</span>(ici_diag_pre, Code_Type <span class="sc">==</span> <span class="st">"ICD9"</span>,  <span class="at">select =</span> <span class="fu">c</span>(<span class="st">"EMPI"</span>, <span class="st">"Code"</span>))</span>
+<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a>diag_icd10 <span class="ot">&lt;-</span> <span class="fu">subset</span>(ici_diag_pre, Code_Type <span class="sc">==</span> <span class="st">"ICD10"</span>, <span class="at">select =</span> <span class="fu">c</span>(<span class="st">"EMPI"</span>, <span class="st">"Code"</span>))</span>
+<span id="cb42-28"><a href="#cb42-28" aria-hidden="true" tabindex="-1"></a>diag_icd9  <span class="ot">&lt;-</span> diag_icd9[<span class="sc">!</span>(diag_icd9<span class="sc">$</span>Code <span class="sc">==</span> <span class="st">""</span>), ]</span>
+<span id="cb42-29"><a href="#cb42-29" aria-hidden="true" tabindex="-1"></a>diag_icd10 <span class="ot">&lt;-</span> diag_icd10[<span class="sc">!</span>(diag_icd10<span class="sc">$</span>Code <span class="sc">==</span> <span class="st">""</span>), ]</span>
+<span id="cb42-30"><a href="#cb42-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-31"><a href="#cb42-31" aria-hidden="true" tabindex="-1"></a>charlson9  <span class="ot">&lt;-</span> <span class="fu">comorbidity</span>(<span class="at">x =</span> diag_icd9,  <span class="at">id =</span> <span class="st">"EMPI"</span>, <span class="at">code =</span> <span class="st">"Code"</span>,</span>
+<span id="cb42-32"><a href="#cb42-32" aria-hidden="true" tabindex="-1"></a>                           <span class="at">map =</span> <span class="st">"charlson_icd9_quan"</span>,  <span class="at">assign0 =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb42-33"><a href="#cb42-33" aria-hidden="true" tabindex="-1"></a>charlson10 <span class="ot">&lt;-</span> <span class="fu">comorbidity</span>(<span class="at">x =</span> diag_icd10, <span class="at">id =</span> <span class="st">"EMPI"</span>, <span class="at">code =</span> <span class="st">"Code"</span>,</span>
+<span id="cb42-34"><a href="#cb42-34" aria-hidden="true" tabindex="-1"></a>                           <span class="at">map =</span> <span class="st">"charlson_icd10_quan"</span>, <span class="at">assign0 =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb42-35"><a href="#cb42-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-36"><a href="#cb42-36" aria-hidden="true" tabindex="-1"></a>charlson <span class="ot">&lt;-</span> <span class="fu">merge</span>(charlson9, charlson10, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb42-37"><a href="#cb42-37" aria-hidden="true" tabindex="-1"></a>charlson[<span class="fu">is.na</span>(charlson)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb42-38"><a href="#cb42-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-39"><a href="#cb42-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Take maximum across ICD-9 / ICD-10 for each domain</span></span>
+<span id="cb42-40"><a href="#cb42-40" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>ami      <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>mi.x,       charlson<span class="sc">$</span>mi.y)</span>
+<span id="cb42-41"><a href="#cb42-41" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>chf      <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>chf.x,      charlson<span class="sc">$</span>chf.y)</span>
+<span id="cb42-42"><a href="#cb42-42" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>pvd      <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>pvd.x,      charlson<span class="sc">$</span>pvd.y)</span>
+<span id="cb42-43"><a href="#cb42-43" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>cevd     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>cevd.x,     charlson<span class="sc">$</span>cevd.y)</span>
+<span id="cb42-44"><a href="#cb42-44" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>dementia <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>dementia.x,  charlson<span class="sc">$</span>dementia.y)</span>
+<span id="cb42-45"><a href="#cb42-45" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>copd     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>cpd.x,      charlson<span class="sc">$</span>cpd.y)</span>
+<span id="cb42-46"><a href="#cb42-46" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>rheumd   <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>rheumd.x,   charlson<span class="sc">$</span>rheumd.y)</span>
+<span id="cb42-47"><a href="#cb42-47" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>pud      <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>pud.x,      charlson<span class="sc">$</span>pud.y)</span>
+<span id="cb42-48"><a href="#cb42-48" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>mld      <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>mld.x,      charlson<span class="sc">$</span>mld.y)</span>
+<span id="cb42-49"><a href="#cb42-49" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>diab     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>diab.x,     charlson<span class="sc">$</span>diab.y)</span>
+<span id="cb42-50"><a href="#cb42-50" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>diabwc   <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>diabwc.x,   charlson<span class="sc">$</span>diabwc.y)</span>
+<span id="cb42-51"><a href="#cb42-51" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>hp       <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>hp.x,       charlson<span class="sc">$</span>hp.y)</span>
+<span id="cb42-52"><a href="#cb42-52" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>rend     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>rend.x,     charlson<span class="sc">$</span>rend.y)</span>
+<span id="cb42-53"><a href="#cb42-53" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>canc     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>canc.x,     charlson<span class="sc">$</span>canc.y)</span>
+<span id="cb42-54"><a href="#cb42-54" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>msld     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>msld.x,     charlson<span class="sc">$</span>msld.y)</span>
+<span id="cb42-55"><a href="#cb42-55" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>metacanc <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>metacanc.x, charlson<span class="sc">$</span>metacanc.y)</span>
+<span id="cb42-56"><a href="#cb42-56" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>aids     <span class="ot">&lt;-</span> <span class="fu">pmax</span>(charlson<span class="sc">$</span>aids.x,     charlson<span class="sc">$</span>aids.y)</span>
+<span id="cb42-57"><a href="#cb42-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-58"><a href="#cb42-58" aria-hidden="true" tabindex="-1"></a>charlson <span class="ot">&lt;-</span> charlson <span class="sc">%&gt;%</span></span>
+<span id="cb42-59"><a href="#cb42-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">subset</span>(<span class="at">select =</span> <span class="fu">c</span>(EMPI, ami, chf, pvd, cevd, dementia, copd, rheumd, pud, mld,</span>
+<span id="cb42-60"><a href="#cb42-60" aria-hidden="true" tabindex="-1"></a>                    diab, diabwc, hp, rend, canc, msld, metacanc, aids))</span>
+<span id="cb42-61"><a href="#cb42-61" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>canc <span class="ot">&lt;-</span> <span class="dv">1</span>  <span class="co"># all patients have cancer by definition</span></span>
+<span id="cb42-62"><a href="#cb42-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-63"><a href="#cb42-63" aria-hidden="true" tabindex="-1"></a>charlson <span class="ot">&lt;-</span> <span class="fu">merge</span>(charlson, leuk_lymph, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb42-64"><a href="#cb42-64" aria-hidden="true" tabindex="-1"></a>charlson[<span class="fu">is.na</span>(charlson)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb42-65"><a href="#cb42-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-66"><a href="#cb42-66" aria-hidden="true" tabindex="-1"></a>ages <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">subset</span>(<span class="at">select =</span> <span class="fu">c</span>(EMPI, age))</span>
+<span id="cb42-67"><a href="#cb42-67" aria-hidden="true" tabindex="-1"></a>charlson <span class="ot">&lt;-</span> <span class="fu">merge</span>(charlson, ages, <span class="at">by.x =</span> <span class="dv">1</span>, <span class="at">by.y =</span> <span class="dv">1</span>)</span>
+<span id="cb42-68"><a href="#cb42-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-69"><a href="#cb42-69" aria-hidden="true" tabindex="-1"></a><span class="co"># Weighted Charlson score with age adjustment (Quan 2011)</span></span>
+<span id="cb42-70"><a href="#cb42-70" aria-hidden="true" tabindex="-1"></a>charlson<span class="sc">$</span>score <span class="ot">&lt;-</span></span>
+<span id="cb42-71"><a href="#cb42-71" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>ami <span class="sc">+</span> charlson<span class="sc">$</span>chf <span class="sc">+</span> charlson<span class="sc">$</span>pvd <span class="sc">+</span> charlson<span class="sc">$</span>cevd <span class="sc">+</span></span>
+<span id="cb42-72"><a href="#cb42-72" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>dementia <span class="sc">+</span> charlson<span class="sc">$</span>copd <span class="sc">+</span> charlson<span class="sc">$</span>rheumd <span class="sc">+</span> charlson<span class="sc">$</span>pud <span class="sc">+</span></span>
+<span id="cb42-73"><a href="#cb42-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>mld <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> charlson<span class="sc">$</span>msld <span class="sc">==</span> <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb42-74"><a href="#cb42-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>msld <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb42-75"><a href="#cb42-75" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>diab <span class="sc">+</span> charlson<span class="sc">$</span>diabwc <span class="sc">+</span></span>
+<span id="cb42-76"><a href="#cb42-76" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>hp <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span> charlson<span class="sc">$</span>rend <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span> charlson<span class="sc">$</span>canc <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span></span>
+<span id="cb42-77"><a href="#cb42-77" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>metacanc <span class="sc">*</span> <span class="dv">4</span> <span class="sc">+</span> charlson<span class="sc">$</span>aids <span class="sc">*</span> <span class="dv">6</span> <span class="sc">+</span></span>
+<span id="cb42-78"><a href="#cb42-78" aria-hidden="true" tabindex="-1"></a>  charlson<span class="sc">$</span>leukemia <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span> charlson<span class="sc">$</span>lymphoma <span class="sc">*</span> <span class="dv">2</span> <span class="sc">+</span></span>
+<span id="cb42-79"><a href="#cb42-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>age <span class="sc">&gt;=</span> <span class="dv">50</span> <span class="sc">&amp;</span> charlson<span class="sc">$</span>age <span class="sc">&lt;</span> <span class="dv">60</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb42-80"><a href="#cb42-80" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>age <span class="sc">&gt;=</span> <span class="dv">60</span> <span class="sc">&amp;</span> charlson<span class="sc">$</span>age <span class="sc">&lt;</span> <span class="dv">70</span>, <span class="dv">2</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb42-81"><a href="#cb42-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>age <span class="sc">&gt;=</span> <span class="dv">70</span> <span class="sc">&amp;</span> charlson<span class="sc">$</span>age <span class="sc">&lt;</span> <span class="dv">80</span>, <span class="dv">3</span>, <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb42-82"><a href="#cb42-82" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(charlson<span class="sc">$</span>age <span class="sc">&gt;=</span> <span class="dv">80</span>, <span class="dv">4</span>, <span class="dv">0</span>)</span>
+<span id="cb42-83"><a href="#cb42-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-84"><a href="#cb42-84" aria-hidden="true" tabindex="-1"></a><span class="co"># cci: categorical severity</span></span>
+<span id="cb42-85"><a href="#cb42-85" aria-hidden="true" tabindex="-1"></a>charlson_sc <span class="ot">&lt;-</span> charlson <span class="sc">%&gt;%</span> <span class="fu">subset</span>(<span class="at">select =</span> <span class="fu">c</span>(EMPI, score))</span>
+<span id="cb42-86"><a href="#cb42-86" aria-hidden="true" tabindex="-1"></a>charlson_sc<span class="sc">$</span>cci <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(charlson_sc<span class="sc">$</span>score <span class="sc">&lt;</span> <span class="dv">3</span>, <span class="st">"mild"</span>,</span>
+<span id="cb42-87"><a href="#cb42-87" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">ifelse</span>(charlson_sc<span class="sc">$</span>score <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">&amp;</span> charlson_sc<span class="sc">$</span>score <span class="sc">&lt;</span> <span class="dv">5</span>, <span class="st">"moderate"</span>, <span class="st">"severe"</span>))</span>
+<span id="cb42-88"><a href="#cb42-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-89"><a href="#cb42-89" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">merge</span>(charlson_sc, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -2009,51 +2085,51 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply cmp_variable() to build cmp_time_* and cmp_status_* for each outcome.</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="co"># AE outcomes (anemia, throm, aki, grade_2/3_aes) are now computed from RPDR pipeline</span></span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="co"># (section 4.9) and their competing-risk variables are computed here.</span></span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Adverse event competing risk</span></span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_anemia_2, <span class="at">event_status =</span> Anemia_g2_90days, <span class="at">name =</span> <span class="st">"anemia_2"</span>)</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_anemia_3, <span class="at">event_status =</span> Anemia_g3_90days, <span class="at">name =</span> <span class="st">"anemia_3"</span>)</span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_throm_2,  <span class="at">event_status =</span> Throm_g2_90days,  <span class="at">name =</span> <span class="st">"throm_2"</span>)</span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_throm_3,  <span class="at">event_status =</span> Throm_g3_90days,  <span class="at">name =</span> <span class="st">"throm_3"</span>)</span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_aki_2,    <span class="at">event_status =</span> AKI_g2_90days,    <span class="at">name =</span> <span class="st">"aki_2"</span>)</span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_aki_3,    <span class="at">event_status =</span> AKI_g3_90days,    <span class="at">name =</span> <span class="st">"aki_3"</span>)</span>
-<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Composite AE: use the earliest event time across anemia/throm/AKI</span></span>
-<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_grade_2_aes =</span> <span class="fu">pmin</span>(time_to_anemia_2, time_to_throm_2, time_to_aki_2, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_grade_3_aes =</span> <span class="fu">pmin</span>(time_to_anemia_3, time_to_throm_3, time_to_aki_3, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_grade_2_aes, <span class="at">event_status =</span> grade_2_aes, <span class="at">name =</span> <span class="st">"grade_2_aes"</span>)</span>
-<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_grade_3_aes, <span class="at">event_status =</span> grade_3_aes, <span class="at">name =</span> <span class="st">"grade_3_aes"</span>)</span>
-<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Platinum-related hospitalization (side effects: hosp reasons 1–7)</span></span>
-<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master,</span>
-<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_time =</span> time_to_side_effect, <span class="at">event_status =</span> side_effect, <span class="at">name =</span> <span class="st">"side_effect"</span>)</span>
-<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Hospitalization by reason 1–11</span></span>
-<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_1,  <span class="at">event_status =</span> event_hosp_1,  <span class="at">name =</span> <span class="st">"hosp_1"</span>)</span>
-<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_2,  <span class="at">event_status =</span> event_hosp_2,  <span class="at">name =</span> <span class="st">"hosp_2"</span>)</span>
-<span id="cb42-28"><a href="#cb42-28" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_3,  <span class="at">event_status =</span> event_hosp_3,  <span class="at">name =</span> <span class="st">"hosp_3"</span>)</span>
-<span id="cb42-29"><a href="#cb42-29" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_4,  <span class="at">event_status =</span> event_hosp_4,  <span class="at">name =</span> <span class="st">"hosp_4"</span>)</span>
-<span id="cb42-30"><a href="#cb42-30" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_5,  <span class="at">event_status =</span> event_hosp_5,  <span class="at">name =</span> <span class="st">"hosp_5"</span>)</span>
-<span id="cb42-31"><a href="#cb42-31" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_6,  <span class="at">event_status =</span> event_hosp_6,  <span class="at">name =</span> <span class="st">"hosp_6"</span>)</span>
-<span id="cb42-32"><a href="#cb42-32" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_7,  <span class="at">event_status =</span> event_hosp_7,  <span class="at">name =</span> <span class="st">"hosp_7"</span>)</span>
-<span id="cb42-33"><a href="#cb42-33" aria-hidden="true" tabindex="-1"></a><span class="co"># hosp_8–11 use their own event_status</span></span>
-<span id="cb42-34"><a href="#cb42-34" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_8,  <span class="at">event_status =</span> event_hosp_8,  <span class="at">name =</span> <span class="st">"hosp_8"</span>)</span>
-<span id="cb42-35"><a href="#cb42-35" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_9,  <span class="at">event_status =</span> event_hosp_9,  <span class="at">name =</span> <span class="st">"hosp_9"</span>)</span>
-<span id="cb42-36"><a href="#cb42-36" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_10, <span class="at">event_status =</span> event_hosp_10, <span class="at">name =</span> <span class="st">"hosp_10"</span>)</span>
-<span id="cb42-37"><a href="#cb42-37" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_11, <span class="at">event_status =</span> event_hosp_11, <span class="at">name =</span> <span class="st">"hosp_11"</span>)</span>
-<span id="cb42-38"><a href="#cb42-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-39"><a href="#cb42-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-40"><a href="#cb42-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert all cmp_status_* columns to factor (required by tidycmprsk)</span></span>
-<span id="cb42-41"><a href="#cb42-41" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb42-42"><a href="#cb42-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"cmp_status_"</span>), as.factor))</span>
-<span id="cb42-43"><a href="#cb42-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-44"><a href="#cb42-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Save final_master for use by analysis.qmd</span></span>
-<span id="cb42-45"><a href="#cb42-45" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_master, <span class="st">"final_master.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply cmp_variable() to build cmp_time_* and cmp_status_* for each outcome.</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="co"># AE outcomes (anemia, throm, aki, grade_2/3_aes) are now computed from RPDR pipeline</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="co"># (section 4.9) and their competing-risk variables are computed here.</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Adverse event competing risk</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_anemia_2, <span class="at">event_status =</span> Anemia_g2_90days, <span class="at">name =</span> <span class="st">"anemia_2"</span>)</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_anemia_3, <span class="at">event_status =</span> Anemia_g3_90days, <span class="at">name =</span> <span class="st">"anemia_3"</span>)</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_throm_2,  <span class="at">event_status =</span> Throm_g2_90days,  <span class="at">name =</span> <span class="st">"throm_2"</span>)</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_throm_3,  <span class="at">event_status =</span> Throm_g3_90days,  <span class="at">name =</span> <span class="st">"throm_3"</span>)</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_aki_2,    <span class="at">event_status =</span> AKI_g2_90days,    <span class="at">name =</span> <span class="st">"aki_2"</span>)</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_aki_3,    <span class="at">event_status =</span> AKI_g3_90days,    <span class="at">name =</span> <span class="st">"aki_3"</span>)</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Composite AE: use the earliest event time across anemia/throm/AKI</span></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_grade_2_aes =</span> <span class="fu">pmin</span>(time_to_anemia_2, time_to_throm_2, time_to_aki_2, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_grade_3_aes =</span> <span class="fu">pmin</span>(time_to_anemia_3, time_to_throm_3, time_to_aki_3, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_grade_2_aes, <span class="at">event_status =</span> grade_2_aes, <span class="at">name =</span> <span class="st">"grade_2_aes"</span>)</span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_grade_3_aes, <span class="at">event_status =</span> grade_3_aes, <span class="at">name =</span> <span class="st">"grade_3_aes"</span>)</span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Platinum-related hospitalization (side effects: hosp reasons 1–7)</span></span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master,</span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_time =</span> time_to_side_effect, <span class="at">event_status =</span> side_effect, <span class="at">name =</span> <span class="st">"side_effect"</span>)</span>
+<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Hospitalization by reason 1–11</span></span>
+<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_1,  <span class="at">event_status =</span> event_hosp_1,  <span class="at">name =</span> <span class="st">"hosp_1"</span>)</span>
+<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_2,  <span class="at">event_status =</span> event_hosp_2,  <span class="at">name =</span> <span class="st">"hosp_2"</span>)</span>
+<span id="cb43-28"><a href="#cb43-28" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_3,  <span class="at">event_status =</span> event_hosp_3,  <span class="at">name =</span> <span class="st">"hosp_3"</span>)</span>
+<span id="cb43-29"><a href="#cb43-29" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_4,  <span class="at">event_status =</span> event_hosp_4,  <span class="at">name =</span> <span class="st">"hosp_4"</span>)</span>
+<span id="cb43-30"><a href="#cb43-30" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_5,  <span class="at">event_status =</span> event_hosp_5,  <span class="at">name =</span> <span class="st">"hosp_5"</span>)</span>
+<span id="cb43-31"><a href="#cb43-31" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_6,  <span class="at">event_status =</span> event_hosp_6,  <span class="at">name =</span> <span class="st">"hosp_6"</span>)</span>
+<span id="cb43-32"><a href="#cb43-32" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_7,  <span class="at">event_status =</span> event_hosp_7,  <span class="at">name =</span> <span class="st">"hosp_7"</span>)</span>
+<span id="cb43-33"><a href="#cb43-33" aria-hidden="true" tabindex="-1"></a><span class="co"># hosp_8–11 use their own event_status</span></span>
+<span id="cb43-34"><a href="#cb43-34" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_8,  <span class="at">event_status =</span> event_hosp_8,  <span class="at">name =</span> <span class="st">"hosp_8"</span>)</span>
+<span id="cb43-35"><a href="#cb43-35" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_9,  <span class="at">event_status =</span> event_hosp_9,  <span class="at">name =</span> <span class="st">"hosp_9"</span>)</span>
+<span id="cb43-36"><a href="#cb43-36" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_10, <span class="at">event_status =</span> event_hosp_10, <span class="at">name =</span> <span class="st">"hosp_10"</span>)</span>
+<span id="cb43-37"><a href="#cb43-37" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_11, <span class="at">event_status =</span> event_hosp_11, <span class="at">name =</span> <span class="st">"hosp_11"</span>)</span>
+<span id="cb43-38"><a href="#cb43-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-39"><a href="#cb43-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-40"><a href="#cb43-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert all cmp_status_* columns to factor (required by tidycmprsk)</span></span>
+<span id="cb43-41"><a href="#cb43-41" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb43-42"><a href="#cb43-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"cmp_status_"</span>), as.factor))</span>
+<span id="cb43-43"><a href="#cb43-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-44"><a href="#cb43-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Save final_master for use by analysis.qmd</span></span>
+<span id="cb43-45"><a href="#cb43-45" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_master, <span class="st">"final_master.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 

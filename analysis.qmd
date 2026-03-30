@@ -52,6 +52,7 @@ table_one_cc_ratio
 ```{r}
 #| label: derived-vars
 # Hospitalization binary (from REDCap hosp_status_90d)
+# Dose discrepancy percentile: based on carbo_dose_cys / carbo_dose_cg ratio
 final_master <- final_master %>%
   mutate(
     hosp_90 = case_when(
@@ -60,8 +61,8 @@ final_master <- final_master %>%
       TRUE ~ NA_real_
     ),
     platinum_related_hosp = ifelse(side_effect == 1, 1, 0),
-    cc_percentile = ntile(cr_cys, 100),
-    cc_decile     = ntile(cr_cys, 10)
+    dd_percentile = ntile(dose_discrepancy, 100),
+    dd_decile     = ntile(dose_discrepancy, 10)
   )
 ```
 
@@ -88,9 +89,9 @@ table_one_incidence
 
 ```{r}
 #| label: decile-rates
-# Compute event rates by decile
+# Compute event rates by dose discrepancy decile
 final_master <- final_master %>%
-  group_by(cc_decile) %>%
+  group_by(dd_decile) %>%
   mutate(
     anemia_2_rate_decile              = mean(Anemia_g2_90days, na.rm = TRUE),
     anemia_3_rate_decile              = mean(Anemia_g3_90days, na.rm = TRUE),
@@ -103,23 +104,23 @@ final_master <- final_master %>%
     death_rate_decile                 = mean(death_90, na.rm = TRUE)
   ) %>%
   ungroup() %>%
-  mutate(cc_decile = as.numeric(cc_decile))
+  mutate(dd_decile = as.numeric(dd_decile))
 ```
 
 ```{r}
 #| label: decile-summary
-# Summarize cr_cys ratio by decile
+# Summarize dose discrepancy by decile
 summary_by_decile <- final_master %>%
-  group_by(cc_decile) %>%
+  group_by(dd_decile) %>%
   summarise(
     n      = n(),
-    min    = min(cr_cys, na.rm = TRUE),
-    q1     = quantile(cr_cys, 0.25, na.rm = TRUE),
-    median = median(cr_cys, na.rm = TRUE),
-    mean   = mean(cr_cys, na.rm = TRUE),
-    q3     = quantile(cr_cys, 0.75, na.rm = TRUE),
-    max    = max(cr_cys, na.rm = TRUE),
-    sd     = sd(cr_cys, na.rm = TRUE)
+    min    = min(dose_discrepancy, na.rm = TRUE),
+    q1     = quantile(dose_discrepancy, 0.25, na.rm = TRUE),
+    median = median(dose_discrepancy, na.rm = TRUE),
+    mean   = mean(dose_discrepancy, na.rm = TRUE),
+    q3     = quantile(dose_discrepancy, 0.75, na.rm = TRUE),
+    max    = max(dose_discrepancy, na.rm = TRUE),
+    sd     = sd(dose_discrepancy, na.rm = TRUE)
   )
 ```
 
@@ -148,17 +149,17 @@ loess_plot <- function(data, x, y, x_point, y_point, title, xlab, ylab) {
 }
 ```
 
-# 5 LOESS Plots by Percentile
+# 5 LOESS Plots by Dose Discrepancy Percentile
 
 ## 5.1 Grade 2 Anemia
 
 ```{r}
 #| label: plot-anemia-2
 loess_plot(
-  data = final_master, x = cc_percentile, y = Anemia_g2_90days,
-  x_point = cc_decile * 10, y_point = anemia_2_rate_decile,
+  data = final_master, x = dd_percentile, y = Anemia_g2_90days,
+  x_point = dd_decile * 10, y_point = anemia_2_rate_decile,
   title = "Grade >= 2 Anemia",
-  xlab = "Percentile of SCR/CYS Ratio", ylab = "Grade >= 2 Anemia"
+  xlab = "Percentile of Dose Discrepancy (CKD-EPI/CG)", ylab = "Grade >= 2 Anemia"
 )
 ```
 
@@ -167,10 +168,10 @@ loess_plot(
 ```{r}
 #| label: plot-throm-3
 loess_plot(
-  data = final_master, x = cc_percentile, y = Throm_g3_90days,
-  x_point = cc_decile * 10, y_point = throm_3_rate_decile,
+  data = final_master, x = dd_percentile, y = Throm_g3_90days,
+  x_point = dd_decile * 10, y_point = throm_3_rate_decile,
   title = "Grade >= 3 Thrombocytopenia",
-  xlab = "Percentile of SCR/CYS Ratio", ylab = "Grade >= 3 Thrombocytopenia"
+  xlab = "Percentile of Dose Discrepancy (CKD-EPI/CG)", ylab = "Grade >= 3 Thrombocytopenia"
 )
 ```
 
@@ -179,10 +180,10 @@ loess_plot(
 ```{r}
 #| label: plot-aki-3
 loess_plot(
-  data = final_master, x = cc_percentile, y = AKI_g3_90days,
-  x_point = cc_decile * 10, y_point = aki_3_rate_decile,
+  data = final_master, x = dd_percentile, y = AKI_g3_90days,
+  x_point = dd_decile * 10, y_point = aki_3_rate_decile,
   title = "Grade >= 3 Creatinine Increased",
-  xlab = "Percentile of SCR/CYS Ratio", ylab = "Grade >= 3 Creatinine Increased"
+  xlab = "Percentile of Dose Discrepancy (CKD-EPI/CG)", ylab = "Grade >= 3 Creatinine Increased"
 )
 ```
 
@@ -191,10 +192,10 @@ loess_plot(
 ```{r}
 #| label: plot-hosp
 loess_plot(
-  data = final_master, x = cc_percentile, y = hosp_90,
-  x_point = cc_decile * 10, y_point = hos_rate_decile,
+  data = final_master, x = dd_percentile, y = hosp_90,
+  x_point = dd_decile * 10, y_point = hos_rate_decile,
   title = "Overall Hospitalization",
-  xlab = "Percentile of SCR/CYS Ratio", ylab = "Overall Hospitalization"
+  xlab = "Percentile of Dose Discrepancy (CKD-EPI/CG)", ylab = "Overall Hospitalization"
 )
 ```
 
@@ -203,16 +204,128 @@ loess_plot(
 ```{r}
 #| label: plot-platinum-hosp
 loess_plot(
-  data = final_master, x = cc_percentile, y = platinum_related_hosp,
-  x_point = cc_decile * 10, y_point = platinum_related_hos_rate_decile,
+  data = final_master, x = dd_percentile, y = platinum_related_hosp,
+  x_point = dd_decile * 10, y_point = platinum_related_hos_rate_decile,
   title = "Hospitalization for Platinum-Associated AEs",
-  xlab = "Percentile of SCR/CYS Ratio", ylab = "Hospitalization for Platinum-Associated AEs"
+  xlab = "Percentile of Dose Discrepancy (CKD-EPI/CG)", ylab = "Hospitalization for Platinum-Associated AEs"
 )
 ```
 
-# 6 Cumulative Incidence Plots
+# 6 Dose Discrepancy Plots
 
-## 6.1 Platinum-Related Hospitalization (Side Effect)
+## 6.1 CKD-EPI vs Cockcroft-Gault Scatter
+
+```{r}
+#| label: plot-scatter-gfr
+ggplot(final_master, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex)) +
+  geom_point(alpha = 0.6, color = "black") +
+  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "grey50") +
+  scale_x_continuous(limits = c(0, 225), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0, 225), expand = c(0, 0)) +
+  labs(x = "Cockcroft-Gault (mL/min)",
+       y = "CKD-EPI Cr-Cys Unindexed (mL/min)",
+       title = "Cockcroft-Gault vs CKD-EPI Cr-Cys") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank())
+```
+
+## 6.2 GFR Distribution: CG vs CKD-EPI
+
+```{r}
+#| label: plot-gfr-hist
+plot_data_long <- final_master %>%
+  select(record_id, cockcroft, ckd_epi_gfr_cre_cys_unindex) %>%
+  pivot_longer(
+    cols = c(cockcroft, ckd_epi_gfr_cre_cys_unindex),
+    names_to = "measure_type", values_to = "gfr_value"
+  ) %>%
+  filter(!is.na(gfr_value)) %>%
+  mutate(measure_type = case_match(measure_type,
+    "cockcroft"                    ~ "Cockcroft-Gault",
+    "ckd_epi_gfr_cre_cys_unindex" ~ "CKD-EPI (Cr-Cys) Unindexed"
+  ))
+
+ggplot(plot_data_long, aes(x = gfr_value, fill = measure_type)) +
+  geom_histogram(color = "black", alpha = 0.7, bins = 30, position = "identity") +
+  facet_wrap(~ measure_type) +
+  geom_vline(
+    data = plot_data_long %>% group_by(measure_type) %>%
+      summarise(grp_mean = mean(gfr_value, na.rm = TRUE)),
+    aes(xintercept = grp_mean), color = "red", linetype = "dashed", linewidth = 0.8
+  ) +
+  scale_fill_manual(values = c("#1F78B4", "#33A02C")) +
+  labs(title = "Renal Function Distribution",
+       subtitle = "Comparing Absolute GFR (mL/min)",
+       x = "GFR (mL/min)", y = "Number of Patients") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none")
+```
+
+## 6.3 Carboplatin Dose Discrepancy Distribution
+
+```{r}
+#| label: plot-dose-diff
+ggplot(final_master, aes(x = dose_diff_pct)) +
+  geom_histogram(color = "black", fill = "#1F78B4", alpha = 0.7, bins = 40) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red", linewidth = 0.8) +
+  labs(title = "Carboplatin Dose Difference: CKD-EPI Cr-Cys vs Cockcroft-Gault",
+       x = "Dose Difference (%)", y = "Number of Patients",
+       subtitle = "Positive = CKD-EPI recommends higher dose") +
+  theme_minimal(base_size = 14)
+```
+
+## 6.4 Scatter by Sex
+
+```{r}
+#| label: plot-scatter-sex
+ggplot(final_master, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex, color = sex)) +
+  geom_point(alpha = 0.6) +
+  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "grey50") +
+  scale_x_continuous(limits = c(0, 225), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0, 225), expand = c(0, 0)) +
+  scale_color_manual(values = c("Male" = "black", "Female" = "red"),
+                     name = "Sex") +
+  labs(x = "Cockcroft-Gault (mL/min)",
+       y = "CKD-EPI Cr-Cys Unindexed (mL/min)",
+       title = "CG vs CKD-EPI by Sex") +
+  theme_bw() + theme(panel.grid.minor = element_blank())
+```
+
+## 6.5 Scatter by BMI
+
+```{r}
+#| label: plot-scatter-bmi
+ggplot(final_master, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex, color = bmi_30)) +
+  geom_point(alpha = 0.6) +
+  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "grey50") +
+  scale_x_continuous(limits = c(0, 225), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0, 225), expand = c(0, 0)) +
+  scale_color_manual(values = c("<30" = "black", ">=30" = "red"), name = "BMI") +
+  labs(x = "Cockcroft-Gault (mL/min)",
+       y = "CKD-EPI Cr-Cys Unindexed (mL/min)",
+       title = "CG vs CKD-EPI by BMI") +
+  theme_bw() + theme(panel.grid.minor = element_blank())
+```
+
+## 6.6 Scatter by Age
+
+```{r}
+#| label: plot-scatter-age
+ggplot(final_master, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex, color = age_70)) +
+  geom_point(alpha = 0.6) +
+  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "grey50") +
+  scale_x_continuous(limits = c(0, 225), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0, 225), expand = c(0, 0)) +
+  scale_color_manual(values = c("<70" = "black", ">=70" = "red"), name = "Age") +
+  labs(x = "Cockcroft-Gault (mL/min)",
+       y = "CKD-EPI Cr-Cys Unindexed (mL/min)",
+       title = "CG vs CKD-EPI by Age") +
+  theme_bw() + theme(panel.grid.minor = element_blank())
+```
+
+# 7 Cumulative Incidence Plots
+
+## 7.1 Platinum-Related Hospitalization (Side Effect)
 
 ```{r}
 #| label: cuminc-side-effect

@@ -142,7 +142,23 @@ Hospitalization reasons 1–11 per REDCap codebook:
 | `cis_dose_cat` | Cisplatin dose category: 1=<75 mg/m², 2=≥75 mg/m², 0=not cisplatin |
 | `cis_group` | Cisplatin dose tier: 1=<40 mg/m², 2=40–60 mg/m², 3=≥60 mg/m² |
 
-## 1.11 Derived — Drug Indicators & Competing Risk
+## 1.11 Derived — Carboplatin Dose Discrepancy
+
+Carboplatin is dosed via the **Calvert formula**: Dose(mg) = target AUC × (GFR + 25).
+Standard practice uses Cockcroft-Gault for GFR. CKD-EPI Cr-Cys may give a different GFR,
+leading to a different recommended dose.
+
+| In Code | Description |
+|---|---|
+| `carbo_dose_cg` | Recommended carboplatin dose (mg) using Cockcroft-Gault: AUC × (CG + 25) |
+| `carbo_dose_cys` | Recommended carboplatin dose (mg) using CKD-EPI Cr-Cys unindexed: AUC × (eGFR + 25) |
+| `dose_discrepancy` | Ratio: `carbo_dose_cys / carbo_dose_cg` (>1 = CKD-EPI suggests higher dose) |
+| `dose_diff_pct` | Percentage difference: (CKD-EPI dose − CG dose) / CG dose × 100 |
+| `ecog_score_cat2` | ECOG binary: "0" vs ">=1" |
+| `bmi_30` | BMI binary: "<30" vs ">=30" |
+| `age_70` | Age binary: "<70" vs ">=70" |
+
+## 1.12 Derived — Drug Indicators & Competing Risk
 
 Drug indicators (binary 0/1) parsed from `regimen_dose` text by `create_drug_indicators()`:
 `Bevacizumab`, `Paclitaxel`, `Pemetrexed`, `Durvalumab`, `Doxorubicin`,
@@ -1120,7 +1136,33 @@ final_master <- final_master %>%
 table(final_master$dose_1)
 ```
 
-## 5.9 Rename baseline lab variables (Copy 709 convention)
+## 5.9 Carboplatin dose discrepancy variables (from Leyre dose.Rmd)
+
+```{r}
+#| label: clean-dose-carbo
+# Carboplatin is dosed via Calvert formula: Dose(mg) = target AUC × (GFR + 25)
+# Standard practice uses Cockcroft-Gault for GFR. If CKD-EPI Cr-Cys gives a
+# different GFR, the recommended carboplatin dose would differ.
+#
+# carbo_dose_cg:  Calvert dose using Cockcroft-Gault (standard)
+# carbo_dose_cys: Calvert dose using CKD-EPI Cr-Cys unindexed
+# dose_discrepancy: ratio of CKD-EPI dose / Cockcroft dose (>1 = higher dose
+#   recommended by CKD-EPI; <1 = lower dose recommended)
+# dose_diff_pct: percentage difference (positive = CKD-EPI suggests higher dose)
+
+final_master <- final_master %>%
+  mutate(
+    carbo_dose_cg  = carbo_dose * (cockcroft + 25),
+    carbo_dose_cys = carbo_dose * (ckd_epi_gfr_cre_cys_unindex + 25),
+    dose_discrepancy = carbo_dose_cys / carbo_dose_cg,
+    dose_diff_pct    = (carbo_dose_cys - carbo_dose_cg) / carbo_dose_cg * 100,
+    ecog_score_cat2  = ifelse(ecog_score == 0, "0", ">=1"),
+    bmi_30 = factor(ifelse(bmi < 30, "<30", ">=30")),
+    age_70 = factor(ifelse(age < 70, "<70", ">=70"))
+  )
+```
+
+## 5.10 Rename baseline lab variables (Copy 709 convention)
 
 ```{r}
 #| label: clean-rename-labs
