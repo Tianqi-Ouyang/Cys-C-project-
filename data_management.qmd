@@ -985,7 +985,32 @@ final_master <- final_master %>%
   )
 ```
 
-## 5.7 Cancer type categories (7 groups)
+## 5.7 Label REDCap coded variables
+
+```{r}
+#| label: clean-labels
+# Apply human-readable labels to REDCap numeric-coded variables (per data dictionary)
+final_master <- final_master %>%
+  mutate(
+    sex        = factor(sex, levels = c(1, 2), labels = c("Male", "Female")),
+    race       = factor(race, levels = 1:5, labels = c("White", "Black", "Asian", "Other", "Unknown")),
+    ethnicity  = factor(ethnicity, levels = 1:3, labels = c("Non-Hispanic", "Hispanic", "Unknown")),
+    tumor_stage = factor(tumor_stage, levels = c(1, 2), labels = c("Local/Early", "Advanced/Metastatic")),
+    platin_group = factor(platin_group, levels = 1:3, labels = c("Carboplatin", "Cisplatin", "Unknown")),
+    # ecog_score: REDCap codes 1=ECOG 0, 2=ECOG 1, ..., 7=N/A
+    ecog_score = case_when(
+      ecog_score >= 1 & ecog_score <= 6 ~ ecog_score - 1,  # remap to actual ECOG 0–5
+      ecog_score == 7 ~ NA_real_,                           # N/A → missing
+      TRUE ~ NA_real_
+    ),
+    ecog_estimate = case_when(
+      ecog_estimate >= 1 & ecog_estimate <= 6 ~ ecog_estimate - 1,
+      TRUE ~ NA_real_
+    )
+  )
+```
+
+## 5.8 Cancer type categories (7 groups)
 
 ```{r}
 #| label: clean-cancer-type-cat
@@ -1021,18 +1046,26 @@ table(final_master$cancer_type_cat_7)
 
 ```{r}
 #| label: clean-platinum
-# carbo / cis: binary platinum type
-# carbo_AUC / cis_dose / cis_recommend: dose values (NA for wrong type)
+# carbo / cis: binary platinum type (platin_group is now a labeled factor)
+# carbo_dose: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²
+# 3 carboplatin records have platin_dose and dosage_mg swapped (total mg in
+# platin_dose, AUC in dosage_mg): records 758, 786, 836. Fix by swapping back.
 # cis_group: cisplatin dose tier (1=<40, 2=40–60, 3=≥60 mg/m²)
 # dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)
 # carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin
 # cis_dose_cat: 1=<75 mg/m², 2=≥75, 0=not cisplatin
 final_master <- final_master %>%
   mutate(
-    carbo        = ifelse(platin_group == 1, 1, 0),   # REDCap: 1 = Carboplatin
-    cis          = ifelse(platin_group == 2, 1, 0),   # REDCap: 2 = Cisplatin
-    carbo_dose   = case_when(carbo == 1 ~ platin_dose, TRUE ~ NA_real_),
-    cis_dose     = case_when(cis   == 1 ~ platin_dose, TRUE ~ NA_real_),
+    carbo        = ifelse(platin_group == "Carboplatin", 1, 0),
+    cis          = ifelse(platin_group == "Cisplatin",   1, 0),
+    # Fix 3 swapped records: platin_dose > 10 for carboplatin means mg was
+    # entered in the AUC field; their dosage_mg contains the actual AUC
+    carbo_dose   = case_when(
+      carbo == 1 & platin_dose > 10 ~ as.numeric(dosage_mg),  # swap back
+      carbo == 1                     ~ platin_dose,
+      TRUE ~ NA_real_
+    ),
+    cis_dose     = case_when(cis == 1 ~ platin_dose, TRUE ~ NA_real_),
     cis_group    = case_when(
       cis_dose < 40                    ~ 1,
       cis_dose >= 40 & cis_dose < 60  ~ 2,
@@ -1274,8 +1307,14 @@ final_master <- cmp_variable(final_master, event_time = time_to_throm_2,  event_
 final_master <- cmp_variable(final_master, event_time = time_to_throm_3,  event_status = Throm_g3_90days,  name = "throm_3")
 final_master <- cmp_variable(final_master, event_time = time_to_aki_2,    event_status = AKI_g2_90days,    name = "aki_2")
 final_master <- cmp_variable(final_master, event_time = time_to_aki_3,    event_status = AKI_g3_90days,    name = "aki_3")
-final_master <- cmp_variable(final_master, event_time = time_to_anemia_2, event_status = grade_2_aes,      name = "grade_2_aes")
-final_master <- cmp_variable(final_master, event_time = time_to_anemia_3, event_status = grade_3_aes,      name = "grade_3_aes")
+# Composite AE: use the earliest event time across anemia/throm/AKI
+final_master <- final_master %>%
+  mutate(
+    time_to_grade_2_aes = pmin(time_to_anemia_2, time_to_throm_2, time_to_aki_2, na.rm = TRUE),
+    time_to_grade_3_aes = pmin(time_to_anemia_3, time_to_throm_3, time_to_aki_3, na.rm = TRUE)
+  )
+final_master <- cmp_variable(final_master, event_time = time_to_grade_2_aes, event_status = grade_2_aes, name = "grade_2_aes")
+final_master <- cmp_variable(final_master, event_time = time_to_grade_3_aes, event_status = grade_3_aes, name = "grade_3_aes")
 
 # Platinum-related hospitalization (side effects: hosp reasons 1–7)
 final_master <- cmp_variable(final_master,

@@ -1,5 +1,145 @@
 [
   {
+    "objectID": "analysis.html",
+    "href": "analysis.html",
+    "title": "Analysis",
+    "section": "",
+    "text": "Code\nlibrary(tidyverse)\nlibrary(scales)\nlibrary(ggplot2)\nlibrary(tidycmprsk)\nlibrary(ggsurvfit)\nlibrary(gtsummary)\n\n# Load final_master from data management output\nfinal_master &lt;- readRDS(\"final_master.rds\")"
+  },
+  {
+    "objectID": "analysis.html#by-creatininecystatin-c-ratio",
+    "href": "analysis.html#by-creatininecystatin-c-ratio",
+    "title": "Analysis",
+    "section": "2.1 By Creatinine/Cystatin C Ratio",
+    "text": "2.1 By Creatinine/Cystatin C Ratio\n\n\nCode\n##dose_1: carbo-AUC ≥ 5 mg/mL/min, or cisplatin ≥ 75 mg/m2\ntable_one_cc_ratio &lt;- final_master %&gt;%\n  dplyr::select(age, age_cat, sex, race, ethnicity, tumor_stage, cancer_type_cat_7,\n                platin_group, cis_dose, cis_dose_cat, carbo_dose, carbo_AUC_cat, dose_1,\n                ici, Bevacizumab, Paclitaxel, Pemetrexed, Doxorubicin, Etoposide, Gemcitabine, Pertuzumab, Trastuzumab, Docetaxel, Fluorouracil, Methotrexate, Vinblastine, Administered_alone,\n                hiv_rpdr, thyroid,\n                score, ecog_score, bmi, bmi_cat, pre_HGB_45days, pre_PLT_45days, pre_ALB_45days, baseline_cys_c, baseline_cre, cockcroft, baseline_cre_egfr, baseline_cys_c_egfr, ckd_epi_gfr_cre_cys, baseline_cre_egfr_unindexed, baseline_cys_c_egfr_unindexed, ckd_epi_gfr_cre_cys_unindex, ckd_stage_cg, cr_cys, cr_cys_7) %&gt;%\n  tbl_summary(statistic = list(age ~ \"{mean} ({sd})\"),\n              by = cr_cys_7) %&gt;%\n  add_overall() %&gt;%\n  add_p(\n    test.args = list(\n      all_categorical() ~ list(simulate.p.value = TRUE)\n    )\n  )\ntable_one_cc_ratio\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCharacteristic\nOverall N = 5951\n0 N = 4301\n1 N = 1651\np-value2\n\n\n\n\nage\n66 (12)\n64 (13)\n69 (10)\n&lt;0.001\n\n\nage_cat\n\n\n\n\n\n\n0.11\n\n\n    1\n243 (41%)\n187 (43%)\n56 (34%)\n\n\n\n\n    2\n301 (51%)\n207 (48%)\n94 (57%)\n\n\n\n\n    3\n51 (8.6%)\n36 (8.4%)\n15 (9.1%)\n\n\n\n\nsex\n\n\n\n\n\n\n0.003\n\n\n    Male\n202 (34%)\n162 (38%)\n40 (24%)\n\n\n\n\n    Female\n393 (66%)\n268 (62%)\n125 (76%)\n\n\n\n\nrace\n\n\n\n\n\n\n0.7\n\n\n    White\n496 (83%)\n357 (83%)\n139 (84%)\n\n\n\n\n    Black\n20 (3.4%)\n15 (3.5%)\n5 (3.0%)\n\n\n\n\n    Asian\n29 (4.9%)\n24 (5.6%)\n5 (3.0%)\n\n\n\n\n    Other\n9 (1.5%)\n6 (1.4%)\n3 (1.8%)\n\n\n\n\n    Unknown\n41 (6.9%)\n28 (6.5%)\n13 (7.9%)\n\n\n\n\nethnicity\n\n\n\n\n\n\n0.2\n\n\n    Non-Hispanic\n513 (86%)\n368 (86%)\n145 (88%)\n\n\n\n\n    Hispanic\n43 (7.2%)\n29 (6.7%)\n14 (8.5%)\n\n\n\n\n    Unknown\n39 (6.6%)\n33 (7.7%)\n6 (3.6%)\n\n\n\n\ntumor_stage\n\n\n\n\n\n\n0.013\n\n\n    Local/Early\n190 (32%)\n150 (35%)\n40 (24%)\n\n\n\n\n    Advanced/Metastatic\n405 (68%)\n280 (65%)\n125 (76%)\n\n\n\n\ncancer_type_cat_7\n\n\n\n\n\n\n0.014\n\n\n    Thoracic\n200 (34%)\n128 (30%)\n72 (44%)\n\n\n\n\n    Breast\n73 (12%)\n56 (13%)\n17 (10%)\n\n\n\n\n    GI\n58 (9.7%)\n45 (10%)\n13 (7.9%)\n\n\n\n\n    GU\n13 (2.2%)\n12 (2.8%)\n1 (0.6%)\n\n\n\n\n    GYN\n186 (31%)\n137 (32%)\n49 (30%)\n\n\n\n\n    HEENT\n49 (8.2%)\n42 (9.8%)\n7 (4.2%)\n\n\n\n\n    Other\n16 (2.7%)\n10 (2.3%)\n6 (3.6%)\n\n\n\n\nplatin_group\n\n\n\n\n\n\n\n\n\n\n    Carboplatin\n595 (100%)\n430 (100%)\n165 (100%)\n\n\n\n\n    Cisplatin\n0 (0%)\n0 (0%)\n0 (0%)\n\n\n\n\n    Unknown\n0 (0%)\n0 (0%)\n0 (0%)\n\n\n\n\ncis_dose\nNA (NA, NA)\nNA (NA, NA)\nNA (NA, NA)\n\n\n\n\n    Unknown\n595\n430\n165\n\n\n\n\ncis_dose_cat\n\n\n\n\n\n\n\n\n\n\n    0\n595 (100%)\n430 (100%)\n165 (100%)\n\n\n\n\ncarbo_dose\n\n\n\n\n\n\n&lt;0.001\n\n\n    1.5\n57 (9.6%)\n46 (11%)\n11 (6.7%)\n\n\n\n\n    2\n76 (13%)\n54 (13%)\n22 (13%)\n\n\n\n\n    3\n12 (2.0%)\n5 (1.2%)\n7 (4.2%)\n\n\n\n\n    3.5\n1 (0.2%)\n1 (0.2%)\n0 (0%)\n\n\n\n\n    4\n56 (9.4%)\n30 (7.0%)\n26 (16%)\n\n\n\n\n    5\n271 (46%)\n193 (45%)\n78 (47%)\n\n\n\n\n    6\n122 (21%)\n101 (23%)\n21 (13%)\n\n\n\n\ncarbo_AUC_cat\n\n\n\n\n\n\n0.065\n\n\n    1\n202 (34%)\n136 (32%)\n66 (40%)\n\n\n\n\n    2\n393 (66%)\n294 (68%)\n99 (60%)\n\n\n\n\ndose_1\n\n\n\n\n\n\n0.068\n\n\n    0\n202 (34%)\n136 (32%)\n66 (40%)\n\n\n\n\n    1\n393 (66%)\n294 (68%)\n99 (60%)\n\n\n\n\nici\n119 (20%)\n76 (18%)\n43 (26%)\n0.026\n\n\nBevacizumab\n31 (5.2%)\n18 (4.2%)\n13 (7.9%)\n0.10\n\n\nPaclitaxel\n326 (55%)\n239 (56%)\n87 (53%)\n0.6\n\n\nPemetrexed\n134 (23%)\n81 (19%)\n53 (32%)\n&lt;0.001\n\n\nDoxorubicin\n8 (1.3%)\n7 (1.6%)\n1 (0.6%)\n0.5\n\n\nEtoposide\n42 (7.1%)\n35 (8.1%)\n7 (4.2%)\n0.12\n\n\nGemcitabine\n10 (1.7%)\n7 (1.6%)\n3 (1.8%)\n&gt;0.9\n\n\nPertuzumab\n56 (9.4%)\n44 (10%)\n12 (7.3%)\n0.3\n\n\nTrastuzumab\n58 (9.7%)\n47 (11%)\n11 (6.7%)\n0.13\n\n\nDocetaxel\n61 (10%)\n49 (11%)\n12 (7.3%)\n0.2\n\n\nFluorouracil\n\n\n\n\n\n\n\n\n\n\n    0\n595 (100%)\n430 (100%)\n165 (100%)\n\n\n\n\nMethotrexate\n\n\n\n\n\n\n\n\n\n\n    0\n595 (100%)\n430 (100%)\n165 (100%)\n\n\n\n\nVinblastine\n\n\n\n\n\n\n\n\n\n\n    0\n595 (100%)\n430 (100%)\n165 (100%)\n\n\n\n\nAdministered_alone\n6 (1.0%)\n4 (0.9%)\n2 (1.2%)\n0.7\n\n\nhiv_rpdr\n7 (1.2%)\n5 (1.2%)\n2 (1.2%)\n&gt;0.9\n\n\nthyroid\n120 (20%)\n86 (20%)\n34 (21%)\n&gt;0.9\n\n\nscore\n8.0 (6.0, 11.0)\n8.0 (6.0, 10.0)\n9.0 (8.0, 12.0)\n&lt;0.001\n\n\necog_score\n\n\n\n\n\n\n&lt;0.001\n\n\n    0\n289 (49%)\n240 (56%)\n49 (30%)\n\n\n\n\n    1\n261 (44%)\n173 (40%)\n88 (53%)\n\n\n\n\n    2\n36 (6.1%)\n15 (3.5%)\n21 (13%)\n\n\n\n\n    3\n9 (1.5%)\n2 (0.5%)\n7 (4.2%)\n\n\n\n\nbmi\n26.9 (23.4, 30.8)\n26.9 (23.4, 30.8)\n26.5 (23.4, 30.9)\n&gt;0.9\n\n\nbmi_cat\n\n\n\n\n\n\n0.8\n\n\n    1\n19 (3.2%)\n15 (3.5%)\n4 (2.4%)\n\n\n\n\n    2\n200 (34%)\n142 (33%)\n58 (35%)\n\n\n\n\n    3\n202 (34%)\n149 (35%)\n53 (32%)\n\n\n\n\n    4\n174 (29%)\n124 (29%)\n50 (30%)\n\n\n\n\npre_HGB_45days\n12.70 (11.70, 13.80)\n12.90 (12.10, 13.90)\n11.90 (10.80, 13.10)\n&lt;0.001\n\n\npre_PLT_45days\n272 (216, 342)\n266 (214, 334)\n284 (224, 376)\n0.012\n\n\npre_ALB_45days\n4.20 (4.00, 4.40)\n4.30 (4.10, 4.50)\n4.00 (3.60, 4.20)\n&lt;0.001\n\n\nbaseline_cys_c\n1.02 (0.87, 1.23)\n0.96 (0.83, 1.14)\n1.18 (1.03, 1.48)\n&lt;0.001\n\n\nbaseline_cre\n0.81 (0.70, 0.97)\n0.84 (0.73, 1.00)\n0.73 (0.60, 0.88)\n&lt;0.001\n\n\ncockcroft\n81 (62, 104)\n80 (62, 100)\n86 (61, 112)\n0.2\n\n\nbaseline_cre_egfr\n87 (71, 97)\n85 (71, 95)\n92 (72, 101)\n0.007\n\n\nbaseline_cys_c_egfr\n71 (55, 88)\n77 (61, 93)\n58 (42, 69)\n&lt;0.001\n\n\nckd_epi_gfr_cre_cys\n81 (66, 95)\n83 (69, 98)\n74 (55, 86)\n&lt;0.001\n\n\nbaseline_cre_egfr_unindexed\n89 (73, 102)\n88 (73, 100)\n90 (74, 104)\n0.3\n\n\nbaseline_cys_c_egfr_unindexed\n73 (57, 92)\n80 (63, 97)\n58 (42, 72)\n&lt;0.001\n\n\nckd_epi_gfr_cre_cys_unindex\n83 (67, 100)\n87 (71, 104)\n75 (56, 90)\n&lt;0.001\n\n\nckd_stage_cg\n\n\n\n\n\n\n0.002\n\n\n    1\n230 (39%)\n152 (35%)\n78 (47%)\n\n\n\n\n    2\n236 (40%)\n190 (44%)\n46 (28%)\n\n\n\n\n    3\n125 (21%)\n86 (20%)\n39 (24%)\n\n\n\n\n    4\n4 (0.7%)\n2 (0.5%)\n2 (1.2%)\n\n\n\n\ncr_cys\n0.79 (0.69, 0.92)\n0.86 (0.78, 0.96)\n0.62 (0.56, 0.66)\n&lt;0.001\n\n\n\n1 Mean (SD); n (%); Median (Q1, Q3)\n\n\n2 Wilcoxon rank sum test; Pearson’s Chi-squared test with simulated p-value (based on 2000 replicates); Fisher’s Exact Test for Count Data with simulated p-value (based on 2000 replicates); Fisher’s exact test"
+  },
+  {
+    "objectID": "analysis.html#incidence-outcomes-by-creatininecystatin-c-ratio",
+    "href": "analysis.html#incidence-outcomes-by-creatininecystatin-c-ratio",
+    "title": "Analysis",
+    "section": "3.1 Incidence Outcomes by Creatinine/Cystatin C Ratio",
+    "text": "3.1 Incidence Outcomes by Creatinine/Cystatin C Ratio\n\n\nCode\ntable_one_incidence &lt;- final_master %&gt;%\n  select(platinum_related_hosp, hosp_90, grade_3_aes, death_90, cr_cys_7) %&gt;%\n  tbl_summary(\n    by = cr_cys_7,\n    statistic = list(\n      all_continuous() ~ \"{mean} ({sd})\",\n      all_categorical() ~ \"{n} ({p}%)\"\n    ),\n    digits = list(\n      all_continuous() ~ 1,\n      all_categorical() ~ 1\n    )\n  ) %&gt;%\n  add_overall()\ntable_one_incidence\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCharacteristic\nOverall N = 5951\n0 N = 4301\n1 N = 1651\n\n\n\n\nplatinum_related_hosp\n87.0 (14.6%)\n47.0 (10.9%)\n40.0 (24.2%)\n\n\nhosp_90\n165.0 (27.7%)\n105.0 (24.4%)\n60.0 (36.4%)\n\n\ngrade_3_aes\n86.0 (14.5%)\n39.0 (9.1%)\n47.0 (28.5%)\n\n\ndeath_90\n22.0 (3.7%)\n6.0 (1.4%)\n16.0 (9.7%)\n\n\n\n1 n (%)\n\n\n\n\n\n\n\n\n\n\nCode\n# Compute event rates by decile\nfinal_master &lt;- final_master %&gt;%\n  group_by(cc_decile) %&gt;%\n  mutate(\n    anemia_2_rate_decile              = mean(Anemia_g2_90days, na.rm = TRUE),\n    anemia_3_rate_decile              = mean(Anemia_g3_90days, na.rm = TRUE),\n    throm_2_rate_decile               = mean(Throm_g2_90days, na.rm = TRUE),\n    throm_3_rate_decile               = mean(Throm_g3_90days, na.rm = TRUE),\n    aki_2_rate_decile                 = mean(AKI_g2_90days, na.rm = TRUE),\n    aki_3_rate_decile                 = mean(AKI_g3_90days, na.rm = TRUE),\n    hos_rate_decile                   = mean(hosp_90, na.rm = TRUE),\n    platinum_related_hos_rate_decile  = mean(platinum_related_hosp, na.rm = TRUE),\n    death_rate_decile                 = mean(death_90, na.rm = TRUE)\n  ) %&gt;%\n  ungroup() %&gt;%\n  mutate(cc_decile = as.numeric(cc_decile))\n\n\n\n\nCode\n# Summarize cr_cys ratio by decile\nsummary_by_decile &lt;- final_master %&gt;%\n  group_by(cc_decile) %&gt;%\n  summarise(\n    n      = n(),\n    min    = min(cr_cys, na.rm = TRUE),\n    q1     = quantile(cr_cys, 0.25, na.rm = TRUE),\n    median = median(cr_cys, na.rm = TRUE),\n    mean   = mean(cr_cys, na.rm = TRUE),\n    q3     = quantile(cr_cys, 0.75, na.rm = TRUE),\n    max    = max(cr_cys, na.rm = TRUE),\n    sd     = sd(cr_cys, na.rm = TRUE)\n  )"
+  },
+  {
+    "objectID": "analysis.html#grade-2-anemia",
+    "href": "analysis.html#grade-2-anemia",
+    "title": "Analysis",
+    "section": "5.1 Grade 2 Anemia",
+    "text": "5.1 Grade 2 Anemia\n\n\nCode\nloess_plot(\n  data = final_master, x = cc_percentile, y = Anemia_g2_90days,\n  x_point = cc_decile * 10, y_point = anemia_2_rate_decile,\n  title = \"Grade &gt;= 2 Anemia\",\n  xlab = \"Percentile of SCR/CYS Ratio\", ylab = \"Grade &gt;= 2 Anemia\"\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-3-thrombocytopenia",
+    "href": "analysis.html#grade-3-thrombocytopenia",
+    "title": "Analysis",
+    "section": "5.2 Grade 3 Thrombocytopenia",
+    "text": "5.2 Grade 3 Thrombocytopenia\n\n\nCode\nloess_plot(\n  data = final_master, x = cc_percentile, y = Throm_g3_90days,\n  x_point = cc_decile * 10, y_point = throm_3_rate_decile,\n  title = \"Grade &gt;= 3 Thrombocytopenia\",\n  xlab = \"Percentile of SCR/CYS Ratio\", ylab = \"Grade &gt;= 3 Thrombocytopenia\"\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-3-aki-creatinine-increased",
+    "href": "analysis.html#grade-3-aki-creatinine-increased",
+    "title": "Analysis",
+    "section": "5.3 Grade 3 AKI (Creatinine Increased)",
+    "text": "5.3 Grade 3 AKI (Creatinine Increased)\n\n\nCode\nloess_plot(\n  data = final_master, x = cc_percentile, y = AKI_g3_90days,\n  x_point = cc_decile * 10, y_point = aki_3_rate_decile,\n  title = \"Grade &gt;= 3 Creatinine Increased\",\n  xlab = \"Percentile of SCR/CYS Ratio\", ylab = \"Grade &gt;= 3 Creatinine Increased\"\n)"
+  },
+  {
+    "objectID": "analysis.html#overall-hospitalization",
+    "href": "analysis.html#overall-hospitalization",
+    "title": "Analysis",
+    "section": "5.4 Overall Hospitalization",
+    "text": "5.4 Overall Hospitalization\n\n\nCode\nloess_plot(\n  data = final_master, x = cc_percentile, y = hosp_90,\n  x_point = cc_decile * 10, y_point = hos_rate_decile,\n  title = \"Overall Hospitalization\",\n  xlab = \"Percentile of SCR/CYS Ratio\", ylab = \"Overall Hospitalization\"\n)"
+  },
+  {
+    "objectID": "analysis.html#platinum-related-hospitalization",
+    "href": "analysis.html#platinum-related-hospitalization",
+    "title": "Analysis",
+    "section": "5.5 Platinum-Related Hospitalization",
+    "text": "5.5 Platinum-Related Hospitalization\n\n\nCode\nloess_plot(\n  data = final_master, x = cc_percentile, y = platinum_related_hosp,\n  x_point = cc_decile * 10, y_point = platinum_related_hos_rate_decile,\n  title = \"Hospitalization for Platinum-Associated AEs\",\n  xlab = \"Percentile of SCR/CYS Ratio\", ylab = \"Hospitalization for Platinum-Associated AEs\"\n)"
+  },
+  {
+    "objectID": "analysis.html#platinum-related-hospitalization-side-effect",
+    "href": "analysis.html#platinum-related-hospitalization-side-effect",
+    "title": "Analysis",
+    "section": "6.1 Platinum-Related Hospitalization (Side Effect)",
+    "text": "6.1 Platinum-Related Hospitalization (Side Effect)\n\n\nCode\nfit_side_effect &lt;- cuminc(\n  Surv(cmp_time_side_effect, cmp_status_side_effect) ~ cr_cys_7,\n  data = final_master\n)\n\nggcuminc(fit_side_effect) +\n  labs(\n    title = \"Platinum-Related Hospitalization\",\n    x = \"Follow-up Time (Days)\",\n    y = \"Cumulative Incidence\"\n  ) +\n  scale_y_continuous(labels = percent_format(accuracy = 1)) +\n  theme_classic(base_size = 14) +\n  theme(\n    plot.title    = element_text(face = \"bold\", size = 16),\n    axis.title    = element_text(size = 14),\n    axis.text     = element_text(size = 12),\n    legend.title  = element_blank(),\n    legend.text   = element_text(size = 12)\n  ) +\n  scale_color_manual(values = c(\"red\", \"blue\"))"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "",
+    "text": "Primary exposure: cr_cys_7 — binary indicator for creatinine / cystatin C ratio &lt; 0.7\nFollow-up: 90 days from baseline sample date\nFramework: Competing risks (death as competing event for non-fatal outcomes)"
+  },
+  {
+    "objectID": "index.html#inclusion",
+    "href": "index.html#inclusion",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "Inclusion",
+    "text": "Inclusion\n\nPatients in REDCap export whose EMPI appears in list.csv\nReceived cisplatin or carboplatin (platin_group non-missing)\nBaseline cystatin C value available (cys_c_baseline non-missing)"
+  },
+  {
+    "objectID": "index.html#exclusion",
+    "href": "index.html#exclusion",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "Exclusion",
+    "text": "Exclusion\n\nEMPI not in list: REDCap records filtered to only EMPIs present in list.csv\nMissing baseline cystatin C: 3 patients excluded (cys_c_baseline is NA)\nMissing platinum group: 1 patient excluded (platin_group is NA)\n\nFinal cohort: ~877 patients (from 880 in REDCap after exclusions)"
+  },
+  {
+    "objectID": "index.html#grade-23-adverse-events-within-90-days",
+    "href": "index.html#grade-23-adverse-events-within-90-days",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "Grade 2/3 Adverse Events (within 90 days)",
+    "text": "Grade 2/3 Adverse Events (within 90 days)\n\n\n\nOutcome\nDefinition\n\n\n\n\nAnemia grade 2\nHGB &lt; 10 g/dL\n\n\nAnemia grade 3\nHGB &lt; 8 g/dL\n\n\nThrombocytopenia grade 2\nPLT &lt; 75 x10^9/L\n\n\nThrombocytopenia grade 3\nPLT &lt; 50 x10^9/L\n\n\nAKI grade 2\nPost-baseline CRE &gt; 1.5x pre-baseline CRE (KDIGO)\n\n\nAKI grade 3\nPost-baseline CRE &gt; 3.0x pre-baseline CRE (KDIGO)\n\n\nComposite grade 2\nAny of anemia/thrombocytopenia/AKI grade 2\n\n\nComposite grade 3\nAny of anemia/thrombocytopenia/AKI grade 3"
+  },
+  {
+    "objectID": "index.html#hospitalizations-ed-visits",
+    "href": "index.html#hospitalizations-ed-visits",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "Hospitalizations & ED Visits",
+    "text": "Hospitalizations & ED Visits\n\nHospitalizations: 11 reason categories; reasons 1-7 define side_effect (platinum-related)\nED visits: 7 reason categories\nAll censored at 90 days"
+  },
+  {
+    "objectID": "index.html#mortality",
+    "href": "index.html#mortality",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "Mortality",
+    "text": "Mortality\n\n90-day mortality (death_90): derived from pt_status and days_last_follow_up"
+  },
+  {
+    "objectID": "index.html#exposure",
+    "href": "index.html#exposure",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "Exposure",
+    "text": "Exposure\n\n\n\nVariable\nDescription\n\n\n\n\ncr_cys\nRaw ratio: baseline creatinine / cystatin C\n\n\ncr_cys_7\nPrimary exposure: 1 if ratio &lt; 0.7\n\n\ncr_cys_cat\nCategorical: &lt;0.5 / 0.5-0.7 / 0.7-0.9 / &gt;=0.9"
+  },
+  {
+    "objectID": "index.html#egfr-kidney-function",
+    "href": "index.html#egfr-kidney-function",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "eGFR & Kidney Function",
+    "text": "eGFR & Kidney Function\n\n\n\nVariable\nDescription\n\n\n\n\nbaseline_cre_egfr\nCKD-EPI eGFR from creatinine\n\n\nbaseline_cys_c_egfr\nCKD-EPI eGFR from cystatin C\n\n\nckd_epi_gfr_cre_cys\nCKD-EPI combined creatinine-cystatin C eGFR\n\n\ncockcroft\nCockcroft-Gault creatinine clearance\n\n\nckd_stage_cg\nCKD stage from Cockcroft-Gault"
+  },
+  {
+    "objectID": "index.html#pre-baseline-labs-closest-value-within-45-days-before-baseline",
+    "href": "index.html#pre-baseline-labs-closest-value-within-45-days-before-baseline",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "Pre-baseline Labs (closest value within 45 days before baseline)",
+    "text": "Pre-baseline Labs (closest value within 45 days before baseline)\n\n\n\nVariable\nRPDR Group_Id\n\n\n\n\npre_CRE_45days\nCRE\n\n\npre_HGB_45days\nHGB\n\n\npre_PLT_45days\nPLT\n\n\npre_ALB_45days\nALB\n\n\npre_GHBA1C_45days\nGHBA1C"
+  },
+  {
+    "objectID": "index.html#comorbidities-treatment",
+    "href": "index.html#comorbidities-treatment",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "Comorbidities & Treatment",
+    "text": "Comorbidities & Treatment\n\n\n\nVariable\nDescription\n\n\n\n\nscore / cci\nCharlson comorbidity index (from RPDR ICD codes)\n\n\nthyroid\nThyroid disease (RPDR diagnosis + medication)\n\n\nhiv_rpdr\nHIV from RPDR diagnoses + medications\n\n\ndose_1\nHigh-dose platinum flag\n\n\ncancer_type_cat_7\nCancer type (7 categories)\n\n\nici\nImmune checkpoint inhibitor use"
+  },
+  {
+    "objectID": "index.html#competing-risk-variables",
+    "href": "index.html#competing-risk-variables",
+    "title": "CysC / Creatinine Ratio – Project Summary",
+    "section": "Competing Risk Variables",
+    "text": "Competing Risk Variables\n\n\n\nPattern\nDescription\n\n\n\n\ncmp_time_&lt;outcome&gt;\nTime for competing risk model\n\n\ncmp_status_&lt;outcome&gt;\n0 = censored, 1 = event, 2 = death"
+  },
+  {
     "objectID": "data_management.html",
     "href": "data_management.html",
     "title": "Data Management",
@@ -231,18 +371,25 @@
     "text": "5.6 BMI, age categories, ICI, CKD stage\n\n\nCode\n# bmi: calculated from height (cm) and weight (kg)\n# bmi_cat: 1=underweight &lt;18.5, 2=normal 18.5–25, 3=overweight 25–30, 4=obese ≥30\n# age_cat: 1=≤65, 2=66–80, 3=&gt;80\n# ici: immunotherapy co-administration (Atezolizumab OR Pembrolizumab OR Durvalumab)\n# ckd_stage_cg: CKD stage derived from Cockcroft-Gault eGFR\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    bmi = weight / (height / 100)^2,\n    bmi_cat = case_when(\n      bmi &lt; 18.5              ~ 1,\n      bmi &gt;= 18.5 & bmi &lt; 25 ~ 2,\n      bmi &gt;= 25   & bmi &lt; 30 ~ 3,\n      bmi &gt;= 30               ~ 4,\n      TRUE ~ NA_real_\n    ),\n    age_cat = case_when(\n      age &lt;= 65             ~ 1,\n      age &gt; 65 & age &lt;= 80 ~ 2,\n      age &gt; 80              ~ 3\n    ),\n    ici = ifelse(Atezolizumab == 1 | Pembrolizumab == 1 | Durvalumab == 1, 1, 0),\n    ckd_stage_cg = factor(case_when(\n      cockcroft &gt;= 90              ~ 1,\n      cockcroft &gt;= 60 & cockcroft &lt; 90 ~ 2,\n      cockcroft &gt;= 30 & cockcroft &lt; 60 ~ 3,\n      cockcroft &gt;= 15 & cockcroft &lt; 30 ~ 4,\n      cockcroft &lt; 15                   ~ 5\n    ))\n  )"
   },
   {
+    "objectID": "data_management.html#label-redcap-coded-variables",
+    "href": "data_management.html#label-redcap-coded-variables",
+    "title": "Data Management",
+    "section": "5.7 Label REDCap coded variables",
+    "text": "5.7 Label REDCap coded variables\n\n\nCode\n# Apply human-readable labels to REDCap numeric-coded variables (per data dictionary)\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    sex        = factor(sex, levels = c(1, 2), labels = c(\"Male\", \"Female\")),\n    race       = factor(race, levels = 1:5, labels = c(\"White\", \"Black\", \"Asian\", \"Other\", \"Unknown\")),\n    ethnicity  = factor(ethnicity, levels = 1:3, labels = c(\"Non-Hispanic\", \"Hispanic\", \"Unknown\")),\n    tumor_stage = factor(tumor_stage, levels = c(1, 2), labels = c(\"Local/Early\", \"Advanced/Metastatic\")),\n    platin_group = factor(platin_group, levels = 1:3, labels = c(\"Carboplatin\", \"Cisplatin\", \"Unknown\")),\n    # ecog_score: REDCap codes 1=ECOG 0, 2=ECOG 1, ..., 7=N/A\n    ecog_score = case_when(\n      ecog_score &gt;= 1 & ecog_score &lt;= 6 ~ ecog_score - 1,  # remap to actual ECOG 0–5\n      ecog_score == 7 ~ NA_real_,                           # N/A → missing\n      TRUE ~ NA_real_\n    ),\n    ecog_estimate = case_when(\n      ecog_estimate &gt;= 1 & ecog_estimate &lt;= 6 ~ ecog_estimate - 1,\n      TRUE ~ NA_real_\n    )\n  )"
+  },
+  {
     "objectID": "data_management.html#cancer-type-categories-7-groups",
     "href": "data_management.html#cancer-type-categories-7-groups",
     "title": "Data Management",
-    "section": "5.7 Cancer type categories (7 groups)",
-    "text": "5.7 Cancer type categories (7 groups)\n\n\nCode\n# cancer_type_cat_7: recode REDCap tumor_type (numeric 1–9) into 7 clinical groups\n# REDCap coding (from data dictionary):\n#   1 = Lung → Thoracic\n#   2 = Breast\n#   3 = Upper GI/esophagus/gastric  → GI\n#   4 = Lower GI/colon/rectum      → GI\n#   5 = Genitourinary/RCC/bladder   → GU\n#   6 = Mesothelioma                → Other\n#   7 = Gyn/ovarian/uterus/cervix  → GYN\n#   8 = HEENT/Laryngeal/head & neck → HEENT\n#   9 = Other                       → Other\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    cancer_type_cat_7 = factor(case_when(\n      tumor_type == 1             ~ 1,   # Thoracic (Lung)\n      tumor_type == 2             ~ 2,   # Breast\n      tumor_type %in% c(3, 4)    ~ 3,   # GI (Upper + Lower)\n      tumor_type == 5             ~ 4,   # GU\n      tumor_type == 7             ~ 5,   # GYN\n      tumor_type == 8             ~ 6,   # HEENT\n      tumor_type %in% c(6, 9)    ~ 7,   # Other (Mesothelioma + Other)\n      TRUE ~ NA_real_\n    ), levels = 1:7, labels = c(\"Thoracic\", \"Breast\", \"GI\", \"GU\", \"GYN\", \"HEENT\", \"Other\"))\n  )\n\ntable(final_master$cancer_type_cat_7)\n\n\n\nThoracic   Breast       GI       GU      GYN    HEENT    Other \n     200       73       58       13      186       49       16"
+    "section": "5.8 Cancer type categories (7 groups)",
+    "text": "5.8 Cancer type categories (7 groups)\n\n\nCode\n# cancer_type_cat_7: recode REDCap tumor_type (numeric 1–9) into 7 clinical groups\n# REDCap coding (from data dictionary):\n#   1 = Lung → Thoracic\n#   2 = Breast\n#   3 = Upper GI/esophagus/gastric  → GI\n#   4 = Lower GI/colon/rectum      → GI\n#   5 = Genitourinary/RCC/bladder   → GU\n#   6 = Mesothelioma                → Other\n#   7 = Gyn/ovarian/uterus/cervix  → GYN\n#   8 = HEENT/Laryngeal/head & neck → HEENT\n#   9 = Other                       → Other\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    cancer_type_cat_7 = factor(case_when(\n      tumor_type == 1             ~ 1,   # Thoracic (Lung)\n      tumor_type == 2             ~ 2,   # Breast\n      tumor_type %in% c(3, 4)    ~ 3,   # GI (Upper + Lower)\n      tumor_type == 5             ~ 4,   # GU\n      tumor_type == 7             ~ 5,   # GYN\n      tumor_type == 8             ~ 6,   # HEENT\n      tumor_type %in% c(6, 9)    ~ 7,   # Other (Mesothelioma + Other)\n      TRUE ~ NA_real_\n    ), levels = 1:7, labels = c(\"Thoracic\", \"Breast\", \"GI\", \"GU\", \"GYN\", \"HEENT\", \"Other\"))\n  )\n\ntable(final_master$cancer_type_cat_7)\n\n\n\nThoracic   Breast       GI       GU      GYN    HEENT    Other \n     200       73       58       13      186       49       16"
   },
   {
     "objectID": "data_management.html#platinum-dosing-variables",
     "href": "data_management.html#platinum-dosing-variables",
     "title": "Data Management",
     "section": "5.8 Platinum dosing variables",
-    "text": "5.8 Platinum dosing variables\n\n\nCode\n# carbo / cis: binary platinum type\n# carbo_AUC / cis_dose / cis_recommend: dose values (NA for wrong type)\n# cis_group: cisplatin dose tier (1=&lt;40, 2=40–60, 3=≥60 mg/m²)\n# dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)\n# carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin\n# cis_dose_cat: 1=&lt;75 mg/m², 2=≥75, 0=not cisplatin\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    carbo        = ifelse(platin_group == 1, 1, 0),   # REDCap: 1 = Carboplatin\n    cis          = ifelse(platin_group == 2, 1, 0),   # REDCap: 2 = Cisplatin\n    carbo_dose   = case_when(carbo == 1 ~ platin_dose, TRUE ~ NA_real_),\n    cis_dose     = case_when(cis   == 1 ~ platin_dose, TRUE ~ NA_real_),\n    cis_group    = case_when(\n      cis_dose &lt; 40                    ~ 1,\n      cis_dose &gt;= 40 & cis_dose &lt; 60  ~ 2,\n      cis_dose &gt;= 60                   ~ 3,\n      TRUE ~ NA_real_\n    ),\n    dose_1 = factor(case_when(\n      carbo_dose &gt;= 5 | cis_dose &gt;= 75 ~ 1,\n      carbo_dose &lt;  5 | cis_dose &lt;  75 ~ 0,\n      TRUE ~ NA_real_\n    )),\n    carbo_AUC_cat = case_when(\n      carbo_dose &lt;= 4 ~ 1,\n      carbo_dose &gt;= 5 ~ 2,\n      TRUE ~ 0\n    ),\n    cis_dose_cat = case_when(\n      cis_dose &lt;  75 ~ 1,\n      cis_dose &gt;= 75 ~ 2,\n      TRUE ~ 0\n    )\n  )\n\ntable(final_master$dose_1)\n\n\n\n  0   1 \n201 394"
+    "text": "5.8 Platinum dosing variables\n\n\nCode\n# carbo / cis: binary platinum type (platin_group is now a labeled factor)\n# carbo_dose: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²\n# 3 carboplatin records have platin_dose and dosage_mg swapped (total mg in\n# platin_dose, AUC in dosage_mg): records 758, 786, 836. Fix by swapping back.\n# cis_group: cisplatin dose tier (1=&lt;40, 2=40–60, 3=≥60 mg/m²)\n# dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)\n# carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin\n# cis_dose_cat: 1=&lt;75 mg/m², 2=≥75, 0=not cisplatin\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    carbo        = ifelse(platin_group == \"Carboplatin\", 1, 0),\n    cis          = ifelse(platin_group == \"Cisplatin\",   1, 0),\n    # Fix 3 swapped records: platin_dose &gt; 10 for carboplatin means mg was\n    # entered in the AUC field; their dosage_mg contains the actual AUC\n    carbo_dose   = case_when(\n      carbo == 1 & platin_dose &gt; 10 ~ as.numeric(dosage_mg),  # swap back\n      carbo == 1                     ~ platin_dose,\n      TRUE ~ NA_real_\n    ),\n    cis_dose     = case_when(cis == 1 ~ platin_dose, TRUE ~ NA_real_),\n    cis_group    = case_when(\n      cis_dose &lt; 40                    ~ 1,\n      cis_dose &gt;= 40 & cis_dose &lt; 60  ~ 2,\n      cis_dose &gt;= 60                   ~ 3,\n      TRUE ~ NA_real_\n    ),\n    dose_1 = factor(case_when(\n      carbo_dose &gt;= 5 | cis_dose &gt;= 75 ~ 1,\n      carbo_dose &lt;  5 | cis_dose &lt;  75 ~ 0,\n      TRUE ~ NA_real_\n    )),\n    carbo_AUC_cat = case_when(\n      carbo_dose &lt;= 4 ~ 1,\n      carbo_dose &gt;= 5 ~ 2,\n      TRUE ~ 0\n    ),\n    cis_dose_cat = case_when(\n      cis_dose &lt;  75 ~ 1,\n      cis_dose &gt;= 75 ~ 2,\n      TRUE ~ 0\n    )\n  )\n\ntable(final_master$dose_1)\n\n\n\n  0   1 \n202 393"
   },
   {
     "objectID": "data_management.html#rename-baseline-lab-variables-copy-709-convention",
@@ -284,69 +431,6 @@
     "href": "data_management.html#competing-risk-variables",
     "title": "Data Management",
     "section": "5.15 Competing risk variables",
-    "text": "5.15 Competing risk variables\n\n\nCode\n# Apply cmp_variable() to build cmp_time_* and cmp_status_* for each outcome.\n# AE outcomes (anemia, throm, aki, grade_2/3_aes) are now computed from RPDR pipeline\n# (section 4.9) and their competing-risk variables are computed here.\n\n# Adverse event competing risk\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_anemia_2, event_status = Anemia_g2_90days, name = \"anemia_2\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_anemia_3, event_status = Anemia_g3_90days, name = \"anemia_3\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_throm_2,  event_status = Throm_g2_90days,  name = \"throm_2\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_throm_3,  event_status = Throm_g3_90days,  name = \"throm_3\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_aki_2,    event_status = AKI_g2_90days,    name = \"aki_2\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_aki_3,    event_status = AKI_g3_90days,    name = \"aki_3\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_anemia_2, event_status = grade_2_aes,      name = \"grade_2_aes\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_anemia_3, event_status = grade_3_aes,      name = \"grade_3_aes\")\n\n# Platinum-related hospitalization (side effects: hosp reasons 1–7)\nfinal_master &lt;- cmp_variable(final_master,\n  event_time = time_to_side_effect, event_status = side_effect, name = \"side_effect\")\n\n# Hospitalization by reason 1–11\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_1,  event_status = event_hosp_1,  name = \"hosp_1\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_2,  event_status = event_hosp_2,  name = \"hosp_2\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_3,  event_status = event_hosp_3,  name = \"hosp_3\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_4,  event_status = event_hosp_4,  name = \"hosp_4\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_5,  event_status = event_hosp_5,  name = \"hosp_5\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_6,  event_status = event_hosp_6,  name = \"hosp_6\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_7,  event_status = event_hosp_7,  name = \"hosp_7\")\n# hosp_8–11 use their own event_status\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_8,  event_status = event_hosp_8,  name = \"hosp_8\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_9,  event_status = event_hosp_9,  name = \"hosp_9\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_10, event_status = event_hosp_10, name = \"hosp_10\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_11, event_status = event_hosp_11, name = \"hosp_11\")\n\n\n# Convert all cmp_status_* columns to factor (required by tidycmprsk)\nfinal_master &lt;- final_master %&gt;%\n  mutate(across(contains(\"cmp_status_\"), as.factor))\n\n# Save final_master for use by analysis.qmd\nsaveRDS(final_master, \"final_master.rds\")"
-  },
-  {
-    "objectID": "analysis.html",
-    "href": "analysis.html",
-    "title": "Analysis",
-    "section": "",
-    "text": "Code\nlibrary(tidyverse)\nlibrary(scales)\nlibrary(ggplot2)\nlibrary(tidycmprsk)\nlibrary(ggsurvfit)\nlibrary(gtsummary)\n\n# Load final_master from data management output\nfinal_master &lt;- readRDS(\"final_master.rds\")"
-  },
-  {
-    "objectID": "analysis.html#by-creatininecystatin-c-ratio",
-    "href": "analysis.html#by-creatininecystatin-c-ratio",
-    "title": "Analysis",
-    "section": "2.1 By Creatinine/Cystatin C Ratio",
-    "text": "2.1 By Creatinine/Cystatin C Ratio\n\n\nCode\n##dose_1: carbo-AUC ≥ 5 mg/mL/min, or cisplatin ≥ 75 mg/m2\ntable_one_cc_ratio &lt;- final_master %&gt;%\n  dplyr::select(age, age_cat, sex, race, ethnicity, tumor_stage, cancer_type_cat_7,\n                platin_group, cis_dose, cis_dose_cat, carbo_dose, carbo_AUC_cat, dose_1,\n                ici, Bevacizumab, Paclitaxel, Pemetrexed, Doxorubicin, Etoposide, Gemcitabine, Pertuzumab, Trastuzumab, Docetaxel, Fluorouracil, Methotrexate, Vinblastine, Administered_alone,\n                hiv_rpdr, thyroid,\n                score, ecog_score, bmi, bmi_cat, pre_HGB_45days, pre_PLT_45days, pre_ALB_45days, baseline_cys_c, baseline_cre, cockcroft, baseline_cre_egfr, baseline_cys_c_egfr, ckd_epi_gfr_cre_cys, baseline_cre_egfr_unindexed, baseline_cys_c_egfr_unindexed, ckd_epi_gfr_cre_cys_unindex, ckd_stage_cg, cr_cys, cr_cys_7) %&gt;%\n  tbl_summary(statistic = list(age ~ \"{mean} ({sd})\"),\n              by = cr_cys_7) %&gt;%\n  add_overall() %&gt;%\n  add_p(\n    test.args = list(\n      all_categorical() ~ list(simulate.p.value = TRUE)\n    )\n  )\ntable_one_cc_ratio\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCharacteristic\nOverall N = 5951\n0 N = 4301\n1 N = 1651\np-value2\n\n\n\n\nage\n66 (12)\n64 (13)\n69 (10)\n&lt;0.001\n\n\nage_cat\n\n\n\n\n\n\n0.088\n\n\n    1\n243 (41%)\n187 (43%)\n56 (34%)\n\n\n\n\n    2\n301 (51%)\n207 (48%)\n94 (57%)\n\n\n\n\n    3\n51 (8.6%)\n36 (8.4%)\n15 (9.1%)\n\n\n\n\nsex\n\n\n\n\n\n\n0.002\n\n\n    1\n202 (34%)\n162 (38%)\n40 (24%)\n\n\n\n\n    2\n393 (66%)\n268 (62%)\n125 (76%)\n\n\n\n\nrace\n\n\n\n\n\n\n0.7\n\n\n    1\n496 (83%)\n357 (83%)\n139 (84%)\n\n\n\n\n    2\n20 (3.4%)\n15 (3.5%)\n5 (3.0%)\n\n\n\n\n    3\n29 (4.9%)\n24 (5.6%)\n5 (3.0%)\n\n\n\n\n    4\n9 (1.5%)\n6 (1.4%)\n3 (1.8%)\n\n\n\n\n    5\n41 (6.9%)\n28 (6.5%)\n13 (7.9%)\n\n\n\n\nethnicity\n\n\n\n\n\n\n0.2\n\n\n    1\n513 (86%)\n368 (86%)\n145 (88%)\n\n\n\n\n    2\n43 (7.2%)\n29 (6.7%)\n14 (8.5%)\n\n\n\n\n    3\n39 (6.6%)\n33 (7.7%)\n6 (3.6%)\n\n\n\n\ntumor_stage\n\n\n\n\n\n\n0.018\n\n\n    1\n190 (32%)\n150 (35%)\n40 (24%)\n\n\n\n\n    2\n405 (68%)\n280 (65%)\n125 (76%)\n\n\n\n\ncancer_type_cat_7\n\n\n\n\n\n\n0.013\n\n\n    Thoracic\n200 (34%)\n128 (30%)\n72 (44%)\n\n\n\n\n    Breast\n73 (12%)\n56 (13%)\n17 (10%)\n\n\n\n\n    GI\n58 (9.7%)\n45 (10%)\n13 (7.9%)\n\n\n\n\n    GU\n13 (2.2%)\n12 (2.8%)\n1 (0.6%)\n\n\n\n\n    GYN\n186 (31%)\n137 (32%)\n49 (30%)\n\n\n\n\n    HEENT\n49 (8.2%)\n42 (9.8%)\n7 (4.2%)\n\n\n\n\n    Other\n16 (2.7%)\n10 (2.3%)\n6 (3.6%)\n\n\n\n\nplatin_group\n\n\n\n\n\n\n\n\n\n\n    1\n595 (100%)\n430 (100%)\n165 (100%)\n\n\n\n\ncis_dose\nNA (NA, NA)\nNA (NA, NA)\nNA (NA, NA)\n\n\n\n\n    Unknown\n595\n430\n165\n\n\n\n\ncis_dose_cat\n\n\n\n\n\n\n\n\n\n\n    0\n595 (100%)\n430 (100%)\n165 (100%)\n\n\n\n\ncarbo_dose\n5.00 (4.00, 5.00)\n5.00 (4.00, 5.00)\n5.00 (4.00, 5.00)\n0.046\n\n\ncarbo_AUC_cat\n\n\n\n\n\n\n0.047\n\n\n    1\n201 (34%)\n135 (31%)\n66 (40%)\n\n\n\n\n    2\n394 (66%)\n295 (69%)\n99 (60%)\n\n\n\n\ndose_1\n\n\n\n\n\n\n0.044\n\n\n    0\n201 (34%)\n135 (31%)\n66 (40%)\n\n\n\n\n    1\n394 (66%)\n295 (69%)\n99 (60%)\n\n\n\n\nici\n119 (20%)\n76 (18%)\n43 (26%)\n0.033\n\n\nBevacizumab\n31 (5.2%)\n18 (4.2%)\n13 (7.9%)\n0.10\n\n\nPaclitaxel\n326 (55%)\n239 (56%)\n87 (53%)\n0.6\n\n\nPemetrexed\n134 (23%)\n81 (19%)\n53 (32%)\n&lt;0.001\n\n\nDoxorubicin\n8 (1.3%)\n7 (1.6%)\n1 (0.6%)\n0.5\n\n\nEtoposide\n42 (7.1%)\n35 (8.1%)\n7 (4.2%)\n0.10\n\n\nGemcitabine\n10 (1.7%)\n7 (1.6%)\n3 (1.8%)\n&gt;0.9\n\n\nPertuzumab\n56 (9.4%)\n44 (10%)\n12 (7.3%)\n0.3\n\n\nTrastuzumab\n58 (9.7%)\n47 (11%)\n11 (6.7%)\n0.13\n\n\nDocetaxel\n61 (10%)\n49 (11%)\n12 (7.3%)\n0.2\n\n\nFluorouracil\n\n\n\n\n\n\n\n\n\n\n    0\n595 (100%)\n430 (100%)\n165 (100%)\n\n\n\n\nMethotrexate\n\n\n\n\n\n\n\n\n\n\n    0\n595 (100%)\n430 (100%)\n165 (100%)\n\n\n\n\nVinblastine\n\n\n\n\n\n\n\n\n\n\n    0\n595 (100%)\n430 (100%)\n165 (100%)\n\n\n\n\nAdministered_alone\n6 (1.0%)\n4 (0.9%)\n2 (1.2%)\n0.7\n\n\nhiv_rpdr\n7 (1.2%)\n5 (1.2%)\n2 (1.2%)\n&gt;0.9\n\n\nthyroid\n120 (20%)\n86 (20%)\n34 (21%)\n&gt;0.9\n\n\nscore\n8.0 (6.0, 11.0)\n8.0 (6.0, 10.0)\n9.0 (8.0, 12.0)\n&lt;0.001\n\n\necog_score\n\n\n\n\n\n\n&lt;0.001\n\n\n    1\n289 (49%)\n240 (56%)\n49 (30%)\n\n\n\n\n    2\n261 (44%)\n173 (40%)\n88 (53%)\n\n\n\n\n    3\n36 (6.1%)\n15 (3.5%)\n21 (13%)\n\n\n\n\n    4\n9 (1.5%)\n2 (0.5%)\n7 (4.2%)\n\n\n\n\nbmi\n26.9 (23.4, 30.8)\n26.9 (23.4, 30.8)\n26.5 (23.4, 30.9)\n&gt;0.9\n\n\nbmi_cat\n\n\n\n\n\n\n0.8\n\n\n    1\n19 (3.2%)\n15 (3.5%)\n4 (2.4%)\n\n\n\n\n    2\n200 (34%)\n142 (33%)\n58 (35%)\n\n\n\n\n    3\n202 (34%)\n149 (35%)\n53 (32%)\n\n\n\n\n    4\n174 (29%)\n124 (29%)\n50 (30%)\n\n\n\n\npre_HGB_45days\n12.70 (11.70, 13.80)\n12.90 (12.10, 13.90)\n11.90 (10.80, 13.10)\n&lt;0.001\n\n\npre_PLT_45days\n272 (216, 342)\n266 (214, 334)\n284 (224, 376)\n0.012\n\n\npre_ALB_45days\n4.20 (4.00, 4.40)\n4.30 (4.10, 4.50)\n4.00 (3.60, 4.20)\n&lt;0.001\n\n\nbaseline_cys_c\n1.02 (0.87, 1.23)\n0.96 (0.83, 1.14)\n1.18 (1.03, 1.48)\n&lt;0.001\n\n\nbaseline_cre\n0.81 (0.70, 0.97)\n0.84 (0.73, 1.00)\n0.73 (0.60, 0.88)\n&lt;0.001\n\n\ncockcroft\n81 (62, 104)\n80 (62, 100)\n86 (61, 112)\n0.2\n\n\nbaseline_cre_egfr\n87 (71, 97)\n85 (71, 95)\n92 (72, 101)\n0.007\n\n\nbaseline_cys_c_egfr\n71 (55, 88)\n77 (61, 93)\n58 (42, 69)\n&lt;0.001\n\n\nckd_epi_gfr_cre_cys\n81 (66, 95)\n83 (69, 98)\n74 (55, 86)\n&lt;0.001\n\n\nbaseline_cre_egfr_unindexed\n89 (73, 102)\n88 (73, 100)\n90 (74, 104)\n0.3\n\n\nbaseline_cys_c_egfr_unindexed\n73 (57, 92)\n80 (63, 97)\n58 (42, 72)\n&lt;0.001\n\n\nckd_epi_gfr_cre_cys_unindex\n83 (67, 100)\n87 (71, 104)\n75 (56, 90)\n&lt;0.001\n\n\nckd_stage_cg\n\n\n\n\n\n\n0.002\n\n\n    1\n230 (39%)\n152 (35%)\n78 (47%)\n\n\n\n\n    2\n236 (40%)\n190 (44%)\n46 (28%)\n\n\n\n\n    3\n125 (21%)\n86 (20%)\n39 (24%)\n\n\n\n\n    4\n4 (0.7%)\n2 (0.5%)\n2 (1.2%)\n\n\n\n\ncr_cys\n0.79 (0.69, 0.92)\n0.86 (0.78, 0.96)\n0.62 (0.56, 0.66)\n&lt;0.001\n\n\n\n1 Mean (SD); n (%); Median (Q1, Q3)\n\n\n2 Wilcoxon rank sum test; Pearson’s Chi-squared test with simulated p-value (based on 2000 replicates); Fisher’s Exact Test for Count Data with simulated p-value (based on 2000 replicates); Fisher’s exact test"
-  },
-  {
-    "objectID": "analysis.html#incidence-outcomes-by-creatininecystatin-c-ratio",
-    "href": "analysis.html#incidence-outcomes-by-creatininecystatin-c-ratio",
-    "title": "Analysis",
-    "section": "3.1 Incidence Outcomes by Creatinine/Cystatin C Ratio",
-    "text": "3.1 Incidence Outcomes by Creatinine/Cystatin C Ratio\n\n\nCode\ntable_one_incidence &lt;- final_master %&gt;%\n  select(platinum_related_hosp, hosp_90, grade_3_aes, death_90, cr_cys_7) %&gt;%\n  tbl_summary(\n    by = cr_cys_7,\n    statistic = list(\n      all_continuous() ~ \"{mean} ({sd})\",\n      all_categorical() ~ \"{n} ({p}%)\"\n    ),\n    digits = list(\n      all_continuous() ~ 1,\n      all_categorical() ~ 1\n    )\n  ) %&gt;%\n  add_overall()\ntable_one_incidence\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCharacteristic\nOverall N = 5951\n0 N = 4301\n1 N = 1651\n\n\n\n\nplatinum_related_hosp\n87.0 (14.6%)\n47.0 (10.9%)\n40.0 (24.2%)\n\n\nhosp_90\n165.0 (27.7%)\n105.0 (24.4%)\n60.0 (36.4%)\n\n\ngrade_3_aes\n86.0 (14.5%)\n39.0 (9.1%)\n47.0 (28.5%)\n\n\ndeath_90\n22.0 (3.7%)\n6.0 (1.4%)\n16.0 (9.7%)\n\n\n\n1 n (%)\n\n\n\n\n\n\n\n\n\n\nCode\n# Compute event rates by decile\nfinal_master &lt;- final_master %&gt;%\n  group_by(cc_decile) %&gt;%\n  mutate(\n    anemia_2_rate_decile              = mean(Anemia_g2_90days, na.rm = TRUE),\n    anemia_3_rate_decile              = mean(Anemia_g3_90days, na.rm = TRUE),\n    throm_2_rate_decile               = mean(Throm_g2_90days, na.rm = TRUE),\n    throm_3_rate_decile               = mean(Throm_g3_90days, na.rm = TRUE),\n    aki_2_rate_decile                 = mean(AKI_g2_90days, na.rm = TRUE),\n    aki_3_rate_decile                 = mean(AKI_g3_90days, na.rm = TRUE),\n    hos_rate_decile                   = mean(hosp_90, na.rm = TRUE),\n    platinum_related_hos_rate_decile  = mean(platinum_related_hosp, na.rm = TRUE),\n    death_rate_decile                 = mean(death_90, na.rm = TRUE)\n  ) %&gt;%\n  ungroup() %&gt;%\n  mutate(cc_decile = as.numeric(cc_decile))\n\n\n\n\nCode\n# Summarize cr_cys ratio by decile\nsummary_by_decile &lt;- final_master %&gt;%\n  group_by(cc_decile) %&gt;%\n  summarise(\n    n      = n(),\n    min    = min(cr_cys, na.rm = TRUE),\n    q1     = quantile(cr_cys, 0.25, na.rm = TRUE),\n    median = median(cr_cys, na.rm = TRUE),\n    mean   = mean(cr_cys, na.rm = TRUE),\n    q3     = quantile(cr_cys, 0.75, na.rm = TRUE),\n    max    = max(cr_cys, na.rm = TRUE),\n    sd     = sd(cr_cys, na.rm = TRUE)\n  )"
-  },
-  {
-    "objectID": "analysis.html#grade-2-anemia",
-    "href": "analysis.html#grade-2-anemia",
-    "title": "Analysis",
-    "section": "5.1 Grade 2 Anemia",
-    "text": "5.1 Grade 2 Anemia\n\n\nCode\nloess_plot(\n  data = final_master, x = cc_percentile, y = Anemia_g2_90days,\n  x_point = cc_decile * 10, y_point = anemia_2_rate_decile,\n  title = \"Grade &gt;= 2 Anemia\",\n  xlab = \"Percentile of SCR/CYS Ratio\", ylab = \"Grade &gt;= 2 Anemia\"\n)"
-  },
-  {
-    "objectID": "analysis.html#grade-3-thrombocytopenia",
-    "href": "analysis.html#grade-3-thrombocytopenia",
-    "title": "Analysis",
-    "section": "5.2 Grade 3 Thrombocytopenia",
-    "text": "5.2 Grade 3 Thrombocytopenia\n\n\nCode\nloess_plot(\n  data = final_master, x = cc_percentile, y = Throm_g3_90days,\n  x_point = cc_decile * 10, y_point = throm_3_rate_decile,\n  title = \"Grade &gt;= 3 Thrombocytopenia\",\n  xlab = \"Percentile of SCR/CYS Ratio\", ylab = \"Grade &gt;= 3 Thrombocytopenia\"\n)"
-  },
-  {
-    "objectID": "analysis.html#grade-3-aki-creatinine-increased",
-    "href": "analysis.html#grade-3-aki-creatinine-increased",
-    "title": "Analysis",
-    "section": "5.3 Grade 3 AKI (Creatinine Increased)",
-    "text": "5.3 Grade 3 AKI (Creatinine Increased)\n\n\nCode\nloess_plot(\n  data = final_master, x = cc_percentile, y = AKI_g3_90days,\n  x_point = cc_decile * 10, y_point = aki_3_rate_decile,\n  title = \"Grade &gt;= 3 Creatinine Increased\",\n  xlab = \"Percentile of SCR/CYS Ratio\", ylab = \"Grade &gt;= 3 Creatinine Increased\"\n)"
-  },
-  {
-    "objectID": "analysis.html#overall-hospitalization",
-    "href": "analysis.html#overall-hospitalization",
-    "title": "Analysis",
-    "section": "5.4 Overall Hospitalization",
-    "text": "5.4 Overall Hospitalization\n\n\nCode\nloess_plot(\n  data = final_master, x = cc_percentile, y = hosp_90,\n  x_point = cc_decile * 10, y_point = hos_rate_decile,\n  title = \"Overall Hospitalization\",\n  xlab = \"Percentile of SCR/CYS Ratio\", ylab = \"Overall Hospitalization\"\n)"
-  },
-  {
-    "objectID": "analysis.html#platinum-related-hospitalization",
-    "href": "analysis.html#platinum-related-hospitalization",
-    "title": "Analysis",
-    "section": "5.5 Platinum-Related Hospitalization",
-    "text": "5.5 Platinum-Related Hospitalization\n\n\nCode\nloess_plot(\n  data = final_master, x = cc_percentile, y = platinum_related_hosp,\n  x_point = cc_decile * 10, y_point = platinum_related_hos_rate_decile,\n  title = \"Hospitalization for Platinum-Associated AEs\",\n  xlab = \"Percentile of SCR/CYS Ratio\", ylab = \"Hospitalization for Platinum-Associated AEs\"\n)"
-  },
-  {
-    "objectID": "analysis.html#platinum-related-hospitalization-side-effect",
-    "href": "analysis.html#platinum-related-hospitalization-side-effect",
-    "title": "Analysis",
-    "section": "6.1 Platinum-Related Hospitalization (Side Effect)",
-    "text": "6.1 Platinum-Related Hospitalization (Side Effect)\n\n\nCode\nfit_side_effect &lt;- cuminc(\n  Surv(cmp_time_side_effect, cmp_status_side_effect) ~ cr_cys_7,\n  data = final_master\n)\n\nggcuminc(fit_side_effect) +\n  labs(\n    title = \"Platinum-Related Hospitalization\",\n    x = \"Follow-up Time (Days)\",\n    y = \"Cumulative Incidence\"\n  ) +\n  scale_y_continuous(labels = percent_format(accuracy = 1)) +\n  theme_classic(base_size = 14) +\n  theme(\n    plot.title    = element_text(face = \"bold\", size = 16),\n    axis.title    = element_text(size = 14),\n    axis.text     = element_text(size = 12),\n    legend.title  = element_blank(),\n    legend.text   = element_text(size = 12)\n  ) +\n  scale_color_manual(values = c(\"red\", \"blue\"))"
+    "text": "5.15 Competing risk variables\n\n\nCode\n# Apply cmp_variable() to build cmp_time_* and cmp_status_* for each outcome.\n# AE outcomes (anemia, throm, aki, grade_2/3_aes) are now computed from RPDR pipeline\n# (section 4.9) and their competing-risk variables are computed here.\n\n# Adverse event competing risk\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_anemia_2, event_status = Anemia_g2_90days, name = \"anemia_2\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_anemia_3, event_status = Anemia_g3_90days, name = \"anemia_3\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_throm_2,  event_status = Throm_g2_90days,  name = \"throm_2\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_throm_3,  event_status = Throm_g3_90days,  name = \"throm_3\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_aki_2,    event_status = AKI_g2_90days,    name = \"aki_2\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_aki_3,    event_status = AKI_g3_90days,    name = \"aki_3\")\n# Composite AE: use the earliest event time across anemia/throm/AKI\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    time_to_grade_2_aes = pmin(time_to_anemia_2, time_to_throm_2, time_to_aki_2, na.rm = TRUE),\n    time_to_grade_3_aes = pmin(time_to_anemia_3, time_to_throm_3, time_to_aki_3, na.rm = TRUE)\n  )\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_grade_2_aes, event_status = grade_2_aes, name = \"grade_2_aes\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_grade_3_aes, event_status = grade_3_aes, name = \"grade_3_aes\")\n\n# Platinum-related hospitalization (side effects: hosp reasons 1–7)\nfinal_master &lt;- cmp_variable(final_master,\n  event_time = time_to_side_effect, event_status = side_effect, name = \"side_effect\")\n\n# Hospitalization by reason 1–11\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_1,  event_status = event_hosp_1,  name = \"hosp_1\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_2,  event_status = event_hosp_2,  name = \"hosp_2\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_3,  event_status = event_hosp_3,  name = \"hosp_3\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_4,  event_status = event_hosp_4,  name = \"hosp_4\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_5,  event_status = event_hosp_5,  name = \"hosp_5\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_6,  event_status = event_hosp_6,  name = \"hosp_6\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_7,  event_status = event_hosp_7,  name = \"hosp_7\")\n# hosp_8–11 use their own event_status\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_8,  event_status = event_hosp_8,  name = \"hosp_8\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_9,  event_status = event_hosp_9,  name = \"hosp_9\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_10, event_status = event_hosp_10, name = \"hosp_10\")\nfinal_master &lt;- cmp_variable(final_master, event_time = time_to_event_hosp_11, event_status = event_hosp_11, name = \"hosp_11\")\n\n\n# Convert all cmp_status_* columns to factor (required by tidycmprsk)\nfinal_master &lt;- final_master %&gt;%\n  mutate(across(contains(\"cmp_status_\"), as.factor))\n\n# Save final_master for use by analysis.qmd\nsaveRDS(final_master, \"final_master.rds\")"
   }
 ]
