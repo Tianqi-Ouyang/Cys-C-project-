@@ -27,99 +27,131 @@ Variables with the same name as the PDF / REDCap CSV are not listed. Only **rena
 | `hosp_visit_diff` | `hosp_visit_0_diff` |
 | `hosp_visit_reason___1–11` | `hosp_visit_0_reason_1–11` |
 
-## 1.2 Derived — eGFR & Kidney Function
+## 1.2 Labeled REDCap Variables
+
+These variables are stored as numeric codes in the REDCap CSV and labeled in section 5.7.
+
+| In Code | REDCap Coding |
+|---|---|
+| `sex` | 1=Male, 2=Female |
+| `race` | 1=White, 2=Black, 3=Asian, 4=Other, 5=Unknown |
+| `ethnicity` | 1=Non-Hispanic, 2=Hispanic, 3=Unknown |
+| `tumor_stage` | 1=Local/neoadjuvant/early (stage I–II), 2=Advanced/metastatic (stage III–IV) |
+| `platin_group` | 1=Carboplatin, 2=Cisplatin, 3=Unknown |
+| `ecog_score` | REDCap stores 1=ECOG 0, 2=ECOG 1, …, 7=N/A. Remapped to actual ECOG (0–5); 7 → NA |
+| `ecog_estimate` | Same remapping as `ecog_score`; shown only when `ecog_score` = N/A |
+
+## 1.3 Derived — eGFR & Kidney Function
 
 | In Code | Description |
 |---|---|
-| `cockcroft` | Cockcroft-Gault creatinine clearance |
-| `ckd_epi_gfr_cre_cys` | CKD-EPI combined creatinine-cystatin C eGFR |
-| `ckd_epi_gfr_cre_cys_unindex` | Body-adjusted combined CKD-EPI eGFR |
-| `baseline_cre_egfr_unindexed` | Body-adjusted creatinine-based eGFR |
-| `baseline_cys_c_egfr_unindexed` | Body-adjusted cystatin-based eGFR |
-| `ckd_stage_cg` | CKD stage from Cockcroft-Gault |
+| `cockcroft` | Cockcroft-Gault creatinine clearance (mL/min) |
+| `ckd_epi_gfr_cre_cys` | CKD-EPI 2012 combined creatinine + cystatin C eGFR (mL/min/1.73m²) |
+| `ckd_epi_gfr_cre_cys_unindex` | Combined CKD-EPI eGFR adjusted for body surface area (mL/min) |
+| `baseline_cre_egfr_unindexed` | CKD-EPI creatinine eGFR adjusted for body surface area (mL/min) |
+| `baseline_cys_c_egfr_unindexed` | CKD-EPI cystatin C eGFR adjusted for body surface area (mL/min) |
+| `ckd_stage_cg` | CKD stage 1–5 from Cockcroft-Gault (1=≥90, 2=60–89, 3=30–59, 4=15–29, 5=<15 mL/min) |
 
-## 1.3 Derived — RPDR Pre-baseline Labs (within 45 days)
+## 1.4 Derived — RPDR Pre-baseline Labs (within 45 days before baseline)
 
-| In Code | RPDR Group_Id |
-|---|---|
-| `pre_CRE_45days` | `CRE` |
-| `pre_HGB_45days` | `HGB` |
-| `pre_PLT_45days` | `PLT` |
-| `pre_ALB_45days` | `ALB` |
-| `pre_GHBA1C_45days` | `GHBA1C` |
+| In Code | RPDR Group_Id | Units |
+|---|---|---|
+| `pre_CRE_45days` | `CRE` | mg/dL |
+| `pre_HGB_45days` | `HGB` | g/dL |
+| `pre_PLT_45days` | `PLT` | ×10³/µL |
+| `pre_ALB_45days` | `ALB` | g/dL |
+| `pre_GHBA1C_45days` | `GHBA1C` | % |
 
-## 1.4 Derived — Exposure
-
-| In Code | Description |
-|---|---|
-| `cr_cys` | baseline_cre / baseline_cys_c |
-| `cr_cys_7` | Binary: 1 if ratio < 0.7 (primary exposure) |
-| `cr_cys_cat` | Categorical: <0.5 / 0.5–0.7 / 0.7–0.9 / ≥0.9 |
-| `exposure_epi_30` | baseline_cys_c_egfr < 0.7 × baseline_cre_egfr |
-| `exposure_cg_30` | ckd_epi_gfr_cre_cys_unindex < 0.7 × cockcroft |
-| `exposure_cg_15` | ckd_epi_gfr_cre_cys_unindex < 0.85 × cockcroft |
-| `egfr_combined_cg_ratio` | ckd_epi_gfr_cre_cys_unindex / cockcroft |
-
-## 1.5 Derived — Adverse Events (within 90 days)
+## 1.5 Derived — Exposure
 
 | In Code | Description |
 |---|---|
-| `Anemia_g2_90days` / `Anemia_g3_90days` | Grade ≥ 2/3 anemia |
-| `Throm_g2_90days` / `Throm_g3_90days` | Grade ≥ 2/3 thrombocytopenia |
-| `AKI_g2_90days` / `AKI_g3_90days` | Grade ≥ 2/3 AKI |
-| `grade_2_aes` / `grade_3_aes` | Composite: any AE grade 2/3 |
-| `time_to_anemia_2` … `time_to_aki_3` | Days to each AE (90 if none) |
+| `cr_cys` | Creatinine-to-cystatin C ratio: `baseline_cre / baseline_cys_c` |
+| `cr_cys_7` | Primary exposure (binary): 1 if `cr_cys` < 0.7, 0 otherwise |
+| `cr_cys_cat` | 4-level categorical: <0.5 / 0.5–0.7 / 0.7–0.9 / ≥0.9 |
+| `exposure_epi_30` | Binary: 1 if cystatin C eGFR < 0.7 × creatinine eGFR (CKD-EPI based) |
+| `exposure_cg_30` | Binary: 1 if combined unindexed eGFR < 0.7 × Cockcroft-Gault |
+| `exposure_cg_15` | Binary: 1 if combined unindexed eGFR < 0.85 × Cockcroft-Gault |
+| `egfr_combined_cg_ratio` | Ratio: combined unindexed eGFR / Cockcroft-Gault |
 
-## 1.6 Derived — Hospitalizations & ED
-
-| In Code | Description |
-|---|---|
-| `event_hosp_1–11` | Hospitalization by reason |
-| `time_to_event_hosp_1–11` | Days from baseline |
-| `side_effect` | Hosp reasons 1–7 (platinum-related), any = 1 |
-| `time_to_side_effect` | Time to first platinum-related hosp (90 if none) |
-| `extra_ed_n` / `extra_hosp_n` | Count of extra ED visits / hospitalizations |
-
-## 1.7 Derived — Mortality
+## 1.6 Derived — Adverse Events (within 90 days of baseline)
 
 | In Code | Description |
 |---|---|
-| `days_last_follow_up` | Days from baseline to last follow-up |
-| `death_90` | 1 if died within 90 days |
-| `time_to_death_90` | Days to death (capped at 90) |
-| `time_to_death_90_status` | 0=censored, 2=dead |
+| `Anemia_g2_90days` | Binary: 1 if HGB < 8 g/dL within 90 days (CTCAE grade ≥ 2) |
+| `Anemia_g3_90days` | Binary: 1 if HGB < 6.5 g/dL within 90 days (CTCAE grade ≥ 3) |
+| `Throm_g2_90days` | Binary: 1 if PLT < 75 ×10³/µL within 90 days (CTCAE grade ≥ 2) |
+| `Throm_g3_90days` | Binary: 1 if PLT < 50 ×10³/µL within 90 days (CTCAE grade ≥ 3) |
+| `AKI_g2_90days` | Binary: 1 if creatinine > 1.5× pre-baseline within 90 days (CTCAE grade ≥ 2) |
+| `AKI_g3_90days` | Binary: 1 if creatinine > 3× pre-baseline within 90 days (CTCAE grade ≥ 3) |
+| `grade_2_aes` | Composite binary: 1 if any of anemia/throm/AKI grade ≥ 2 |
+| `grade_3_aes` | Composite binary: 1 if any of anemia/throm/AKI grade ≥ 3 |
+| `time_to_anemia_2` … `time_to_aki_3` | Days from baseline to each AE (90 if no event) |
+| `time_to_grade_2_aes` / `time_to_grade_3_aes` | Days to earliest composite AE (min across anemia/throm/AKI) |
 
-## 1.8 Derived — Comorbidities & Categories
+## 1.7 Derived — Hospitalizations & ED
+
+Hospitalization reasons 1–11 per REDCap codebook:
+1=Nausea/vomiting/GI, 2=Failure to thrive/fatigue/dehydration, 3=AKI,
+4=Electrolyte abnormalities, 5=Cytopenia, 6=Febrile neutropenia,
+7=Infection/sepsis, 8=Cancer progression, 9=Immune-related AE,
+10=Planned surgery/port, 11=Other
 
 | In Code | Description |
 |---|---|
-| `score` / `cci` | Charlson comorbidity index (RPDR ICD codes) |
-| `thyroid` | Thyroid disease (RPDR diagnosis + medication) |
-| `hiv_rpdr` | HIV from RPDR |
-| `bmi` / `bmi_cat` | BMI and category |
-| `age_cat` | 1=≤65, 2=66–80, 3=>80 |
-| `ici` | Immune checkpoint inhibitor use |
-| `cancer_type_cat_7` | Cancer type (7 categories) |
+| `event_hosp_1` … `event_hosp_11` | Binary: 1 if hospitalized for that reason within 90 days |
+| `time_to_event_hosp_1` … `time_to_event_hosp_11` | Days from baseline to hospitalization by reason (90 if none) |
+| `side_effect` | Binary: 1 if any hospitalization for reasons 1–7 (platinum-related AEs) |
+| `time_to_side_effect` | Days to first platinum-related hospitalization (90 if none) |
+| `extra_ed_n` | Count of additional ED visits (beyond the first) |
+| `extra_hosp_n` | Count of additional hospitalizations (beyond the first) |
 
-## 1.9 Derived — Platinum Dosing
+## 1.8 Derived — Mortality
 
 | In Code | Description |
 |---|---|
-| `carbo` / `cis` | Binary: Carboplatin / Cisplatin |
-| `carbo_AUC` / `carbo_dose` | Carboplatin AUC |
-| `cis_dose` / `cis_recommend` | Cisplatin mg/m² |
-| `dose_1` | High-dose: carbo AUC ≥ 5 OR cisplatin ≥ 75 mg/m² |
-| `carbo_AUC_cat` / `cis_dose_cat` / `cis_group` | Dose categories |
+| `days_last_follow_up` | Days from baseline to last follow-up date |
+| `death_90` | Binary: 1 if died within 90 days (REDCap `pt_status` = 3 "Dead") |
+| `time_to_death_90` | Days to death, capped at 90 (90 if alive/censored) |
+| `time_to_death_90_status` | 0=censored (alive at last follow-up), 2=dead within 90 days |
 
-## 1.10 Derived — Drug Indicators & Competing Risk
+## 1.9 Derived — Comorbidities & Categories
 
-Drug indicators parsed from `regimen_dose` by `create_drug_indicators()`:
+| In Code | Description |
+|---|---|
+| `score` | Charlson comorbidity index weighted score (from RPDR ICD codes via `comorbidity` package) |
+| `cci` | Charlson category: "mild" (score 1–2), "moderate" (3–4), "severe" (≥5) |
+| `thyroid` | Binary: 1 if thyroid disease in RPDR diagnoses or medications |
+| `hiv_rpdr` | Binary: 1 if HIV in RPDR diagnoses or medications |
+| `bmi` | Body mass index: weight(kg) / height(m)² |
+| `bmi_cat` | 1=Underweight (<18.5), 2=Normal (18.5–25), 3=Overweight (25–30), 4=Obese (≥30) |
+| `age_cat` | 1=≤65 years, 2=66–80 years, 3=>80 years |
+| `ici` | Binary: 1 if receiving immune checkpoint inhibitor (Atezolizumab, Pembrolizumab, or Durvalumab) |
+| `cancer_type_cat_7` | Factor from `tumor_type`: Thoracic(1), Breast(2), GI(3,4), GU(5), GYN(7), HEENT(8), Other(6,9) |
+
+## 1.10 Derived — Platinum Dosing
+
+| In Code | Description |
+|---|---|
+| `carbo` | Binary: 1 if `platin_group` = Carboplatin |
+| `cis` | Binary: 1 if `platin_group` = Cisplatin |
+| `carbo_dose` | Carboplatin AUC (from `platin_dose` for carboplatin patients; NA for cisplatin) |
+| `cis_dose` | Cisplatin dose in mg/m² (from `platin_dose` for cisplatin patients; NA for carboplatin) |
+| `dose_1` | Binary factor: 1=High-dose (carbo AUC ≥ 5 OR cisplatin ≥ 75 mg/m²), 0=Low-dose |
+| `carbo_AUC_cat` | Carboplatin AUC category: 1=AUC ≤ 4, 2=AUC ≥ 5, 0=not carboplatin |
+| `cis_dose_cat` | Cisplatin dose category: 1=<75 mg/m², 2=≥75 mg/m², 0=not cisplatin |
+| `cis_group` | Cisplatin dose tier: 1=<40 mg/m², 2=40–60 mg/m², 3=≥60 mg/m² |
+
+## 1.11 Derived — Drug Indicators & Competing Risk
+
+Drug indicators (binary 0/1) parsed from `regimen_dose` text by `create_drug_indicators()`:
 `Bevacizumab`, `Paclitaxel`, `Pemetrexed`, `Durvalumab`, `Doxorubicin`,
 `Pembrolizumab`, `Etoposide`, `Gemcitabine`, `Atezolizumab`, `Pertuzumab`,
 `Trastuzumab`, `Docetaxel`, `Fluorouracil`, `Methotrexate`, `Vinblastine`,
-`Administered_alone`
+`Administered_alone` (1 if no co-administered drugs detected)
 
-Competing risk: `cmp_time_<outcome>` / `cmp_status_<outcome>` (0=censored, 1=event, 2=death)
+Competing risk variables: `cmp_time_<outcome>` / `cmp_status_<outcome>` for each outcome.
+Status coding: 0=censored (alive, no event by 90 days), 1=event occurred, 2=death (competing event)
 
 ---
 
