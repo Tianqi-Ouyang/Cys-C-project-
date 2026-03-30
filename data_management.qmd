@@ -150,10 +150,10 @@ leading to a different recommended dose.
 
 | In Code | Description |
 |---|---|
-| `carbo_dose_cg` | Recommended carboplatin dose (mg) using Cockcroft-Gault: AUC × (CG + 25) |
-| `carbo_dose_cys` | Recommended carboplatin dose (mg) using CKD-EPI Cr-Cys unindexed: AUC × (eGFR + 25) |
-| `dose_discrepancy` | Ratio: `carbo_dose_cys / carbo_dose_cg` (>1 = CKD-EPI suggests higher dose) |
-| `dose_diff_pct` | Percentage difference: (CKD-EPI dose − CG dose) / CG dose × 100 |
+| `carbo_dose_redcap` | Actual administered carboplatin dose (mg) from REDCap `dosage_mg` |
+| `carbo_dose_cre_cys` | Predicted carboplatin dose (mg) using CKD-EPI Cr-Cys unindexed: AUC × (eGFR + 25) |
+| `dose_discrepancy` | Actual − predicted dose (mg): `carbo_dose_redcap − carbo_dose_cre_cys` |
+| `dose_diff_pct` | Percentage difference: (actual − predicted) / predicted × 100 |
 | `ecog_score_cat2` | ECOG binary: "0" vs ">=1" |
 | `bmi_30` | BMI binary: "<30" vs ">=30" |
 | `age_70` | Age binary: "<70" vs ">=70" |
@@ -1010,18 +1010,18 @@ table(final_master$cr_cys_7)
 final_master <- final_master %>%
   mutate(
     bmi = weight / (height / 100)^2,
-    bmi_cat = case_when(
-      bmi < 18.5              ~ 1,
-      bmi >= 18.5 & bmi < 25 ~ 2,
-      bmi >= 25   & bmi < 30 ~ 3,
-      bmi >= 30               ~ 4,
-      TRUE ~ NA_real_
-    ),
-    age_cat = case_when(
-      age <= 65             ~ 1,
-      age > 65 & age <= 80 ~ 2,
-      age > 80              ~ 3
-    ),
+    bmi_cat = factor(case_when(
+      bmi < 18.5              ~ "Underweight (<18.5)",
+      bmi >= 18.5 & bmi < 25 ~ "Normal (18.5-25)",
+      bmi >= 25   & bmi < 30 ~ "Overweight (25-30)",
+      bmi >= 30               ~ "Obese (>=30)",
+      TRUE ~ NA_character_
+    ), levels = c("Underweight (<18.5)", "Normal (18.5-25)", "Overweight (25-30)", "Obese (>=30)")),
+    age_cat = factor(case_when(
+      age <= 65             ~ "<=65",
+      age > 65 & age <= 80 ~ "66-80",
+      age > 80              ~ ">80"
+    ), levels = c("<=65", "66-80", ">80")),
     ici = ifelse(Atezolizumab == 1 | Pembrolizumab == 1 | Durvalumab == 1, 1, 0),
     ckd_stage_cg = factor(case_when(
       cockcroft >= 90              ~ 1,
@@ -1138,22 +1138,21 @@ table(final_master$dose_1)
 ```{r}
 #| label: clean-dose-carbo
 # Carboplatin is dosed via Calvert formula: Dose(mg) = target AUC × (GFR + 25)
-# Standard practice uses Cockcroft-Gault for GFR. If CKD-EPI Cr-Cys gives a
-# different GFR, the recommended carboplatin dose would differ.
+# Standard practice uses Cockcroft-Gault → that's the actual dose given (in REDCap dosage_mg).
+# CKD-EPI Cr-Cys may predict a different dose.
 #
-# carbo_dose_cg:  Calvert dose using Cockcroft-Gault (standard)
-# carbo_dose_cys: Calvert dose using CKD-EPI Cr-Cys unindexed
-# dose_discrepancy: ratio of CKD-EPI dose / Cockcroft dose (>1 = higher dose
-#   recommended by CKD-EPI; <1 = lower dose recommended)
-# dose_diff_pct: percentage difference (positive = CKD-EPI suggests higher dose)
+# carbo_dose_redcap:  actual administered dose from REDCap (dosage_mg)
+# carbo_dose_cre_cys: predicted dose using CKD-EPI Cr-Cys unindexed eGFR
+# dose_discrepancy:   actual - predicted (mg); positive = patient got more than CKD-EPI predicts
+# dose_diff_pct:      (actual - predicted) / predicted × 100
 
 final_master <- final_master %>%
   mutate(
-    carbo_dose_cg  = carbo_dose * (cockcroft + 25),
-    carbo_dose_cys = carbo_dose * (ckd_epi_gfr_cre_cys_unindex + 25),
-    dose_discrepancy = carbo_dose_cys / carbo_dose_cg,
-    dose_diff_pct    = (carbo_dose_cys - carbo_dose_cg) / carbo_dose_cg * 100,
-    ecog_score_cat2  = ifelse(ecog_score == 0, "0", ">=1"),
+    carbo_dose_redcap  = as.numeric(dosage_mg),
+    carbo_dose_cre_cys = carbo_dose * (ckd_epi_gfr_cre_cys_unindex + 25),
+    dose_discrepancy   = carbo_dose_redcap - carbo_dose_cre_cys,
+    dose_diff_pct      = (carbo_dose_redcap - carbo_dose_cre_cys) / carbo_dose_cre_cys * 100,
+    ecog_score_cat2    = ifelse(ecog_score == 0, "0", ">=1"),
     bmi_30 = factor(ifelse(bmi < 30, "<30", ">=30")),
     age_70 = factor(ifelse(age < 70, "<70", ">=70"))
   )

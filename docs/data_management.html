@@ -727,20 +727,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>carbo_dose_cg</code></td>
-<td>Recommended carboplatin dose (mg) using Cockcroft-Gault: AUC × (CG + 25)</td>
+<td><code>carbo_dose_redcap</code></td>
+<td>Actual administered carboplatin dose (mg) from REDCap <code>dosage_mg</code></td>
 </tr>
 <tr class="even">
-<td><code>carbo_dose_cys</code></td>
-<td>Recommended carboplatin dose (mg) using CKD-EPI Cr-Cys unindexed: AUC × (eGFR + 25)</td>
+<td><code>carbo_dose_cre_cys</code></td>
+<td>Predicted carboplatin dose (mg) using CKD-EPI Cr-Cys unindexed: AUC × (eGFR + 25)</td>
 </tr>
 <tr class="odd">
 <td><code>dose_discrepancy</code></td>
-<td>Ratio: <code>carbo_dose_cys / carbo_dose_cg</code> (&gt;1 = CKD-EPI suggests higher dose)</td>
+<td>Actual − predicted dose (mg): <code>carbo_dose_redcap − carbo_dose_cre_cys</code></td>
 </tr>
 <tr class="even">
 <td><code>dose_diff_pct</code></td>
-<td>Percentage difference: (CKD-EPI dose − CG dose) / CG dose × 100</td>
+<td>Percentage difference: (actual − predicted) / predicted × 100</td>
 </tr>
 <tr class="odd">
 <td><code>ecog_score_cat2</code></td>
@@ -1696,18 +1696,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
 <span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">bmi =</span> weight <span class="sc">/</span> (height <span class="sc">/</span> <span class="dv">100</span>)<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">bmi_cat =</span> <span class="fu">case_when</span>(</span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>      bmi <span class="sc">&lt;</span> <span class="fl">18.5</span>              <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>      bmi <span class="sc">&gt;=</span> <span class="fl">18.5</span> <span class="sc">&amp;</span> bmi <span class="sc">&lt;</span> <span class="dv">25</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
-<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>      bmi <span class="sc">&gt;=</span> <span class="dv">25</span>   <span class="sc">&amp;</span> bmi <span class="sc">&lt;</span> <span class="dv">30</span> <span class="sc">~</span> <span class="dv">3</span>,</span>
-<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>      bmi <span class="sc">&gt;=</span> <span class="dv">30</span>               <span class="sc">~</span> <span class="dv">4</span>,</span>
-<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
-<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_cat =</span> <span class="fu">case_when</span>(</span>
-<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">&lt;=</span> <span class="dv">65</span>             <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">&gt;</span> <span class="dv">65</span> <span class="sc">&amp;</span> age <span class="sc">&lt;=</span> <span class="dv">80</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
-<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">&gt;</span> <span class="dv">80</span>              <span class="sc">~</span> <span class="dv">3</span></span>
-<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">bmi_cat =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>      bmi <span class="sc">&lt;</span> <span class="fl">18.5</span>              <span class="sc">~</span> <span class="st">"Underweight (&lt;18.5)"</span>,</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>      bmi <span class="sc">&gt;=</span> <span class="fl">18.5</span> <span class="sc">&amp;</span> bmi <span class="sc">&lt;</span> <span class="dv">25</span> <span class="sc">~</span> <span class="st">"Normal (18.5-25)"</span>,</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>      bmi <span class="sc">&gt;=</span> <span class="dv">25</span>   <span class="sc">&amp;</span> bmi <span class="sc">&lt;</span> <span class="dv">30</span> <span class="sc">~</span> <span class="st">"Overweight (25-30)"</span>,</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>      bmi <span class="sc">&gt;=</span> <span class="dv">30</span>               <span class="sc">~</span> <span class="st">"Obese (&gt;=30)"</span>,</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>    ), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Underweight (&lt;18.5)"</span>, <span class="st">"Normal (18.5-25)"</span>, <span class="st">"Overweight (25-30)"</span>, <span class="st">"Obese (&gt;=30)"</span>)),</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_cat =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">&lt;=</span> <span class="dv">65</span>             <span class="sc">~</span> <span class="st">"&lt;=65"</span>,</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">&gt;</span> <span class="dv">65</span> <span class="sc">&amp;</span> age <span class="sc">&lt;=</span> <span class="dv">80</span> <span class="sc">~</span> <span class="st">"66-80"</span>,</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>      age <span class="sc">&gt;</span> <span class="dv">80</span>              <span class="sc">~</span> <span class="st">"&gt;80"</span></span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>    ), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;=65"</span>, <span class="st">"66-80"</span>, <span class="st">"&gt;80"</span>)),</span>
 <span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">ici =</span> <span class="fu">ifelse</span>(Atezolizumab <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> Pembrolizumab <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> Durvalumab <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
 <span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">ckd_stage_cg =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
 <span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>      cockcroft <span class="sc">&gt;=</span> <span class="dv">90</span>              <span class="sc">~</span> <span class="dv">1</span>,</span>
@@ -1842,25 +1842,24 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carboplatin is dosed via Calvert formula: Dose(mg) = target AUC × (GFR + 25)</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Standard practice uses Cockcroft-Gault for GFR. If CKD-EPI Cr-Cys gives a</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co"># different GFR, the recommended carboplatin dose would differ.</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Standard practice uses Cockcroft-Gault → that's the actual dose given (in REDCap dosage_mg).</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co"># CKD-EPI Cr-Cys may predict a different dose.</span></span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_dose_cg:  Calvert dose using Cockcroft-Gault (standard)</span></span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_dose_cys: Calvert dose using CKD-EPI Cr-Cys unindexed</span></span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="co"># dose_discrepancy: ratio of CKD-EPI dose / Cockcroft dose (&gt;1 = higher dose</span></span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   recommended by CKD-EPI; &lt;1 = lower dose recommended)</span></span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="co"># dose_diff_pct: percentage difference (positive = CKD-EPI suggests higher dose)</span></span>
-<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose_cg  =</span> carbo_dose <span class="sc">*</span> (cockcroft <span class="sc">+</span> <span class="dv">25</span>),</span>
-<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose_cys =</span> carbo_dose <span class="sc">*</span> (ckd_epi_gfr_cre_cys_unindex <span class="sc">+</span> <span class="dv">25</span>),</span>
-<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_discrepancy =</span> carbo_dose_cys <span class="sc">/</span> carbo_dose_cg,</span>
-<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_diff_pct    =</span> (carbo_dose_cys <span class="sc">-</span> carbo_dose_cg) <span class="sc">/</span> carbo_dose_cg <span class="sc">*</span> <span class="dv">100</span>,</span>
-<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">ecog_score_cat2  =</span> <span class="fu">ifelse</span>(ecog_score <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"0"</span>, <span class="st">"&gt;=1"</span>),</span>
-<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">bmi_30 =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(bmi <span class="sc">&lt;</span> <span class="dv">30</span>, <span class="st">"&lt;30"</span>, <span class="st">"&gt;=30"</span>)),</span>
-<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_70 =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(age <span class="sc">&lt;</span> <span class="dv">70</span>, <span class="st">"&lt;70"</span>, <span class="st">"&gt;=70"</span>))</span>
-<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_dose_redcap:  actual administered dose from REDCap (dosage_mg)</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_dose_cre_cys: predicted dose using CKD-EPI Cr-Cys unindexed eGFR</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="co"># dose_discrepancy:   actual - predicted (mg); positive = patient got more than CKD-EPI predicts</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="co"># dose_diff_pct:      (actual - predicted) / predicted × 100</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose_redcap  =</span> <span class="fu">as.numeric</span>(dosage_mg),</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose_cre_cys =</span> carbo_dose <span class="sc">*</span> (ckd_epi_gfr_cre_cys_unindex <span class="sc">+</span> <span class="dv">25</span>),</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_discrepancy   =</span> carbo_dose_redcap <span class="sc">-</span> carbo_dose_cre_cys,</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_diff_pct      =</span> (carbo_dose_redcap <span class="sc">-</span> carbo_dose_cre_cys) <span class="sc">/</span> carbo_dose_cre_cys <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">ecog_score_cat2    =</span> <span class="fu">ifelse</span>(ecog_score <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"0"</span>, <span class="st">"&gt;=1"</span>),</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">bmi_30 =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(bmi <span class="sc">&lt;</span> <span class="dv">30</span>, <span class="st">"&lt;30"</span>, <span class="st">"&gt;=30"</span>)),</span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_70 =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(age <span class="sc">&lt;</span> <span class="dv">70</span>, <span class="st">"&lt;70"</span>, <span class="st">"&gt;=70"</span>))</span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
