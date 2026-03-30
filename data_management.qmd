@@ -1007,7 +1007,8 @@ final_master <- final_master %>%
       ecog_estimate >= 1 & ecog_estimate <= 6 ~ ecog_estimate - 1,
       TRUE ~ NA_real_
     )
-  )
+  ) %>%
+  droplevels()
 ```
 
 ## 5.8 Cancer type categories (7 groups)
