@@ -665,7 +665,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Binary: 1 if <code>platin_group</code> = Cisplatin</td>
 </tr>
 <tr class="odd">
-<td><code>carbo_dose</code></td>
+<td><code>carbo_AUC</code></td>
 <td>Carboplatin AUC (from <code>platin_dose</code> for carboplatin patients; NA for cisplatin)</td>
 </tr>
 <tr class="even">
@@ -673,12 +673,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Cisplatin dose in mg/m² (from <code>platin_dose</code> for cisplatin patients; NA for carboplatin)</td>
 </tr>
 <tr class="odd">
-<td><code>dose_1</code></td>
+<td><code>high_dose</code></td>
 <td>Binary factor: 1=High-dose (carbo AUC ≥ 5 OR cisplatin ≥ 75 mg/m²), 0=Low-dose</td>
 </tr>
 <tr class="even">
 <td><code>carbo_AUC_cat</code></td>
-<td>Carboplatin AUC category: 1=AUC ≤ 4, 2=AUC ≥ 5, 0=not carboplatin</td>
+<td>Carboplatin AUC category: “&lt;=3” or “&gt;=4”</td>
 </tr>
 <tr class="odd">
 <td><code>cis_dose_cat</code></td>
@@ -1740,7 +1740,7 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo / cis: binary platinum type (platin_group is now a labeled factor)</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_dose: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_AUC: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²</span></span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="co"># cis_group: cisplatin dose tier (1=&lt;40, 2=40–60, 3=≥60 mg/m²)</span></span>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="co"># dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)</span></span>
 <span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin</span></span>
@@ -1749,7 +1749,7 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo        =</span> <span class="fu">ifelse</span>(platin_group <span class="sc">==</span> <span class="st">"Carboplatin"</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
 <span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis          =</span> <span class="fu">ifelse</span>(platin_group <span class="sc">==</span> <span class="st">"Cisplatin"</span>,   <span class="dv">1</span>, <span class="dv">0</span>),</span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose   =</span> <span class="fu">case_when</span>(carbo <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> platin_dose, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span>),</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_AUC    =</span> <span class="fu">case_when</span>(carbo <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> platin_dose, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span>),</span>
 <span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_dose     =</span> <span class="fu">case_when</span>(cis <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> platin_dose, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span>),</span>
 <span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_group    =</span> <span class="fu">case_when</span>(</span>
 <span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&lt;</span> <span class="dv">40</span>                    <span class="sc">~</span> <span class="dv">1</span>,</span>
@@ -1757,16 +1757,16 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">60</span>                   <span class="sc">~</span> <span class="dv">3</span>,</span>
 <span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
 <span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_1 =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
-<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">|</span> cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&lt;</span>  <span class="dv">5</span> <span class="sc">|</span> cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">high_dose =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">|</span> cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&lt;</span>  <span class="dv">5</span> <span class="sc">|</span> cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
 <span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
 <span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>    )),</span>
-<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_AUC_cat =</span> <span class="fu">case_when</span>(</span>
-<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&lt;=</span> <span class="dv">4</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
-<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span></span>
-<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_AUC_cat =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&lt;=</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"&lt;=3"</span>,</span>
+<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&gt;=</span> <span class="dv">4</span> <span class="sc">~</span> <span class="st">"&gt;=4"</span>,</span>
+<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>    ), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;=3"</span>, <span class="st">"&gt;=4"</span>)),</span>
 <span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_dose_cat =</span> <span class="fu">case_when</span>(</span>
 <span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
 <span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
@@ -1774,7 +1774,7 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-36"><a href="#cb34-36" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>dose_1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb34-36"><a href="#cb34-36" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>high_dose)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -1801,7 +1801,7 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
 <span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose_redcap  =</span> <span class="fu">as.numeric</span>(dosage_mg),</span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose_cre_cys =</span> carbo_dose <span class="sc">*</span> (ckd_epi_gfr_cre_cys_unindex <span class="sc">+</span> <span class="dv">25</span>),</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose_cre_cys =</span> carbo_AUC <span class="sc">*</span> (ckd_epi_gfr_cre_cys_unindex <span class="sc">+</span> <span class="dv">25</span>),</span>
 <span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_discrepancy   =</span> carbo_dose_redcap <span class="sc">-</span> carbo_dose_cre_cys,</span>
 <span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_diff_pct      =</span> (carbo_dose_redcap <span class="sc">-</span> carbo_dose_cre_cys) <span class="sc">/</span> carbo_dose_cre_cys <span class="sc">*</span> <span class="dv">100</span>,</span>
 <span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">ecog_score_cat2    =</span> <span class="fu">ifelse</span>(ecog_score <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"0"</span>, <span class="st">"&gt;=1"</span>),</span>

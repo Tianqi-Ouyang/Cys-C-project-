@@ -130,10 +130,10 @@ Hospitalization reasons 1–11 per REDCap codebook:
 |---|---|
 | `carbo` | Binary: 1 if `platin_group` = Carboplatin |
 | `cis` | Binary: 1 if `platin_group` = Cisplatin |
-| `carbo_dose` | Carboplatin AUC (from `platin_dose` for carboplatin patients; NA for cisplatin) |
+| `carbo_AUC` | Carboplatin AUC (from `platin_dose` for carboplatin patients; NA for cisplatin) |
 | `cis_dose` | Cisplatin dose in mg/m² (from `platin_dose` for cisplatin patients; NA for carboplatin) |
-| `dose_1` | Binary factor: 1=High-dose (carbo AUC ≥ 5 OR cisplatin ≥ 75 mg/m²), 0=Low-dose |
-| `carbo_AUC_cat` | Carboplatin AUC category: 1=AUC ≤ 4, 2=AUC ≥ 5, 0=not carboplatin |
+| `high_dose` | Binary factor: 1=High-dose (carbo AUC ≥ 5 OR cisplatin ≥ 75 mg/m²), 0=Low-dose |
+| `carbo_AUC_cat` | Carboplatin AUC category: "<=3" or ">=4" |
 | `cis_dose_cat` | Cisplatin dose category: 1=<75 mg/m², 2=≥75 mg/m², 0=not cisplatin |
 | `cis_group` | Cisplatin dose tier: 1=<40 mg/m², 2=40–60 mg/m², 3=≥60 mg/m² |
 
@@ -1063,7 +1063,7 @@ table(final_master$cancer_type_cat_7)
 ```{r}
 #| label: clean-platinum
 # carbo / cis: binary platinum type (platin_group is now a labeled factor)
-# carbo_dose: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²
+# carbo_AUC: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²
 # cis_group: cisplatin dose tier (1=<40, 2=40–60, 3=≥60 mg/m²)
 # dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)
 # carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin
@@ -1072,7 +1072,7 @@ final_master <- final_master %>%
   mutate(
     carbo        = ifelse(platin_group == "Carboplatin", 1, 0),
     cis          = ifelse(platin_group == "Cisplatin",   1, 0),
-    carbo_dose   = case_when(carbo == 1 ~ platin_dose, TRUE ~ NA_real_),
+    carbo_AUC    = case_when(carbo == 1 ~ platin_dose, TRUE ~ NA_real_),
     cis_dose     = case_when(cis == 1 ~ platin_dose, TRUE ~ NA_real_),
     cis_group    = case_when(
       cis_dose < 40                    ~ 1,
@@ -1080,16 +1080,16 @@ final_master <- final_master %>%
       cis_dose >= 60                   ~ 3,
       TRUE ~ NA_real_
     ),
-    dose_1 = factor(case_when(
-      carbo_dose >= 5 | cis_dose >= 75 ~ 1,
-      carbo_dose <  5 | cis_dose <  75 ~ 0,
+    high_dose = factor(case_when(
+      carbo_AUC >= 5 | cis_dose >= 75 ~ 1,
+      carbo_AUC <  5 | cis_dose <  75 ~ 0,
       TRUE ~ NA_real_
     )),
-    carbo_AUC_cat = case_when(
-      carbo_dose <= 4 ~ 1,
-      carbo_dose >= 5 ~ 2,
-      TRUE ~ 0
-    ),
+    carbo_AUC_cat = factor(case_when(
+      carbo_AUC <= 3 ~ "<=3",
+      carbo_AUC >= 4 ~ ">=4",
+      TRUE ~ NA_character_
+    ), levels = c("<=3", ">=4")),
     cis_dose_cat = case_when(
       cis_dose <  75 ~ 1,
       cis_dose >= 75 ~ 2,
@@ -1097,7 +1097,7 @@ final_master <- final_master %>%
     )
   )
 
-table(final_master$dose_1)
+table(final_master$high_dose)
 ```
 
 ## 5.9 Carboplatin dose discrepancy variables (from Leyre dose.Rmd)
@@ -1117,7 +1117,7 @@ table(final_master$dose_1)
 final_master <- final_master %>%
   mutate(
     carbo_dose_redcap  = as.numeric(dosage_mg),
-    carbo_dose_cre_cys = carbo_dose * (ckd_epi_gfr_cre_cys_unindex + 25),
+    carbo_dose_cre_cys = carbo_AUC * (ckd_epi_gfr_cre_cys_unindex + 25),
     dose_discrepancy   = carbo_dose_redcap - carbo_dose_cre_cys,
     dose_diff_pct      = (carbo_dose_redcap - carbo_dose_cre_cys) / carbo_dose_cre_cys * 100,
     ecog_score_cat2    = ifelse(ecog_score == 0, "0", ">=1"),
