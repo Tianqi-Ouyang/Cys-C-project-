@@ -2,6 +2,10 @@
 title: "Data Management"
 author: "Meg"
 date: "2026-03-19"
+execute:
+  eval: true
+  warning: false
+  message: false
 ---
 
 # 1 Variable Name Dictionary
@@ -985,27 +989,27 @@ final_master <- final_master %>%
 
 ```{r}
 #| label: clean-cancer-type-cat
-# cancer_type_cat_7: recode REDCap cancer_type (numeric 1–9) into 6 clinical groups
-# Mapping from Jiaxuan's cancer_retype (final code Rmd):
-#   1 = Thoracic (Lung)
+# cancer_type_cat_7: recode REDCap tumor_type (numeric 1–9) into 7 clinical groups
+# REDCap coding (from data dictionary):
+#   1 = Lung → Thoracic
 #   2 = Breast
-#   3 = GI (Upper GI + Lower GI + "Other" GI cases)
-#   4 = GU (Genitourinary)
-#   5 = GYN (Gynecological)
-#   6 = HEENT (Head & Neck)
-# Note: Without detailed_cancer_type text field (not in raw REDCap CSV),
-#   cancer_type 9 ("Other") cannot be split into pancreatic→GI vs truly Other.
-#   Mesothelioma (cancer_type 6) grouped with Other per Jiaxuan's code.
+#   3 = Upper GI/esophagus/gastric  → GI
+#   4 = Lower GI/colon/rectum      → GI
+#   5 = Genitourinary/RCC/bladder   → GU
+#   6 = Mesothelioma                → Other
+#   7 = Gyn/ovarian/uterus/cervix  → GYN
+#   8 = HEENT/Laryngeal/head & neck → HEENT
+#   9 = Other                       → Other
 final_master <- final_master %>%
   mutate(
     cancer_type_cat_7 = factor(case_when(
-      cancer_type == 1             ~ 1,   # Thoracic
-      cancer_type == 2             ~ 2,   # Breast
-      cancer_type %in% c(3, 4)    ~ 3,   # GI (Upper + Lower)
-      cancer_type == 5             ~ 4,   # GU
-      cancer_type == 7             ~ 5,   # GYN
-      cancer_type == 8             ~ 6,   # HEENT
-      cancer_type %in% c(6, 9)    ~ 7,   # Other (Mesothelioma + Other)
+      tumor_type == 1             ~ 1,   # Thoracic (Lung)
+      tumor_type == 2             ~ 2,   # Breast
+      tumor_type %in% c(3, 4)    ~ 3,   # GI (Upper + Lower)
+      tumor_type == 5             ~ 4,   # GU
+      tumor_type == 7             ~ 5,   # GYN
+      tumor_type == 8             ~ 6,   # HEENT
+      tumor_type %in% c(6, 9)    ~ 7,   # Other (Mesothelioma + Other)
       TRUE ~ NA_real_
     ), levels = 1:7, labels = c("Thoracic", "Breast", "GI", "GU", "GYN", "HEENT", "Other"))
   )
@@ -1025,8 +1029,8 @@ table(final_master$cancer_type_cat_7)
 # cis_dose_cat: 1=<75 mg/m², 2=≥75, 0=not cisplatin
 final_master <- final_master %>%
   mutate(
-    carbo        = ifelse(platin_group == "Carboplatin", 1, 0),
-    cis          = ifelse(platin_group == "Cisplatin",   1, 0),
+    carbo        = ifelse(platin_group == 1, 1, 0),   # REDCap: 1 = Carboplatin
+    cis          = ifelse(platin_group == 2, 1, 0),   # REDCap: 2 = Cisplatin
     carbo_dose   = case_when(carbo == 1 ~ platin_dose, TRUE ~ NA_real_),
     cis_dose     = case_when(cis   == 1 ~ platin_dose, TRUE ~ NA_real_),
     cis_group    = case_when(
