@@ -133,7 +133,7 @@ Hospitalization reasons 1–11 per REDCap codebook:
 | `carbo_AUC` | Carboplatin AUC (from `platin_dose` for carboplatin patients; NA for cisplatin) |
 | `cis_dose` | Cisplatin dose in mg/m² (from `platin_dose` for cisplatin patients; NA for carboplatin) |
 | `high_dose` | Binary factor: 1=High-dose (carbo AUC ≥ 5 OR cisplatin ≥ 75 mg/m²), 0=Low-dose |
-| `carbo_AUC_cat` | Carboplatin AUC category: "<=3" or ">=4" |
+| `carbo_AUC_cat` | Carboplatin AUC category: "<4" or ">=4" |
 | `cis_dose_cat` | Cisplatin dose category: 1=<75 mg/m², 2=≥75 mg/m², 0=not cisplatin |
 | `cis_group` | Cisplatin dose tier: 1=<40 mg/m², 2=40–60 mg/m², 3=≥60 mg/m² |
 
@@ -1086,10 +1086,10 @@ final_master <- final_master %>%
       TRUE ~ NA_real_
     )),
     carbo_AUC_cat = factor(case_when(
-      carbo_AUC <= 3 ~ "<=3",
+      carbo_AUC < 4  ~ "<4",
       carbo_AUC >= 4 ~ ">=4",
       TRUE ~ NA_character_
-    ), levels = c("<=3", ">=4")),
+    ), levels = c("<4", ">=4")),
     cis_dose_cat = case_when(
       cis_dose <  75 ~ 1,
       cis_dose >= 75 ~ 2,

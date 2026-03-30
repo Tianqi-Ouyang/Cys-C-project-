@@ -678,7 +678,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><code>carbo_AUC_cat</code></td>
-<td>Carboplatin AUC category: “&lt;=3” or “&gt;=4”</td>
+<td>Carboplatin AUC category: “&lt;4” or “&gt;=4”</td>
 </tr>
 <tr class="odd">
 <td><code>cis_dose_cat</code></td>
@@ -1763,10 +1763,10 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
 <span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>    )),</span>
 <span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_AUC_cat =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
-<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&lt;=</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"&lt;=3"</span>,</span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&lt;</span> <span class="dv">4</span>  <span class="sc">~</span> <span class="st">"&lt;4"</span>,</span>
 <span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&gt;=</span> <span class="dv">4</span> <span class="sc">~</span> <span class="st">"&gt;=4"</span>,</span>
 <span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>    ), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;=3"</span>, <span class="st">"&gt;=4"</span>)),</span>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>    ), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;4"</span>, <span class="st">"&gt;=4"</span>)),</span>
 <span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_dose_cat =</span> <span class="fu">case_when</span>(</span>
 <span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
 <span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
