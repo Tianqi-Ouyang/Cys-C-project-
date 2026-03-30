@@ -1623,53 +1623,48 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo / cis: binary platinum type (platin_group is now a labeled factor)</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_dose: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²</span></span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 3 carboplatin records have platin_dose and dosage_mg swapped (total mg in</span></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co"># platin_dose, AUC in dosage_mg): records 758, 786, 836. Fix by swapping back.</span></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="co"># cis_group: cisplatin dose tier (1=&lt;40, 2=40–60, 3=≥60 mg/m²)</span></span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="co"># dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)</span></span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin</span></span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="co"># cis_dose_cat: 1=&lt;75 mg/m², 2=≥75, 0=not cisplatin</span></span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo        =</span> <span class="fu">ifelse</span>(platin_group <span class="sc">==</span> <span class="st">"Carboplatin"</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis          =</span> <span class="fu">ifelse</span>(platin_group <span class="sc">==</span> <span class="st">"Cisplatin"</span>,   <span class="dv">1</span>, <span class="dv">0</span>),</span>
-<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Fix 3 swapped records: platin_dose &gt; 10 for carboplatin means mg was</span></span>
-<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># entered in the AUC field; their dosage_mg contains the actual AUC</span></span>
-<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose   =</span> <span class="fu">case_when</span>(</span>
-<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>      carbo <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> platin_dose <span class="sc">&gt;</span> <span class="dv">10</span> <span class="sc">~</span> <span class="fu">as.numeric</span>(dosage_mg),  <span class="co"># swap back</span></span>
-<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>      carbo <span class="sc">==</span> <span class="dv">1</span>                     <span class="sc">~</span> platin_dose,</span>
-<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
-<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_dose     =</span> <span class="fu">case_when</span>(cis <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> platin_dose, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span>),</span>
-<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_group    =</span> <span class="fu">case_when</span>(</span>
-<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&lt;</span> <span class="dv">40</span>                    <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">40</span> <span class="sc">&amp;</span> cis_dose <span class="sc">&lt;</span> <span class="dv">60</span>  <span class="sc">~</span> <span class="dv">2</span>,</span>
-<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">60</span>                   <span class="sc">~</span> <span class="dv">3</span>,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">NOTE</span><span class="co">: 3 carboplatin records (758, 786, 836) appear to have platin_dose and</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co"># dosage_mg swapped — platin_dose contains total mg (139, 539.4, 802.8) while</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="co"># dosage_mg contains the AUC (2, 5, 6). These need manual review in REDCap.</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="co"># cis_group: cisplatin dose tier (1=&lt;40, 2=40–60, 3=≥60 mg/m²)</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="co"># dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="co"># cis_dose_cat: 1=&lt;75 mg/m², 2=≥75, 0=not cisplatin</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo        =</span> <span class="fu">ifelse</span>(platin_group <span class="sc">==</span> <span class="st">"Carboplatin"</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis          =</span> <span class="fu">ifelse</span>(platin_group <span class="sc">==</span> <span class="st">"Cisplatin"</span>,   <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_dose   =</span> <span class="fu">case_when</span>(carbo <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> platin_dose, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span>),</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_dose     =</span> <span class="fu">case_when</span>(cis <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> platin_dose, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span>),</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_group    =</span> <span class="fu">case_when</span>(</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&lt;</span> <span class="dv">40</span>                    <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">40</span> <span class="sc">&amp;</span> cis_dose <span class="sc">&lt;</span> <span class="dv">60</span>  <span class="sc">~</span> <span class="dv">2</span>,</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">60</span>                   <span class="sc">~</span> <span class="dv">3</span>,</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_1 =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">|</span> cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&lt;</span>  <span class="dv">5</span> <span class="sc">|</span> cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
 <span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
-<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_1 =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
-<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">|</span> cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&lt;</span>  <span class="dv">5</span> <span class="sc">|</span> cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
-<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a>    )),</span>
-<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_AUC_cat =</span> <span class="fu">case_when</span>(</span>
-<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&lt;=</span> <span class="dv">4</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>    )),</span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_AUC_cat =</span> <span class="fu">case_when</span>(</span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&lt;=</span> <span class="dv">4</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>      carbo_dose <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span></span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_dose_cat =</span> <span class="fu">case_when</span>(</span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
 <span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span></span>
-<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_dose_cat =</span> <span class="fu">case_when</span>(</span>
-<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
-<span id="cb35-40"><a href="#cb35-40" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span></span>
-<span id="cb35-41"><a href="#cb35-41" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb35-42"><a href="#cb35-42" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb35-43"><a href="#cb35-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-44"><a href="#cb35-44" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>dose_1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>dose_1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
   0   1 
-202 393 </code></pre>
+201 394 </code></pre>
 </div>
 </div>
 </section>
