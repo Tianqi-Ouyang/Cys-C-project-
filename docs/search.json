@@ -11,7 +11,7 @@
     "href": "analysis.html#incidence-outcomes",
     "title": "Analysis",
     "section": "3.1 Incidence Outcomes",
-    "text": "3.1 Incidence Outcomes\n\n\nCode\ntable_one_incidence &lt;- final_master %&gt;%\n  select(platinum_related_hosp, hosp_90, grade_3_aes, death_90) %&gt;%\n  tbl_summary(\n    statistic = list(\n      all_continuous() ~ \"{mean} ({sd})\",\n      all_categorical() ~ \"{n} ({p}%)\"\n    ),\n    digits = list(\n      all_continuous() ~ 1,\n      all_categorical() ~ 1\n    )\n  )\ntable_one_incidence\n\n\n\n\n\n\n\n\nCharacteristic\nN = 5951\n\n\n\n\nplatinum_related_hosp\n87.0 (14.6%)\n\n\nhosp_90\n165.0 (27.7%)\n\n\ngrade_3_aes\n86.0 (14.5%)\n\n\ndeath_90\n22.0 (3.7%)\n\n\n\n1 n (%)"
+    "text": "3.1 Incidence Outcomes\n\n\nCode\ntable_one_incidence &lt;- final_master %&gt;%\n  select(Anemia_g2_90days, Throm_g3_90days, AKI_g3_90days,\n         hosp_90, platinum_related_hosp, death_90) %&gt;%\n  tbl_summary(\n    statistic = list(\n      all_continuous() ~ \"{mean} ({sd})\",\n      all_categorical() ~ \"{n} ({p}%)\"\n    ),\n    digits = list(\n      all_continuous() ~ 1,\n      all_categorical() ~ 1\n    )\n  )\ntable_one_incidence\n\n\n\n\n\n\n\n\nCharacteristic\nN = 5951\n\n\n\n\nAnemia_g2_90days\n257.0 (43.2%)\n\n\nThrom_g3_90days\n22.0 (3.7%)\n\n\nAKI_g3_90days\n5.0 (0.8%)\n\n\nhosp_90\n165.0 (27.7%)\n\n\nplatinum_related_hosp\n87.0 (14.6%)\n\n\ndeath_90\n22.0 (3.7%)\n\n\n\n1 n (%)"
   },
   {
     "objectID": "analysis.html#grade-2-anemia",

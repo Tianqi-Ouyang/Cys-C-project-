@@ -69,7 +69,8 @@ table_one
 ```{r}
 #| label: table1-incidence
 table_one_incidence <- final_master %>%
-  select(platinum_related_hosp, hosp_90, grade_3_aes, death_90) %>%
+  select(Anemia_g2_90days, Throm_g3_90days, AKI_g3_90days,
+         hosp_90, platinum_related_hosp, death_90) %>%
   tbl_summary(
     statistic = list(
       all_continuous() ~ "{mean} ({sd})",
