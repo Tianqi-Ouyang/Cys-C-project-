@@ -49,8 +49,7 @@ table_one <- final_master %>%
     age, age_cat, sex, race, ethnicity, tumor_stage, cancer_type_cat_7,
     carbo_dose, carbo_AUC_cat, dose_1,
     ici, Bevacizumab, Paclitaxel, Pemetrexed, Doxorubicin, Etoposide,
-    Gemcitabine, Pertuzumab, Trastuzumab, Docetaxel, Fluorouracil,
-    Methotrexate, Vinblastine, Administered_alone,
+    Gemcitabine, Pertuzumab, Trastuzumab, Docetaxel, Administered_alone,
     hiv_rpdr, thyroid,
     cci, ecog_score, bmi, bmi_cat,
     pre_HGB_45days, pre_PLT_45days, pre_ALB_45days,
@@ -84,7 +83,52 @@ table_one_incidence <- final_master %>%
 table_one_incidence
 ```
 
-# 4 Dose Discrepancy by Decile
+# 4 Dose Distribution
+
+## 4.1 Actual vs Predicted Dose (Overlaid)
+
+```{r}
+#| label: plot-dose-overlay
+dose_long <- final_master %>%
+  select(record_id, carbo_dose_redcap, carbo_dose_cre_cys) %>%
+  pivot_longer(
+    cols = c(carbo_dose_redcap, carbo_dose_cre_cys),
+    names_to = "dose_type", values_to = "dose_mg"
+  ) %>%
+  filter(!is.na(dose_mg)) %>%
+  mutate(dose_type = case_match(dose_type,
+    "carbo_dose_redcap"  ~ "Actual (REDCap)",
+    "carbo_dose_cre_cys" ~ "Predicted (CKD-EPI Cr-Cys)"
+  ))
+
+ggplot(dose_long, aes(x = dose_mg, fill = dose_type)) +
+  geom_histogram(alpha = 0.5, bins = 40, position = "identity", color = "black") +
+  scale_fill_manual(values = c("Actual (REDCap)" = "#E31A1C",
+                                "Predicted (CKD-EPI Cr-Cys)" = "#1F78B4")) +
+  labs(title = "Carboplatin Dose Distribution",
+       x = "Dose (mg)", y = "Number of Patients", fill = "Dose Type") +
+  theme_minimal(base_size = 14)
+```
+
+## 4.2 Actual vs Predicted Dose (Side by Side)
+
+```{r}
+#| label: plot-dose-facet
+ggplot(dose_long, aes(x = dose_mg, fill = dose_type)) +
+  geom_histogram(color = "black", alpha = 0.7, bins = 40) +
+  facet_wrap(~ dose_type) +
+  geom_vline(
+    data = dose_long %>% group_by(dose_type) %>%
+      summarise(grp_mean = mean(dose_mg, na.rm = TRUE)),
+    aes(xintercept = grp_mean), color = "red", linetype = "dashed", linewidth = 0.8
+  ) +
+  scale_fill_manual(values = c("Actual (REDCap)" = "#E31A1C",
+                                "Predicted (CKD-EPI Cr-Cys)" = "#1F78B4")) +
+  labs(title = "Carboplatin Dose Distribution",
+       x = "Dose (mg)", y = "Number of Patients") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none")
+```
 
 ```{r}
 #| label: decile-rates
@@ -103,20 +147,6 @@ final_master <- final_master %>%
   ) %>%
   ungroup() %>%
   mutate(dd_decile = as.numeric(dd_decile))
-```
-
-```{r}
-#| label: decile-summary
-summary_by_decile <- final_master %>%
-  group_by(dd_decile) %>%
-  summarise(
-    n      = n(),
-    min    = min(dose_discrepancy, na.rm = TRUE),
-    median = median(dose_discrepancy, na.rm = TRUE),
-    mean   = mean(dose_discrepancy, na.rm = TRUE),
-    max    = max(dose_discrepancy, na.rm = TRUE)
-  )
-summary_by_decile
 ```
 
 # 5 LOESS Plots: AE Rates by Dose Discrepancy Percentile
