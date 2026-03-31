@@ -1,7 +1,7 @@
 ---
 title: "Analysis"
-author: "Meg"
-date: "2026-03-26"
+author: "Tianqi Ouyang"
+date: "2026-03-31"
 execute:
   eval: true
   warning: false
@@ -72,6 +72,7 @@ table_one_incidence <- final_master %>%
   select(Anemia_g2_90days, Anemia_g3_90days,
          Throm_g2_90days, Throm_g3_90days,
          AKI_g2_90days, AKI_g3_90days,
+         grade_2_aes, grade_3_aes,
          hosp_90, platinum_related_hosp, death_90) %>%
   tbl_summary(
     statistic = list(
