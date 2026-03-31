@@ -69,7 +69,9 @@ table_one
 ```{r}
 #| label: table1-incidence
 table_one_incidence <- final_master %>%
-  select(Anemia_g2_90days, Throm_g3_90days, AKI_g3_90days,
+  select(Anemia_g2_90days, Anemia_g3_90days,
+         Throm_g2_90days, Throm_g3_90days,
+         AKI_g2_90days, AKI_g3_90days,
          hosp_90, platinum_related_hosp, death_90) %>%
   tbl_summary(
     statistic = list(
@@ -153,9 +155,19 @@ final_master <- final_master %>%
 # 5 LOESS Plots: AE Rates by Dose Discrepancy Percentile
 
 ```{r}
+#| label: compute-vline-medians
+# Median dose discrepancy at 60th and 70th percentile (for vertical line labels)
+median_dd_p60 <- median(
+  final_master$dose_discrepancy[final_master$dd_percentile == 60], na.rm = TRUE)
+median_dd_p70 <- median(
+  final_master$dose_discrepancy[final_master$dd_percentile == 70], na.rm = TRUE)
+```
+
+```{r}
 #| label: fn-loess-plot
-loess_plot <- function(data, x, y, x_point, y_point, title, xlab, ylab) {
-  ggplot(data, aes(x = {{x}}, y = {{y}})) +
+loess_plot <- function(data, x, y, x_point, y_point, title, xlab, ylab,
+                       vlines = NULL) {
+  p <- ggplot(data, aes(x = {{x}}, y = {{y}})) +
     geom_point(aes(x = {{x_point}}, y = {{y_point}}),
                size = 4, color = "black", shape = 19) +
     geom_smooth(method = "loess", se = TRUE, span = 0.75, color = "blue", linewidth = 1.5) +
@@ -169,6 +181,14 @@ loess_plot <- function(data, x, y, x_point, y_point, title, xlab, ylab) {
       axis.text.y   = element_text(size = 10),
       plot.title     = element_text(size = 13, face = "bold")
     )
+  if (!is.null(vlines)) {
+    p <- p +
+      geom_vline(data = vlines, aes(xintercept = x),
+                 linetype = "dashed", color = "red", linewidth = 0.7) +
+      geom_text(data = vlines, aes(x = x, y = Inf, label = label),
+                vjust = 1.5, hjust = -0.1, size = 3.2, color = "red")
+  }
+  p
 }
 
 loess_plot_raw <- function(data, x, y, title, xlab, ylab) {
@@ -187,6 +207,16 @@ loess_plot_raw <- function(data, x, y, title, xlab, ylab) {
 }
 ```
 
+```{r}
+#| label: vline-data
+# Vertical reference lines for percentile LOESS plots
+pct_vlines <- data.frame(
+  x     = c(60, 70),
+  label = c(paste0("P60: median ", round(median_dd_p60, 0), " mg"),
+            paste0("P70: median ", round(median_dd_p70, 0), " mg"))
+)
+```
+
 ## 5.1 Grade 2 Anemia
 
 ```{r}
@@ -196,11 +226,40 @@ loess_plot(
   x_point = dd_decile * 10, y_point = anemia_2_rate_decile,
   title = "Grade >= 2 Anemia",
   xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
-  ylab = "Grade >= 2 Anemia"
+  ylab = "Grade >= 2 Anemia",
+  vlines = pct_vlines
 )
 ```
 
-## 5.2 Grade 3 Thrombocytopenia
+## 5.2 Grade 3 Anemia
+
+```{r}
+#| label: plot-anemia-3
+loess_plot(
+  data = final_master, x = dd_percentile, y = Anemia_g3_90days,
+  x_point = dd_decile * 10, y_point = anemia_3_rate_decile,
+  title = "Grade >= 3 Anemia",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Grade >= 3 Anemia",
+  vlines = pct_vlines
+)
+```
+
+## 5.3 Grade 2 Thrombocytopenia
+
+```{r}
+#| label: plot-throm-2
+loess_plot(
+  data = final_master, x = dd_percentile, y = Throm_g2_90days,
+  x_point = dd_decile * 10, y_point = throm_2_rate_decile,
+  title = "Grade >= 2 Thrombocytopenia",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Grade >= 2 Thrombocytopenia",
+  vlines = pct_vlines
+)
+```
+
+## 5.4 Grade 3 Thrombocytopenia
 
 ```{r}
 #| label: plot-throm-3
@@ -209,11 +268,26 @@ loess_plot(
   x_point = dd_decile * 10, y_point = throm_3_rate_decile,
   title = "Grade >= 3 Thrombocytopenia",
   xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
-  ylab = "Grade >= 3 Thrombocytopenia"
+  ylab = "Grade >= 3 Thrombocytopenia",
+  vlines = pct_vlines
 )
 ```
 
-## 5.3 Grade 3 AKI
+## 5.5 Grade 2 AKI
+
+```{r}
+#| label: plot-aki-2
+loess_plot(
+  data = final_master, x = dd_percentile, y = AKI_g2_90days,
+  x_point = dd_decile * 10, y_point = aki_2_rate_decile,
+  title = "Grade >= 2 Creatinine Increased",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Grade >= 2 Creatinine Increased",
+  vlines = pct_vlines
+)
+```
+
+## 5.6 Grade 3 AKI
 
 ```{r}
 #| label: plot-aki-3
@@ -222,11 +296,12 @@ loess_plot(
   x_point = dd_decile * 10, y_point = aki_3_rate_decile,
   title = "Grade >= 3 Creatinine Increased",
   xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
-  ylab = "Grade >= 3 Creatinine Increased"
+  ylab = "Grade >= 3 Creatinine Increased",
+  vlines = pct_vlines
 )
 ```
 
-## 5.4 Overall Hospitalization
+## 5.7 Overall Hospitalization
 
 ```{r}
 #| label: plot-hosp
@@ -235,11 +310,12 @@ loess_plot(
   x_point = dd_decile * 10, y_point = hos_rate_decile,
   title = "Overall Hospitalization",
   xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
-  ylab = "Overall Hospitalization"
+  ylab = "Overall Hospitalization",
+  vlines = pct_vlines
 )
 ```
 
-## 5.5 Platinum-Related Hospitalization
+## 5.8 Platinum-Related Hospitalization
 
 ```{r}
 #| label: plot-platinum-hosp
@@ -248,7 +324,8 @@ loess_plot(
   x_point = dd_decile * 10, y_point = platinum_related_hos_rate_decile,
   title = "Hospitalization for Platinum-Associated AEs",
   xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
-  ylab = "Hospitalization for Platinum-Associated AEs"
+  ylab = "Hospitalization for Platinum-Associated AEs",
+  vlines = pct_vlines
 )
 ```
 
@@ -266,7 +343,31 @@ loess_plot_raw(
 )
 ```
 
-## 6.2 Grade 3 Thrombocytopenia
+## 6.2 Grade 3 Anemia
+
+```{r}
+#| label: plot-anemia-3-raw
+loess_plot_raw(
+  data = final_master, x = dose_discrepancy, y = Anemia_g3_90days,
+  title = "Grade >= 3 Anemia",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Grade >= 3 Anemia"
+)
+```
+
+## 6.3 Grade 2 Thrombocytopenia
+
+```{r}
+#| label: plot-throm-2-raw
+loess_plot_raw(
+  data = final_master, x = dose_discrepancy, y = Throm_g2_90days,
+  title = "Grade >= 2 Thrombocytopenia",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Grade >= 2 Thrombocytopenia"
+)
+```
+
+## 6.4 Grade 3 Thrombocytopenia
 
 ```{r}
 #| label: plot-throm-3-raw
@@ -278,7 +379,19 @@ loess_plot_raw(
 )
 ```
 
-## 6.3 Grade 3 AKI
+## 6.5 Grade 2 AKI
+
+```{r}
+#| label: plot-aki-2-raw
+loess_plot_raw(
+  data = final_master, x = dose_discrepancy, y = AKI_g2_90days,
+  title = "Grade >= 2 Creatinine Increased",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Grade >= 2 Creatinine Increased"
+)
+```
+
+## 6.6 Grade 3 AKI
 
 ```{r}
 #| label: plot-aki-3-raw
@@ -290,7 +403,7 @@ loess_plot_raw(
 )
 ```
 
-## 6.4 Overall Hospitalization
+## 6.7 Overall Hospitalization
 
 ```{r}
 #| label: plot-hosp-raw
@@ -302,7 +415,7 @@ loess_plot_raw(
 )
 ```
 
-## 6.5 Platinum-Related Hospitalization
+## 6.8 Platinum-Related Hospitalization
 
 ```{r}
 #| label: plot-platinum-hosp-raw

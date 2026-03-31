@@ -637,6 +637,19 @@ master_list <- final_master %>% select(EMPI, baseline_sample_date)
 master_lab     <- merge(master_list, lab,     by = "EMPI", all.x = TRUE)
 master_dia     <- merge(master_list, dia,     by = "EMPI", all.y = TRUE)
 master_med     <- merge(master_list, med,     by = "EMPI", all.y = TRUE)
+
+# Exclude patients with no RPDR labs
+empis_with_labs <- unique(lab$EMPI[lab$EMPI %in% final_master$EMPI])
+empis_no_labs   <- setdiff(final_master$EMPI, empis_with_labs)
+n_no_labs       <- length(empis_no_labs)
+
+cat("Patients before RPDR lab exclusion:", nrow(final_master), "\n")
+cat("Patients with no RPDR labs (excluded):", n_no_labs, "\n")
+
+final_master <- final_master %>% filter(EMPI %in% empis_with_labs)
+master_lab   <- master_lab %>% filter(EMPI %in% empis_with_labs)
+
+cat("Patients after RPDR lab exclusion:", nrow(final_master), "\n")
 ```
 
 ## 4.8 Pipeline functions: eGFR formulas
@@ -765,7 +778,8 @@ final_master <- final_master %>%
                                           baseline_creatinine, cys_c_baseline, male, age),
     baseline_cre_egfr_unindexed  = mapply(unindex, baseline_cre_egfr, BSA),
     baseline_cys_c_egfr_unindexed = mapply(unindex, baseline_cys_c_egfr, BSA),
-    ckd_epi_gfr_cre_cys_unindex  = mapply(unindex, ckd_epi_gfr_cre_cys, BSA)
+    ckd_epi_gfr_cre_cys_unindex  = mapply(unindex, ckd_epi_gfr_cre_cys, BSA),
+    ckd_epi_gfr_cre_cys_unindex_cap125 = pmin(ckd_epi_gfr_cre_cys_unindex, 125)
   )
 ```
 
@@ -934,7 +948,14 @@ final_master <- final_master %>%
 #| label: clean-exclusion
 # 3 patients missing baseline cystatin C, 1 missing platinum group → exclude
 final_master <- final_master %>%
-  mutate(cys_c_baseline = as.numeric(cys_c_baseline)) %>%
+  mutate(cys_c_baseline = as.numeric(cys_c_baseline))
+
+cat("Missing cystatin C — record_id:",
+    paste(final_master$record_id[is.na(final_master$cys_c_baseline)], collapse = ", "), "\n")
+cat("Missing platinum group — record_id:",
+    paste(final_master$record_id[is.na(final_master$platin_group)], collapse = ", "), "\n")
+
+final_master <- final_master %>%
   filter(!is.na(cys_c_baseline)) %>%
   filter(!is.na(platin_group))
 ```
@@ -1117,7 +1138,7 @@ table(final_master$high_dose)
 final_master <- final_master %>%
   mutate(
     carbo_dose_redcap  = as.numeric(dosage_mg),
-    carbo_dose_cre_cys = carbo_AUC * (ckd_epi_gfr_cre_cys_unindex + 25),
+    carbo_dose_cre_cys = carbo_AUC * (ckd_epi_gfr_cre_cys_unindex_cap125 + 25),
     dose_discrepancy   = carbo_dose_redcap - carbo_dose_cre_cys,
     dose_diff_pct      = (carbo_dose_redcap - carbo_dose_cre_cys) / carbo_dose_cre_cys * 100,
     ecog_score_cat2    = ifelse(ecog_score == 0, "0", ">=1"),
