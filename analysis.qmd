@@ -452,36 +452,7 @@ loess_plot_raw(
 )
 ```
 
-# 7 Dose Discrepancy Plots
-
-## 7.1 Actual (REDCap) vs Predicted (CKD-EPI Cr-Cys) Dose Scatter
-
-```{r}
-#| label: plot-scatter-dose
-ggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap)) +
-  geom_point(alpha = 0.6, color = "black") +
-  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "red") +
-  labs(x = "Predicted Dose — CKD-EPI Cr-Cys (mg)",
-       y = "Actual Dose — REDCap (mg)",
-       title = "Actual vs Predicted Carboplatin Dose") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
-```
-
-## 7.2 Dose Discrepancy Distribution
-
-```{r}
-#| label: plot-dose-diff
-ggplot(final_master, aes(x = dose_discrepancy)) +
-  geom_histogram(color = "black", fill = "#1F78B4", alpha = 0.7, bins = 40) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "red", linewidth = 0.8) +
-  labs(title = "Dose Discrepancy: Actual (REDCap) - Predicted (CKD-EPI Cr-Cys)",
-       x = "Dose Discrepancy (mg)",
-       y = "Number of Patients",
-       subtitle = "Positive = patient received more than Cr-Cys predicts") +
-  theme_minimal(base_size = 14)
-```
-
-## 7.3 Dose Discrepancy Boxplot (Outlier Inspection)
+# 7 Dose Discrepancy: Outlier Inspection
 
 ```{r}
 #| label: plot-dose-diff-boxplot
@@ -517,48 +488,6 @@ ggplot(final_master, aes(y = dose_discrepancy)) +
        subtitle = "Red points = IQR outliers") +
   theme_minimal(base_size = 14) +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
-```
-
-## 7.4 Scatter by Sex
-
-```{r}
-#| label: plot-scatter-sex
-ggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = sex)) +
-  geom_point(alpha = 0.6) +
-  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "grey50") +
-  scale_color_manual(values = c("Male" = "black", "Female" = "red"), name = "Sex") +
-  labs(x = "Predicted Dose — CKD-EPI Cr-Cys (mg)",
-       y = "Actual Dose — REDCap (mg)",
-       title = "Actual vs Predicted Dose by Sex") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
-```
-
-## 7.5 Scatter by BMI
-
-```{r}
-#| label: plot-scatter-bmi
-ggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = bmi_30)) +
-  geom_point(alpha = 0.6) +
-  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "grey50") +
-  scale_color_manual(values = c("<30" = "black", ">=30" = "red"), name = "BMI") +
-  labs(x = "Predicted Dose — CKD-EPI Cr-Cys (mg)",
-       y = "Actual Dose — REDCap (mg)",
-       title = "Actual vs Predicted Dose by BMI") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
-```
-
-## 7.6 Scatter by Age
-
-```{r}
-#| label: plot-scatter-age
-ggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = age_70)) +
-  geom_point(alpha = 0.6) +
-  geom_abline(intercept = 0, slope = 1, linetype = "solid", color = "grey50") +
-  scale_color_manual(values = c("<70" = "black", ">=70" = "red"), name = "Age") +
-  labs(x = "Predicted Dose — CKD-EPI Cr-Cys (mg)",
-       y = "Actual Dose — REDCap (mg)",
-       title = "Actual vs Predicted Dose by Age") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
 ```
 
 # 8 Cumulative Incidence Plots
