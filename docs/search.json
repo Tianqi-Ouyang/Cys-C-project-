@@ -312,14 +312,14 @@
     "href": "index.html#inclusion",
     "title": "CysC / Creatinine Ratio – Project Summary",
     "section": "Inclusion",
-    "text": "Inclusion\n\nPatients in REDCap export whose EMPI appears in list.csv\nReceived cisplatin or carboplatin (platin_group non-missing)\nBaseline cystatin C value available (cys_c_baseline non-missing)"
+    "text": "Inclusion\n\nPatients in REDCap export whose EMPI appears in N=596 for tianqi.xlsx\nReceived cisplatin or carboplatin (platin_group non-missing)\nBaseline cystatin C value available (cys_c_baseline non-missing)"
   },
   {
     "objectID": "index.html#exclusion",
     "href": "index.html#exclusion",
     "title": "CysC / Creatinine Ratio – Project Summary",
     "section": "Exclusion",
-    "text": "Exclusion\n\nEMPI not in list: REDCap records filtered to only EMPIs present in list.csv\nMissing baseline cystatin C: 3 patients excluded (cys_c_baseline is NA)\nMissing platinum group: 1 patient excluded (platin_group is NA)\n\nFinal cohort: ~877 patients (from 880 in REDCap after exclusions)"
+    "text": "Exclusion\n\nEMPI not in list: REDCap records filtered to only EMPIs present in N=596 for tianqi.xlsx\nNo RPDR labs: Patients with no matching RPDR lab records excluded\nMissing baseline cystatin C: Patients with cys_c_baseline = NA excluded\nMissing platinum group: Patients with platin_group = NA excluded\n\nFinal cohort: Determined at render time (see data_management output for exact counts)"
   },
   {
     "objectID": "index.html#grade-23-adverse-events-within-90-days",
@@ -368,7 +368,7 @@
     "href": "index.html#comorbidities-treatment",
     "title": "CysC / Creatinine Ratio – Project Summary",
     "section": "Comorbidities & Treatment",
-    "text": "Comorbidities & Treatment\n\n\n\nVariable\nDescription\n\n\n\n\nscore / cci\nCharlson comorbidity index (from RPDR ICD codes)\n\n\nthyroid\nThyroid disease (RPDR diagnosis + medication)\n\n\nhiv_rpdr\nHIV from RPDR diagnoses + medications\n\n\ndose_1\nHigh-dose platinum flag\n\n\ncancer_type_cat_7\nCancer type (7 categories)\n\n\nici\nImmune checkpoint inhibitor use"
+    "text": "Comorbidities & Treatment\n\n\n\nVariable\nDescription\n\n\n\n\nscore / cci\nCharlson comorbidity index (from RPDR ICD codes)\n\n\nthyroid\nThyroid disease (RPDR diagnosis + medication)\n\n\nhiv_rpdr\nHIV from RPDR diagnoses + medications\n\n\nhigh_dose\nHigh-dose platinum flag\n\n\ncancer_type_cat_7\nCancer type (7 categories)\n\n\nici\nImmune checkpoint inhibitor use"
   },
   {
     "objectID": "index.html#competing-risk-variables",

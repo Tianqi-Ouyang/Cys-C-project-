@@ -15,8 +15,8 @@ date: "2026-03-31"
 | | Details |
 |---|---|
 | **Data sources** | REDCap export + RPDR (Dia, Lab, Med) |
-| **REDCap export** | `CystatinCInPatientsO_DATA_2026-03-25_1158.csv` |
-| **Patient list** | `list.csv` (EMPI filter applied to REDCap) |
+| **REDCap export** | `CystatinCInPatientsO_DATA_2026-03-31_1136.csv` |
+| **Patient list** | `N=596 for tianqi.xlsx` (EMPI filter applied to REDCap) |
 | **RPDR pull** | `Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216` |
 | **RPDR lab groups** | ALB, CRE, HGB, PLT, GHBA1C |
 | **Platinum types** | Cisplatin and Carboplatin |
@@ -27,17 +27,18 @@ date: "2026-03-31"
 
 ## Inclusion
 
-- Patients in REDCap export whose EMPI appears in `list.csv`
+- Patients in REDCap export whose EMPI appears in `N=596 for tianqi.xlsx`
 - Received cisplatin or carboplatin (`platin_group` non-missing)
 - Baseline cystatin C value available (`cys_c_baseline` non-missing)
 
 ## Exclusion
 
-1. **EMPI not in list:** REDCap records filtered to only EMPIs present in `list.csv`
-2. **Missing baseline cystatin C:** 3 patients excluded (`cys_c_baseline` is NA)
-3. **Missing platinum group:** 1 patient excluded (`platin_group` is NA)
+1. **EMPI not in list:** REDCap records filtered to only EMPIs present in `N=596 for tianqi.xlsx`
+2. **No RPDR labs:** Patients with no matching RPDR lab records excluded
+3. **Missing baseline cystatin C:** Patients with `cys_c_baseline` = NA excluded
+4. **Missing platinum group:** Patients with `platin_group` = NA excluded
 
-**Final cohort:** ~877 patients (from 880 in REDCap after exclusions)
+**Final cohort:** Determined at render time (see data_management output for exact counts)
 
 # Outcomes
 
@@ -68,8 +69,8 @@ date: "2026-03-31"
 
 | File | Description |
 |---|---|
-| `CystatinCInPatientsO_DATA_2026-03-25_1158.csv` | REDCap export |
-| `list.csv` | EMPI inclusion list |
+| `CystatinCInPatientsO_DATA_2026-03-31_1136.csv` | REDCap export |
+| `N=596 for tianqi.xlsx` | EMPI inclusion list |
 | `mes98_03182614492143216_Dia.txt` | RPDR Diagnoses |
 | `mes98_03182614492143216_Lab.txt` | RPDR Labs (ALB, CRE, HGB, PLT, GHBA1C) |
 | `mes98_03182614492143216_Med.txt` | RPDR Medications |
@@ -111,7 +112,7 @@ date: "2026-03-31"
 | `score` / `cci` | Charlson comorbidity index (from RPDR ICD codes) |
 | `thyroid` | Thyroid disease (RPDR diagnosis + medication) |
 | `hiv_rpdr` | HIV from RPDR diagnoses + medications |
-| `dose_1` | High-dose platinum flag |
+| `high_dose` | High-dose platinum flag |
 | `cancer_type_cat_7` | Cancer type (7 categories) |
 | `ici` | Immune checkpoint inhibitor use |
 

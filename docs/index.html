@@ -209,11 +209,11 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td><strong>REDCap export</strong></td>
-<td><code>CystatinCInPatientsO_DATA_2026-03-25_1158.csv</code></td>
+<td><code>CystatinCInPatientsO_DATA_2026-03-31_1136.csv</code></td>
 </tr>
 <tr class="odd">
 <td><strong>Patient list</strong></td>
-<td><code>list.csv</code> (EMPI filter applied to REDCap)</td>
+<td><code>N=596 for tianqi.xlsx</code> (EMPI filter applied to REDCap)</td>
 </tr>
 <tr class="even">
 <td><strong>RPDR pull</strong></td>
@@ -243,7 +243,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="inclusion" class="level2">
 <h2 class="anchored" data-anchor-id="inclusion">Inclusion</h2>
 <ul>
-<li>Patients in REDCap export whose EMPI appears in <code>list.csv</code></li>
+<li>Patients in REDCap export whose EMPI appears in <code>N=596 for tianqi.xlsx</code></li>
 <li>Received cisplatin or carboplatin (<code>platin_group</code> non-missing)</li>
 <li>Baseline cystatin C value available (<code>cys_c_baseline</code> non-missing)</li>
 </ul>
@@ -251,11 +251,12 @@ ul.task-list li input[type="checkbox"] {
 <section id="exclusion" class="level2">
 <h2 class="anchored" data-anchor-id="exclusion">Exclusion</h2>
 <ol type="1">
-<li><strong>EMPI not in list:</strong> REDCap records filtered to only EMPIs present in <code>list.csv</code></li>
-<li><strong>Missing baseline cystatin C:</strong> 3 patients excluded (<code>cys_c_baseline</code> is NA)</li>
-<li><strong>Missing platinum group:</strong> 1 patient excluded (<code>platin_group</code> is NA)</li>
+<li><strong>EMPI not in list:</strong> REDCap records filtered to only EMPIs present in <code>N=596 for tianqi.xlsx</code></li>
+<li><strong>No RPDR labs:</strong> Patients with no matching RPDR lab records excluded</li>
+<li><strong>Missing baseline cystatin C:</strong> Patients with <code>cys_c_baseline</code> = NA excluded</li>
+<li><strong>Missing platinum group:</strong> Patients with <code>platin_group</code> = NA excluded</li>
 </ol>
-<p><strong>Final cohort:</strong> ~877 patients (from 880 in REDCap after exclusions)</p>
+<p><strong>Final cohort:</strong> Determined at render time (see data_management output for exact counts)</p>
 </section>
 </section>
 <section id="outcomes" class="level1">
@@ -335,11 +336,11 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>CystatinCInPatientsO_DATA_2026-03-25_1158.csv</code></td>
+<td><code>CystatinCInPatientsO_DATA_2026-03-31_1136.csv</code></td>
 <td>REDCap export</td>
 </tr>
 <tr class="even">
-<td><code>list.csv</code></td>
+<td><code>N=596 for tianqi.xlsx</code></td>
 <td>EMPI inclusion list</td>
 </tr>
 <tr class="odd">
@@ -473,7 +474,7 @@ ul.task-list li input[type="checkbox"] {
 <td>HIV from RPDR diagnoses + medications</td>
 </tr>
 <tr class="even">
-<td><code>dose_1</code></td>
+<td><code>high_dose</code></td>
 <td>High-dose platinum flag</td>
 </tr>
 <tr class="odd">
