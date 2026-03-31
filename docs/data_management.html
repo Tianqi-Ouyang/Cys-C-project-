@@ -1073,7 +1073,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'Data/CystatinCInPatientsO_DATA_2026-03-31_1025.csv'</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>master <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'Data/CystatinCInPatientsO_DATA_2026-03-31_1136.csv'</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>list <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">'Data/N=596 for tianqi.xlsx'</span>)</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -1241,10 +1241,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">filter</span>(EMPI <span class="sc">%in%</span> empis_with_labs)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>master_lab   <span class="ot">&lt;-</span> master_lab <span class="sc">%&gt;%</span> <span class="fu">filter</span>(EMPI <span class="sc">%in%</span> empis_with_labs)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Patients after RPDR lab exclusion:"</span>, <span class="fu">nrow</span>(final_master), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (n_no_labs <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"  record_ids:"</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste</span>(final_master<span class="sc">$</span>record_id[final_master<span class="sc">$</span>EMPI <span class="sc">%in%</span> empis_no_labs], <span class="at">collapse =</span> <span class="st">", "</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">filter</span>(EMPI <span class="sc">%in%</span> empis_with_labs)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>master_lab   <span class="ot">&lt;-</span> master_lab <span class="sc">%&gt;%</span> <span class="fu">filter</span>(EMPI <span class="sc">%in%</span> empis_with_labs)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Patients after RPDR lab exclusion:"</span>, <span class="fu">nrow</span>(final_master), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Patients after RPDR lab exclusion: 596 </code></pre>
@@ -1625,7 +1630,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(final_master<span class="sc">$</span>record_id[<span class="fu">is.na</span>(final_master<span class="sc">$</span>cys_c_baseline)], <span class="at">collapse =</span> <span class="st">", "</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Missing cystatin C — record_id: 877 </code></pre>
+<pre><code>Missing cystatin C — record_id:  </code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
@@ -1680,7 +1685,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-stdout">
 <pre><code>
   0   1 
-430 165 </code></pre>
+430 166 </code></pre>
 </div>
 </div>
 </section>
@@ -1776,7 +1781,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Thoracic   Breast       GI       GU      GYN    HEENT    Other 
-     200       73       58       13      186       49       16 </code></pre>
+     200       73       58       13      187       49       16 </code></pre>
 </div>
 </div>
 </section>
@@ -1825,7 +1830,7 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <div class="cell-output cell-output-stdout">
 <pre><code>
   0   1 
-202 393 </code></pre>
+202 394 </code></pre>
 </div>
 </div>
 </section>
@@ -1969,7 +1974,7 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <div class="cell-output cell-output-stdout">
 <pre><code>
   0   1 
-588   7 </code></pre>
+589   7 </code></pre>
 </div>
 </div>
 </section>

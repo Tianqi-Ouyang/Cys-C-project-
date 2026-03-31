@@ -11,7 +11,7 @@
     "href": "analysis.html#incidence-outcomes",
     "title": "Analysis",
     "section": "3.1 Incidence Outcomes",
-    "text": "3.1 Incidence Outcomes\n\n\nCode\ntable_one_incidence &lt;- final_master %&gt;%\n  select(Anemia_g2_90days, Anemia_g3_90days,\n         Throm_g2_90days, Throm_g3_90days,\n         AKI_g2_90days, AKI_g3_90days,\n         grade_2_aes, grade_3_aes,\n         hosp_90, platinum_related_hosp, death_90) %&gt;%\n  tbl_summary(\n    statistic = list(\n      all_continuous() ~ \"{mean} ({sd})\",\n      all_categorical() ~ \"{n} ({p}%)\"\n    ),\n    digits = list(\n      all_continuous() ~ 1,\n      all_categorical() ~ 1\n    )\n  )\ntable_one_incidence\n\n\n\n\n\n\n\n\nCharacteristic\nN = 5951\n\n\n\n\nAnemia_g2_90days\n257.0 (43.2%)\n\n\nAnemia_g3_90days\n76.0 (12.8%)\n\n\nThrom_g2_90days\n56.0 (9.4%)\n\n\nThrom_g3_90days\n22.0 (3.7%)\n\n\nAKI_g2_90days\n36.0 (6.1%)\n\n\nAKI_g3_90days\n5.0 (0.8%)\n\n\ngrade_2_aes\n277.0 (46.6%)\n\n\ngrade_3_aes\n86.0 (14.5%)\n\n\nhosp_90\n165.0 (27.7%)\n\n\nplatinum_related_hosp\n87.0 (14.6%)\n\n\ndeath_90\n22.0 (3.7%)\n\n\n\n1 n (%)"
+    "text": "3.1 Incidence Outcomes\n\n\nCode\ntable_one_incidence &lt;- final_master %&gt;%\n  select(Anemia_g2_90days, Anemia_g3_90days,\n         Throm_g2_90days, Throm_g3_90days,\n         AKI_g2_90days, AKI_g3_90days,\n         grade_2_aes, grade_3_aes,\n         hosp_90, platinum_related_hosp, death_90) %&gt;%\n  tbl_summary(\n    statistic = list(\n      all_continuous() ~ \"{mean} ({sd})\",\n      all_categorical() ~ \"{n} ({p}%)\"\n    ),\n    digits = list(\n      all_continuous() ~ 1,\n      all_categorical() ~ 1\n    )\n  )\ntable_one_incidence\n\n\n\n\n\n\n\n\nCharacteristic\nN = 5961\n\n\n\n\nAnemia_g2_90days\n258.0 (43.3%)\n\n\nAnemia_g3_90days\n76.0 (12.8%)\n\n\nThrom_g2_90days\n56.0 (9.4%)\n\n\nThrom_g3_90days\n22.0 (3.7%)\n\n\nAKI_g2_90days\n36.0 (6.0%)\n\n\nAKI_g3_90days\n5.0 (0.8%)\n\n\ngrade_2_aes\n278.0 (46.6%)\n\n\ngrade_3_aes\n86.0 (14.4%)\n\n\nhosp_90\n166.0 (27.9%)\n\n\nplatinum_related_hosp\n88.0 (14.8%)\n\n\ndeath_90\n22.0 (3.7%)\n\n\n\n1 n (%)"
   },
   {
     "objectID": "analysis.html#actual-vs-predicted-dose-overlaid",
@@ -180,6 +180,118 @@
     "title": "Analysis",
     "section": "8.1 Platinum-Related Hospitalization (Side Effect)",
     "text": "8.1 Platinum-Related Hospitalization (Side Effect)\n\n\nCode\nfit_side_effect &lt;- cuminc(\n  Surv(cmp_time_side_effect, cmp_status_side_effect) ~ cr_cys_7,\n  data = final_master\n)\n\nggcuminc(fit_side_effect) +\n  labs(\n    title = \"Platinum-Related Hospitalization\",\n    x = \"Follow-up Time (Days)\",\n    y = \"Cumulative Incidence\"\n  ) +\n  scale_y_continuous(labels = percent_format(accuracy = 1)) +\n  theme_classic(base_size = 14) +\n  theme(\n    plot.title    = element_text(face = \"bold\", size = 16),\n    axis.title    = element_text(size = 14),\n    axis.text     = element_text(size = 12),\n    legend.title  = element_blank(),\n    legend.text   = element_text(size = 12)\n  ) +\n  scale_color_manual(values = c(\"red\", \"blue\"))"
+  },
+  {
+    "objectID": "analysis.html#grade-2-anemia-auc-4",
+    "href": "analysis.html#grade-2-anemia-auc-4",
+    "title": "Analysis",
+    "section": "9.1 Grade 2 Anemia (AUC < 4)",
+    "text": "9.1 Grade 2 Anemia (AUC &lt; 4)\n\n\nCode\nloess_plot(\n  data = fm_lt4, x = dd_percentile_lt4, y = Anemia_g2_90days,\n  x_point = dd_decile_lt4 * 10, y_point = anemia_2_rate_decile_lt4,\n  title = \"Grade &gt;= 2 Anemia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)\",\n  ylab = \"Grade &gt;= 2 Anemia\",\n  vlines = pct_vlines_lt4\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-3-anemia-auc-4",
+    "href": "analysis.html#grade-3-anemia-auc-4",
+    "title": "Analysis",
+    "section": "9.2 Grade 3 Anemia (AUC < 4)",
+    "text": "9.2 Grade 3 Anemia (AUC &lt; 4)\n\n\nCode\nloess_plot(\n  data = fm_lt4, x = dd_percentile_lt4, y = Anemia_g3_90days,\n  x_point = dd_decile_lt4 * 10, y_point = anemia_3_rate_decile_lt4,\n  title = \"Grade &gt;= 3 Anemia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)\",\n  ylab = \"Grade &gt;= 3 Anemia\",\n  vlines = pct_vlines_lt4\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-2-thrombocytopenia-auc-4",
+    "href": "analysis.html#grade-2-thrombocytopenia-auc-4",
+    "title": "Analysis",
+    "section": "9.3 Grade 2 Thrombocytopenia (AUC < 4)",
+    "text": "9.3 Grade 2 Thrombocytopenia (AUC &lt; 4)\n\n\nCode\nloess_plot(\n  data = fm_lt4, x = dd_percentile_lt4, y = Throm_g2_90days,\n  x_point = dd_decile_lt4 * 10, y_point = throm_2_rate_decile_lt4,\n  title = \"Grade &gt;= 2 Thrombocytopenia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)\",\n  ylab = \"Grade &gt;= 2 Thrombocytopenia\",\n  vlines = pct_vlines_lt4\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-3-thrombocytopenia-auc-4",
+    "href": "analysis.html#grade-3-thrombocytopenia-auc-4",
+    "title": "Analysis",
+    "section": "9.4 Grade 3 Thrombocytopenia (AUC < 4)",
+    "text": "9.4 Grade 3 Thrombocytopenia (AUC &lt; 4)\n\n\nCode\nloess_plot(\n  data = fm_lt4, x = dd_percentile_lt4, y = Throm_g3_90days,\n  x_point = dd_decile_lt4 * 10, y_point = throm_3_rate_decile_lt4,\n  title = \"Grade &gt;= 3 Thrombocytopenia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)\",\n  ylab = \"Grade &gt;= 3 Thrombocytopenia\",\n  vlines = pct_vlines_lt4\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-2-aki-auc-4",
+    "href": "analysis.html#grade-2-aki-auc-4",
+    "title": "Analysis",
+    "section": "9.5 Grade 2 AKI (AUC < 4)",
+    "text": "9.5 Grade 2 AKI (AUC &lt; 4)\n\n\nCode\nloess_plot(\n  data = fm_lt4, x = dd_percentile_lt4, y = AKI_g2_90days,\n  x_point = dd_decile_lt4 * 10, y_point = aki_2_rate_decile_lt4,\n  title = \"Grade &gt;= 2 Creatinine Increased (Carboplatin AUC &lt; 4)\",\n  xlab = \"Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)\",\n  ylab = \"Grade &gt;= 2 Creatinine Increased\",\n  vlines = pct_vlines_lt4\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-3-aki-auc-4",
+    "href": "analysis.html#grade-3-aki-auc-4",
+    "title": "Analysis",
+    "section": "9.6 Grade 3 AKI (AUC < 4)",
+    "text": "9.6 Grade 3 AKI (AUC &lt; 4)\n\n\nCode\nloess_plot(\n  data = fm_lt4, x = dd_percentile_lt4, y = AKI_g3_90days,\n  x_point = dd_decile_lt4 * 10, y_point = aki_3_rate_decile_lt4,\n  title = \"Grade &gt;= 3 Creatinine Increased (Carboplatin AUC &lt; 4)\",\n  xlab = \"Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)\",\n  ylab = \"Grade &gt;= 3 Creatinine Increased\",\n  vlines = pct_vlines_lt4\n)"
+  },
+  {
+    "objectID": "analysis.html#overall-hospitalization-auc-4",
+    "href": "analysis.html#overall-hospitalization-auc-4",
+    "title": "Analysis",
+    "section": "9.7 Overall Hospitalization (AUC < 4)",
+    "text": "9.7 Overall Hospitalization (AUC &lt; 4)\n\n\nCode\nloess_plot(\n  data = fm_lt4, x = dd_percentile_lt4, y = hosp_90,\n  x_point = dd_decile_lt4 * 10, y_point = hos_rate_decile_lt4,\n  title = \"Overall Hospitalization (Carboplatin AUC &lt; 4)\",\n  xlab = \"Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)\",\n  ylab = \"Overall Hospitalization\",\n  vlines = pct_vlines_lt4\n)"
+  },
+  {
+    "objectID": "analysis.html#platinum-related-hospitalization-auc-4",
+    "href": "analysis.html#platinum-related-hospitalization-auc-4",
+    "title": "Analysis",
+    "section": "9.8 Platinum-Related Hospitalization (AUC < 4)",
+    "text": "9.8 Platinum-Related Hospitalization (AUC &lt; 4)\n\n\nCode\nloess_plot(\n  data = fm_lt4, x = dd_percentile_lt4, y = platinum_related_hosp,\n  x_point = dd_decile_lt4 * 10, y_point = platinum_related_hos_rate_decile_lt4,\n  title = \"Hospitalization for Platinum-Associated AEs (Carboplatin AUC &lt; 4)\",\n  xlab = \"Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)\",\n  ylab = \"Hospitalization for Platinum-Associated AEs\",\n  vlines = pct_vlines_lt4\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-2-anemia-auc-4-1",
+    "href": "analysis.html#grade-2-anemia-auc-4-1",
+    "title": "Analysis",
+    "section": "10.1 Grade 2 Anemia (AUC < 4)",
+    "text": "10.1 Grade 2 Anemia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Anemia_g2_90days,\n  title = \"Grade &gt;= 2 Anemia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Anemia\"\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-3-anemia-auc-4-1",
+    "href": "analysis.html#grade-3-anemia-auc-4-1",
+    "title": "Analysis",
+    "section": "10.2 Grade 3 Anemia (AUC < 4)",
+    "text": "10.2 Grade 3 Anemia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Anemia_g3_90days,\n  title = \"Grade &gt;= 3 Anemia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Anemia\"\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-2-thrombocytopenia-auc-4-1",
+    "href": "analysis.html#grade-2-thrombocytopenia-auc-4-1",
+    "title": "Analysis",
+    "section": "10.3 Grade 2 Thrombocytopenia (AUC < 4)",
+    "text": "10.3 Grade 2 Thrombocytopenia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Throm_g2_90days,\n  title = \"Grade &gt;= 2 Thrombocytopenia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Thrombocytopenia\"\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-3-thrombocytopenia-auc-4-1",
+    "href": "analysis.html#grade-3-thrombocytopenia-auc-4-1",
+    "title": "Analysis",
+    "section": "10.4 Grade 3 Thrombocytopenia (AUC < 4)",
+    "text": "10.4 Grade 3 Thrombocytopenia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Throm_g3_90days,\n  title = \"Grade &gt;= 3 Thrombocytopenia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Thrombocytopenia\"\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-2-aki-auc-4-1",
+    "href": "analysis.html#grade-2-aki-auc-4-1",
+    "title": "Analysis",
+    "section": "10.5 Grade 2 AKI (AUC < 4)",
+    "text": "10.5 Grade 2 AKI (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = AKI_g2_90days,\n  title = \"Grade &gt;= 2 Creatinine Increased (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Creatinine Increased\"\n)"
+  },
+  {
+    "objectID": "analysis.html#grade-3-aki-auc-4-1",
+    "href": "analysis.html#grade-3-aki-auc-4-1",
+    "title": "Analysis",
+    "section": "10.6 Grade 3 AKI (AUC < 4)",
+    "text": "10.6 Grade 3 AKI (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = AKI_g3_90days,\n  title = \"Grade &gt;= 3 Creatinine Increased (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Creatinine Increased\"\n)"
+  },
+  {
+    "objectID": "analysis.html#overall-hospitalization-auc-4-1",
+    "href": "analysis.html#overall-hospitalization-auc-4-1",
+    "title": "Analysis",
+    "section": "10.7 Overall Hospitalization (AUC < 4)",
+    "text": "10.7 Overall Hospitalization (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = hosp_90,\n  title = \"Overall Hospitalization (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Overall Hospitalization\"\n)"
+  },
+  {
+    "objectID": "analysis.html#platinum-related-hospitalization-auc-4-1",
+    "href": "analysis.html#platinum-related-hospitalization-auc-4-1",
+    "title": "Analysis",
+    "section": "10.8 Platinum-Related Hospitalization (AUC < 4)",
+    "text": "10.8 Platinum-Related Hospitalization (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = platinum_related_hosp,\n  title = \"Hospitalization for Platinum-Associated AEs (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Hospitalization for Platinum-Associated AEs\"\n)"
   },
   {
     "objectID": "index.html",
@@ -403,7 +515,7 @@
     "href": "data_management.html#redcap-export",
     "title": "Data Management",
     "section": "4.1 REDCap export",
-    "text": "4.1 REDCap export\n\n\nCode\nmaster &lt;- read_csv('Data/CystatinCInPatientsO_DATA_2026-03-31_1025.csv')\n\nlist &lt;- read_excel('Data/N=596 for tianqi.xlsx')\n\n# Rename empi to EMPI (uppercase for RPDR compatibility)\nmaster &lt;- master %&gt;% rename(EMPI = empi)\n\n# Keep only patients whose EMPI appears in the list\nmaster &lt;- master %&gt;% filter(EMPI %in% list$EMPI)"
+    "text": "4.1 REDCap export\n\n\nCode\nmaster &lt;- read_csv('Data/CystatinCInPatientsO_DATA_2026-03-31_1136.csv')\n\nlist &lt;- read_excel('Data/N=596 for tianqi.xlsx')\n\n# Rename empi to EMPI (uppercase for RPDR compatibility)\nmaster &lt;- master %&gt;% rename(EMPI = empi)\n\n# Keep only patients whose EMPI appears in the list\nmaster &lt;- master %&gt;% filter(EMPI %in% list$EMPI)"
   },
   {
     "objectID": "data_management.html#standardise-column-names-rename-ed-hosp-variables",
@@ -445,7 +557,7 @@
     "href": "data_management.html#load-rpdr-files",
     "title": "Data Management",
     "section": "4.7 Load RPDR files",
-    "text": "4.7 Load RPDR files\n\n\nCode\n# Diagnoses\ndia &lt;- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Dia.txt',\n  sep = \"|\", fill = TRUE, quote = \"\", header = TRUE)\ndia$Date &lt;- as.Date(dia$Date, \"%m/%d/%Y\")\n\n# Labs (HGB, PLT, ALB, CRE, K, MG, NA — single pull)\nlab &lt;- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Lab.txt',\n  sep = \"|\", fill = TRUE, quote = \"\", header = TRUE) %&gt;%\n  select(EMPI, Seq_Date_Time, Result, Group_Id, Test_Description)\nlab$Seq_Date_Time &lt;- as.Date(lab$Seq_Date_Time, \"%m/%d/%Y\")\n\n# Medications\nmed &lt;- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Med.txt',\n  sep = \"|\", fill = TRUE, quote = \"\", header = TRUE) %&gt;%\n  select(EMPI, Medication_Date, Medication)\nmed$Medication_Date &lt;- as.Date(med$Medication_Date, \"%m/%d/%Y\")\n\n# Patient index: EMPI + baseline date (needed by pre/post lab functions)\nmaster_list &lt;- final_master %&gt;% select(EMPI, baseline_sample_date)\n\nmaster_lab     &lt;- merge(master_list, lab,     by = \"EMPI\", all.x = TRUE)\nmaster_dia     &lt;- merge(master_list, dia,     by = \"EMPI\", all.y = TRUE)\nmaster_med     &lt;- merge(master_list, med,     by = \"EMPI\", all.y = TRUE)\n\n# Exclude patients with no RPDR labs\nempis_with_labs &lt;- unique(lab$EMPI[lab$EMPI %in% final_master$EMPI])\nempis_no_labs   &lt;- setdiff(final_master$EMPI, empis_with_labs)\nn_no_labs       &lt;- length(empis_no_labs)\n\ncat(\"Patients before RPDR lab exclusion:\", nrow(final_master), \"\\n\")\n\n\nPatients before RPDR lab exclusion: 596 \n\n\nCode\ncat(\"Patients with no RPDR labs (excluded):\", n_no_labs, \"\\n\")\n\n\nPatients with no RPDR labs (excluded): 0 \n\n\nCode\nfinal_master &lt;- final_master %&gt;% filter(EMPI %in% empis_with_labs)\nmaster_lab   &lt;- master_lab %&gt;% filter(EMPI %in% empis_with_labs)\n\ncat(\"Patients after RPDR lab exclusion:\", nrow(final_master), \"\\n\")\n\n\nPatients after RPDR lab exclusion: 596"
+    "text": "4.7 Load RPDR files\n\n\nCode\n# Diagnoses\ndia &lt;- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Dia.txt',\n  sep = \"|\", fill = TRUE, quote = \"\", header = TRUE)\ndia$Date &lt;- as.Date(dia$Date, \"%m/%d/%Y\")\n\n# Labs (HGB, PLT, ALB, CRE, K, MG, NA — single pull)\nlab &lt;- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Lab.txt',\n  sep = \"|\", fill = TRUE, quote = \"\", header = TRUE) %&gt;%\n  select(EMPI, Seq_Date_Time, Result, Group_Id, Test_Description)\nlab$Seq_Date_Time &lt;- as.Date(lab$Seq_Date_Time, \"%m/%d/%Y\")\n\n# Medications\nmed &lt;- read.table('/Users/to909/Partners HealthCare Dropbox/Tianqi Ouyang/Thoracic Oncology Spreadsheets/Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216_Med.txt',\n  sep = \"|\", fill = TRUE, quote = \"\", header = TRUE) %&gt;%\n  select(EMPI, Medication_Date, Medication)\nmed$Medication_Date &lt;- as.Date(med$Medication_Date, \"%m/%d/%Y\")\n\n# Patient index: EMPI + baseline date (needed by pre/post lab functions)\nmaster_list &lt;- final_master %&gt;% select(EMPI, baseline_sample_date)\n\nmaster_lab     &lt;- merge(master_list, lab,     by = \"EMPI\", all.x = TRUE)\nmaster_dia     &lt;- merge(master_list, dia,     by = \"EMPI\", all.y = TRUE)\nmaster_med     &lt;- merge(master_list, med,     by = \"EMPI\", all.y = TRUE)\n\n# Exclude patients with no RPDR labs\nempis_with_labs &lt;- unique(lab$EMPI[lab$EMPI %in% final_master$EMPI])\nempis_no_labs   &lt;- setdiff(final_master$EMPI, empis_with_labs)\nn_no_labs       &lt;- length(empis_no_labs)\n\ncat(\"Patients before RPDR lab exclusion:\", nrow(final_master), \"\\n\")\n\n\nPatients before RPDR lab exclusion: 596 \n\n\nCode\ncat(\"Patients with no RPDR labs (excluded):\", n_no_labs, \"\\n\")\n\n\nPatients with no RPDR labs (excluded): 0 \n\n\nCode\nif (n_no_labs &gt; 0) {\n  cat(\"  record_ids:\",\n      paste(final_master$record_id[final_master$EMPI %in% empis_no_labs], collapse = \", \"), \"\\n\")\n}\n\nfinal_master &lt;- final_master %&gt;% filter(EMPI %in% empis_with_labs)\nmaster_lab   &lt;- master_lab %&gt;% filter(EMPI %in% empis_with_labs)\n\ncat(\"Patients after RPDR lab exclusion:\", nrow(final_master), \"\\n\")\n\n\nPatients after RPDR lab exclusion: 596"
   },
   {
     "objectID": "data_management.html#pipeline-functions-egfr-formulas",
@@ -487,14 +599,14 @@
     "href": "data_management.html#exclusion-filter-missing-cystatin-c-or-platinum-type",
     "title": "Data Management",
     "section": "5.4 Exclusion filter: missing cystatin C or platinum type",
-    "text": "5.4 Exclusion filter: missing cystatin C or platinum type\n\n\nCode\n# Exclude patients missing baseline cystatin C or platinum group\nfinal_master &lt;- final_master %&gt;%\n  mutate(cys_c_baseline = as.numeric(cys_c_baseline))\n\ncat(\"Missing cystatin C — record_id:\",\n    paste(final_master$record_id[is.na(final_master$cys_c_baseline)], collapse = \", \"), \"\\n\")\n\n\nMissing cystatin C — record_id: 877 \n\n\nCode\ncat(\"Missing platinum group — record_id:\",\n    paste(final_master$record_id[is.na(final_master$platin_group)], collapse = \", \"), \"\\n\")\n\n\nMissing platinum group — record_id:  \n\n\nCode\nfinal_master &lt;- final_master %&gt;%\n  filter(!is.na(cys_c_baseline)) %&gt;%\n  filter(!is.na(platin_group))"
+    "text": "5.4 Exclusion filter: missing cystatin C or platinum type\n\n\nCode\n# Exclude patients missing baseline cystatin C or platinum group\nfinal_master &lt;- final_master %&gt;%\n  mutate(cys_c_baseline = as.numeric(cys_c_baseline))\n\ncat(\"Missing cystatin C — record_id:\",\n    paste(final_master$record_id[is.na(final_master$cys_c_baseline)], collapse = \", \"), \"\\n\")\n\n\nMissing cystatin C — record_id:  \n\n\nCode\ncat(\"Missing platinum group — record_id:\",\n    paste(final_master$record_id[is.na(final_master$platin_group)], collapse = \", \"), \"\\n\")\n\n\nMissing platinum group — record_id:  \n\n\nCode\nfinal_master &lt;- final_master %&gt;%\n  filter(!is.na(cys_c_baseline)) %&gt;%\n  filter(!is.na(platin_group))"
   },
   {
     "objectID": "data_management.html#exposure-variables",
     "href": "data_management.html#exposure-variables",
     "title": "Data Management",
     "section": "5.5 Exposure variables",
-    "text": "5.5 Exposure variables\n\n\nCode\n# cr_cys: raw ratio (creatinine / cystatin C)\nfinal_master$cr_cys &lt;- final_master$baseline_creatinine / final_master$cys_c_baseline\n\n# cr_cys_cat: four ordered categories\nfinal_master &lt;- final_master %&gt;%\n  mutate(cr_cys_cat = case_when(\n    cr_cys &lt; 0.5                  ~ 1,\n    cr_cys &gt;= 0.5 & cr_cys &lt; 0.7 ~ 2,\n    cr_cys &gt;= 0.7 & cr_cys &lt; 0.9 ~ 3,\n    cr_cys &gt;= 0.9                 ~ 4\n  ))\nfinal_master$cr_cys_cat &lt;- factor(\n  final_master$cr_cys_cat,\n  levels = c(\"1\", \"2\", \"3\", \"4\"),\n  labels = c(\"&lt; 0.5\", \"0.5-0.7\", \"0.7-0.9\", \"≥ 0.9\")\n)\n\n# cr_cys_7: primary binary exposure — 1 if cr_cys &lt; 0.7\nfinal_master$cr_cys_7 &lt;- ifelse(final_master$cr_cys &lt; 0.7, 1, 0)\n\n# Alternative eGFR-based exposure\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    # 30% discrepancy: cystatin eGFR vs creatinine eGFR (CKD-EPI)\n    exposure_epi_30 = ifelse(baseline_cys_c_egfr &lt; 0.7 * baseline_cre_egfr, 1, 0)\n  )\n\ntable(final_master$cr_cys_7)\n\n\n\n  0   1 \n430 165"
+    "text": "5.5 Exposure variables\n\n\nCode\n# cr_cys: raw ratio (creatinine / cystatin C)\nfinal_master$cr_cys &lt;- final_master$baseline_creatinine / final_master$cys_c_baseline\n\n# cr_cys_cat: four ordered categories\nfinal_master &lt;- final_master %&gt;%\n  mutate(cr_cys_cat = case_when(\n    cr_cys &lt; 0.5                  ~ 1,\n    cr_cys &gt;= 0.5 & cr_cys &lt; 0.7 ~ 2,\n    cr_cys &gt;= 0.7 & cr_cys &lt; 0.9 ~ 3,\n    cr_cys &gt;= 0.9                 ~ 4\n  ))\nfinal_master$cr_cys_cat &lt;- factor(\n  final_master$cr_cys_cat,\n  levels = c(\"1\", \"2\", \"3\", \"4\"),\n  labels = c(\"&lt; 0.5\", \"0.5-0.7\", \"0.7-0.9\", \"≥ 0.9\")\n)\n\n# cr_cys_7: primary binary exposure — 1 if cr_cys &lt; 0.7\nfinal_master$cr_cys_7 &lt;- ifelse(final_master$cr_cys &lt; 0.7, 1, 0)\n\n# Alternative eGFR-based exposure\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    # 30% discrepancy: cystatin eGFR vs creatinine eGFR (CKD-EPI)\n    exposure_epi_30 = ifelse(baseline_cys_c_egfr &lt; 0.7 * baseline_cre_egfr, 1, 0)\n  )\n\ntable(final_master$cr_cys_7)\n\n\n\n  0   1 \n430 166"
   },
   {
     "objectID": "data_management.html#bmi-age-categories-ici-ckd-stage",
@@ -515,14 +627,14 @@
     "href": "data_management.html#cancer-type-categories-7-groups",
     "title": "Data Management",
     "section": "5.8 Cancer type categories (7 groups)",
-    "text": "5.8 Cancer type categories (7 groups)\n\n\nCode\n# cancer_type_cat_7: recode REDCap tumor_type (numeric 1–9) into 7 clinical groups\n# REDCap coding (from data dictionary):\n#   1 = Lung → Thoracic\n#   2 = Breast\n#   3 = Upper GI/esophagus/gastric  → GI\n#   4 = Lower GI/colon/rectum      → GI\n#   5 = Genitourinary/RCC/bladder   → GU\n#   6 = Mesothelioma                → Other\n#   7 = Gyn/ovarian/uterus/cervix  → GYN\n#   8 = HEENT/Laryngeal/head & neck → HEENT\n#   9 = Other                       → Other\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    cancer_type_cat_7 = factor(case_when(\n      tumor_type == 1             ~ 1,   # Thoracic (Lung)\n      tumor_type == 2             ~ 2,   # Breast\n      tumor_type %in% c(3, 4)    ~ 3,   # GI (Upper + Lower)\n      tumor_type == 5             ~ 4,   # GU\n      tumor_type == 7             ~ 5,   # GYN\n      tumor_type == 8             ~ 6,   # HEENT\n      tumor_type %in% c(6, 9)    ~ 7,   # Other (Mesothelioma + Other)\n      TRUE ~ NA_real_\n    ), levels = 1:7, labels = c(\"Thoracic\", \"Breast\", \"GI\", \"GU\", \"GYN\", \"HEENT\", \"Other\"))\n  )\n\ntable(final_master$cancer_type_cat_7)\n\n\n\nThoracic   Breast       GI       GU      GYN    HEENT    Other \n     200       73       58       13      186       49       16"
+    "text": "5.8 Cancer type categories (7 groups)\n\n\nCode\n# cancer_type_cat_7: recode REDCap tumor_type (numeric 1–9) into 7 clinical groups\n# REDCap coding (from data dictionary):\n#   1 = Lung → Thoracic\n#   2 = Breast\n#   3 = Upper GI/esophagus/gastric  → GI\n#   4 = Lower GI/colon/rectum      → GI\n#   5 = Genitourinary/RCC/bladder   → GU\n#   6 = Mesothelioma                → Other\n#   7 = Gyn/ovarian/uterus/cervix  → GYN\n#   8 = HEENT/Laryngeal/head & neck → HEENT\n#   9 = Other                       → Other\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    cancer_type_cat_7 = factor(case_when(\n      tumor_type == 1             ~ 1,   # Thoracic (Lung)\n      tumor_type == 2             ~ 2,   # Breast\n      tumor_type %in% c(3, 4)    ~ 3,   # GI (Upper + Lower)\n      tumor_type == 5             ~ 4,   # GU\n      tumor_type == 7             ~ 5,   # GYN\n      tumor_type == 8             ~ 6,   # HEENT\n      tumor_type %in% c(6, 9)    ~ 7,   # Other (Mesothelioma + Other)\n      TRUE ~ NA_real_\n    ), levels = 1:7, labels = c(\"Thoracic\", \"Breast\", \"GI\", \"GU\", \"GYN\", \"HEENT\", \"Other\"))\n  )\n\ntable(final_master$cancer_type_cat_7)\n\n\n\nThoracic   Breast       GI       GU      GYN    HEENT    Other \n     200       73       58       13      187       49       16"
   },
   {
     "objectID": "data_management.html#platinum-dosing-variables",
     "href": "data_management.html#platinum-dosing-variables",
     "title": "Data Management",
     "section": "5.8 Platinum dosing variables",
-    "text": "5.8 Platinum dosing variables\n\n\nCode\n# carbo / cis: binary platinum type (platin_group is now a labeled factor)\n# carbo_AUC: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²\n# cis_group: cisplatin dose tier (1=&lt;40, 2=40–60, 3=≥60 mg/m²)\n# dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)\n# carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin\n# cis_dose_cat: 1=&lt;75 mg/m², 2=≥75, 0=not cisplatin\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    carbo        = ifelse(platin_group == \"Carboplatin\", 1, 0),\n    cis          = ifelse(platin_group == \"Cisplatin\",   1, 0),\n    carbo_AUC    = case_when(carbo == 1 ~ platin_dose, TRUE ~ NA_real_),\n    cis_dose     = case_when(cis == 1 ~ platin_dose, TRUE ~ NA_real_),\n    cis_group    = case_when(\n      cis_dose &lt; 40                    ~ 1,\n      cis_dose &gt;= 40 & cis_dose &lt; 60  ~ 2,\n      cis_dose &gt;= 60                   ~ 3,\n      TRUE ~ NA_real_\n    ),\n    high_dose = factor(case_when(\n      carbo_AUC &gt;= 5 | cis_dose &gt;= 75 ~ 1,\n      carbo_AUC &lt;  5 | cis_dose &lt;  75 ~ 0,\n      TRUE ~ NA_real_\n    )),\n    carbo_AUC_cat = factor(case_when(\n      carbo_AUC &lt; 4  ~ \"&lt;4\",\n      carbo_AUC &gt;= 4 ~ \"&gt;=4\",\n      TRUE ~ NA_character_\n    ), levels = c(\"&lt;4\", \"&gt;=4\")),\n    cis_dose_cat = case_when(\n      cis_dose &lt;  75 ~ 1,\n      cis_dose &gt;= 75 ~ 2,\n      TRUE ~ 0\n    )\n  )\n\ntable(final_master$high_dose)\n\n\n\n  0   1 \n202 393"
+    "text": "5.8 Platinum dosing variables\n\n\nCode\n# carbo / cis: binary platinum type (platin_group is now a labeled factor)\n# carbo_AUC: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²\n# cis_group: cisplatin dose tier (1=&lt;40, 2=40–60, 3=≥60 mg/m²)\n# dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)\n# carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin\n# cis_dose_cat: 1=&lt;75 mg/m², 2=≥75, 0=not cisplatin\nfinal_master &lt;- final_master %&gt;%\n  mutate(\n    carbo        = ifelse(platin_group == \"Carboplatin\", 1, 0),\n    cis          = ifelse(platin_group == \"Cisplatin\",   1, 0),\n    carbo_AUC    = case_when(carbo == 1 ~ platin_dose, TRUE ~ NA_real_),\n    cis_dose     = case_when(cis == 1 ~ platin_dose, TRUE ~ NA_real_),\n    cis_group    = case_when(\n      cis_dose &lt; 40                    ~ 1,\n      cis_dose &gt;= 40 & cis_dose &lt; 60  ~ 2,\n      cis_dose &gt;= 60                   ~ 3,\n      TRUE ~ NA_real_\n    ),\n    high_dose = factor(case_when(\n      carbo_AUC &gt;= 5 | cis_dose &gt;= 75 ~ 1,\n      carbo_AUC &lt;  5 | cis_dose &lt;  75 ~ 0,\n      TRUE ~ NA_real_\n    )),\n    carbo_AUC_cat = factor(case_when(\n      carbo_AUC &lt; 4  ~ \"&lt;4\",\n      carbo_AUC &gt;= 4 ~ \"&gt;=4\",\n      TRUE ~ NA_character_\n    ), levels = c(\"&lt;4\", \"&gt;=4\")),\n    cis_dose_cat = case_when(\n      cis_dose &lt;  75 ~ 1,\n      cis_dose &gt;= 75 ~ 2,\n      TRUE ~ 0\n    )\n  )\n\ntable(final_master$high_dose)\n\n\n\n  0   1 \n202 394"
   },
   {
     "objectID": "data_management.html#carboplatin-dose-discrepancy-variables-from-leyre-dose.rmd",
@@ -557,7 +669,7 @@
     "href": "data_management.html#hiv-from-rpdr-hiv_rpdr",
     "title": "Data Management",
     "section": "5.12 HIV from RPDR (hiv_rpdr)",
-    "text": "5.12 HIV from RPDR (hiv_rpdr)\n\n\nCode\n# hiv_rpdr: HIV status from RPDR diagnoses + medications (Jiaxuan's pipeline).\n# Note: There is no hiv column in the REDCap CSV. The hiv variable in Copy 709 / cleaned_master\n# was always derived from RPDR. Jiaxuan's final code Rmd used the name hiv_new.\n#\n# Step 1: dia_list_name with HIV terms, excluding false-positive diagnosis names\n# Step 2: Further exclude patients whose HIV diagnosis co-occurs with hepatitis B/C\n\nno_hiv &lt;- c(\n  \"1 - Hives-Oncall\",\n  \"Contact with and (suspected) exposure to human immunodeficiency virus [hiv]\",\n  \"Encounter for screening for human immunodeficiency virus [hiv]\",\n  \"counseling\",\n  \"Inconclusive laboratory evidence of human immunodeficiency virus [hiv]\",\n  \"Asymptomatic human immunodeficiency virus [hiv] infection status\",\n  \"Family history of human immunodeficiency virus [hiv] disease\",\n  \"HIV exposure-Oncall\"\n)\n\nhiv_terms &lt;- c(\"hiv\", \"human immunodeficiency virus\")\n\nhiv_med_list &lt;- c(\n  \"abacavir\", \"ziagen\", \"emtricitabine\", \"emtriva\", \"lamivudine\", \"tenofovir\", \"viread\",\n  \"zidovudine\", \"retrovir\", \"doravirine\", \"pifeltro\", \"efavirenz\", \"sustiva\", \"etravirine\",\n  \"intelence\", \"nevirapine\", \"viramune\", \"rilpivirine\", \"edurant\", \"atazanavir\", \"reyataz\",\n  \"darunavir\", \"prezista\", \"fosamprenavir\", \"lexiva\", \"ritonavir\", \"norvir\", \"saquinavir\",\n  \"invirase\", \"tipranavir\", \"aptivus\", \"enfuvirtide\", \"fuzeon\", \"maraviroc\", \"selzentry\",\n  \"cabotegravir\", \"vocabria\", \"dolutegravir\", \"tivicay\", \"raltegravir\", \"isentress\", \"fostemsavir\",\n  \"rukobia\", \"ibalizumab\", \"trogarzo\", \"lenacapavir\", \"sunlenca\",\n  \"atripla\", \"biktarvy\", \"cabenuva\", \"cimduo\", \"combivir\", \"complera\", \"descovy\", \"dovato\",\n  \"epzicom\", \"evotaz\", \"genvoya\", \"juluca\", \"kaletra\", \"odefsey\", \"prezcobix\", \"stribild\",\n  \"symtuza\", \"triumeq\", \"truvada\", \"trizivir\",\n  \"didanosine\", \"stavudine\", \"videx\", \"zerit\", \"delavirdine\", \"rescriptor\", \"indinavir\",\n  \"crixivan\", \"nelfinavir\", \"viracept\", \"fortovase\"\n)\n\nhiv_rpdr_initial &lt;- dia_list_name(\n  master_dia,\n  listed_names  = hiv_terms,\n  excluded_names = no_hiv,\n  med_data       = master_med,\n  med_names      = hiv_med_list,\n  index_date     = baseline_sample_date\n)\n\n# Step 2: Further filter — exclude patients whose HIV diagnosis also mentions hepatitis B/C\nhiv_rpdr_cleaned &lt;- hiv_rpdr_initial %&gt;%\n  left_join(master_dia %&gt;% select(EMPI, Diagnosis_Name), by = \"EMPI\") %&gt;%\n  filter(\n    str_detect(Diagnosis_Name, regex(\"hiv|human immunodeficiency virus\", ignore_case = TRUE)),\n    !str_detect(Diagnosis_Name, regex(\"hepatitis B|hepatitis C\", ignore_case = TRUE))\n  ) %&gt;%\n  distinct(EMPI)\n\nfinal_master &lt;- final_master %&gt;%\n  mutate(hiv_rpdr = ifelse(EMPI %in% hiv_rpdr_cleaned$EMPI, 1, 0))\n\ntable(final_master$hiv_rpdr)\n\n\n\n  0   1 \n588   7"
+    "text": "5.12 HIV from RPDR (hiv_rpdr)\n\n\nCode\n# hiv_rpdr: HIV status from RPDR diagnoses + medications (Jiaxuan's pipeline).\n# Note: There is no hiv column in the REDCap CSV. The hiv variable in Copy 709 / cleaned_master\n# was always derived from RPDR. Jiaxuan's final code Rmd used the name hiv_new.\n#\n# Step 1: dia_list_name with HIV terms, excluding false-positive diagnosis names\n# Step 2: Further exclude patients whose HIV diagnosis co-occurs with hepatitis B/C\n\nno_hiv &lt;- c(\n  \"1 - Hives-Oncall\",\n  \"Contact with and (suspected) exposure to human immunodeficiency virus [hiv]\",\n  \"Encounter for screening for human immunodeficiency virus [hiv]\",\n  \"counseling\",\n  \"Inconclusive laboratory evidence of human immunodeficiency virus [hiv]\",\n  \"Asymptomatic human immunodeficiency virus [hiv] infection status\",\n  \"Family history of human immunodeficiency virus [hiv] disease\",\n  \"HIV exposure-Oncall\"\n)\n\nhiv_terms &lt;- c(\"hiv\", \"human immunodeficiency virus\")\n\nhiv_med_list &lt;- c(\n  \"abacavir\", \"ziagen\", \"emtricitabine\", \"emtriva\", \"lamivudine\", \"tenofovir\", \"viread\",\n  \"zidovudine\", \"retrovir\", \"doravirine\", \"pifeltro\", \"efavirenz\", \"sustiva\", \"etravirine\",\n  \"intelence\", \"nevirapine\", \"viramune\", \"rilpivirine\", \"edurant\", \"atazanavir\", \"reyataz\",\n  \"darunavir\", \"prezista\", \"fosamprenavir\", \"lexiva\", \"ritonavir\", \"norvir\", \"saquinavir\",\n  \"invirase\", \"tipranavir\", \"aptivus\", \"enfuvirtide\", \"fuzeon\", \"maraviroc\", \"selzentry\",\n  \"cabotegravir\", \"vocabria\", \"dolutegravir\", \"tivicay\", \"raltegravir\", \"isentress\", \"fostemsavir\",\n  \"rukobia\", \"ibalizumab\", \"trogarzo\", \"lenacapavir\", \"sunlenca\",\n  \"atripla\", \"biktarvy\", \"cabenuva\", \"cimduo\", \"combivir\", \"complera\", \"descovy\", \"dovato\",\n  \"epzicom\", \"evotaz\", \"genvoya\", \"juluca\", \"kaletra\", \"odefsey\", \"prezcobix\", \"stribild\",\n  \"symtuza\", \"triumeq\", \"truvada\", \"trizivir\",\n  \"didanosine\", \"stavudine\", \"videx\", \"zerit\", \"delavirdine\", \"rescriptor\", \"indinavir\",\n  \"crixivan\", \"nelfinavir\", \"viracept\", \"fortovase\"\n)\n\nhiv_rpdr_initial &lt;- dia_list_name(\n  master_dia,\n  listed_names  = hiv_terms,\n  excluded_names = no_hiv,\n  med_data       = master_med,\n  med_names      = hiv_med_list,\n  index_date     = baseline_sample_date\n)\n\n# Step 2: Further filter — exclude patients whose HIV diagnosis also mentions hepatitis B/C\nhiv_rpdr_cleaned &lt;- hiv_rpdr_initial %&gt;%\n  left_join(master_dia %&gt;% select(EMPI, Diagnosis_Name), by = \"EMPI\") %&gt;%\n  filter(\n    str_detect(Diagnosis_Name, regex(\"hiv|human immunodeficiency virus\", ignore_case = TRUE)),\n    !str_detect(Diagnosis_Name, regex(\"hepatitis B|hepatitis C\", ignore_case = TRUE))\n  ) %&gt;%\n  distinct(EMPI)\n\nfinal_master &lt;- final_master %&gt;%\n  mutate(hiv_rpdr = ifelse(EMPI %in% hiv_rpdr_cleaned$EMPI, 1, 0))\n\ntable(final_master$hiv_rpdr)\n\n\n\n  0   1 \n589   7"
   },
   {
     "objectID": "data_management.html#charlson-comorbidity-index",

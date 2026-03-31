@@ -213,8 +213,8 @@ loess_plot_raw <- function(data, x, y, title, xlab, ylab) {
 # Vertical reference lines for percentile LOESS plots
 pct_vlines <- data.frame(
   x     = c(60, 70),
-  label = c(paste0("P60: median ", round(median_dd_p60, 0), " mg"),
-            paste0("P70: median ", round(median_dd_p70, 0), " mg"))
+  label = c(paste0("median: ", round(median_dd_p60, 0), ""),
+            paste0("median: ", round(median_dd_p70, 0), ""))
 )
 ```
 
@@ -568,8 +568,8 @@ median_dd_p70_lt4 <- median(
 
 pct_vlines_lt4 <- data.frame(
   x     = c(60, 70),
-  label = c(paste0("P60: median ", round(median_dd_p60_lt4, 0), " mg"),
-            paste0("P70: median ", round(median_dd_p70_lt4, 0), " mg"))
+  label = c(paste0("median: ", round(median_dd_p60_lt4, 0), ""),
+            paste0("median: ", round(median_dd_p70_lt4, 0), ""))
 )
 ```
 
