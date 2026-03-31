@@ -481,7 +481,45 @@ ggplot(final_master, aes(x = dose_discrepancy)) +
   theme_minimal(base_size = 14)
 ```
 
-## 7.3 Scatter by Sex
+## 7.3 Dose Discrepancy Boxplot (Outlier Inspection)
+
+```{r}
+#| label: plot-dose-diff-boxplot
+# IQR-based outlier detection
+dd_stats <- boxplot.stats(final_master$dose_discrepancy[!is.na(final_master$dose_discrepancy)])
+
+cat("Dose Discrepancy Summary:\n")
+cat("  Median:", median(final_master$dose_discrepancy, na.rm = TRUE), "mg\n")
+cat("  IQR:   ", IQR(final_master$dose_discrepancy, na.rm = TRUE), "mg\n")
+cat("  Lower fence:", dd_stats$stats[1], "mg\n")
+cat("  Upper fence:", dd_stats$stats[5], "mg\n")
+cat("  N outliers: ", length(dd_stats$out), "\n")
+
+# Flag outlier patients
+outlier_ids <- final_master %>%
+  filter(dose_discrepancy %in% dd_stats$out) %>%
+  select(record_id, EMPI, carbo_AUC, carbo_dose_redcap, carbo_dose_cre_cys,
+         dose_discrepancy, dose_diff_pct,
+         ckd_epi_gfr_cre_cys_unindex, ckd_epi_gfr_cre_cys_unindex_cap125)
+
+cat("\nOutlier record_ids:\n")
+print(outlier_ids %>% select(record_id, dose_discrepancy, dose_diff_pct, carbo_AUC,
+                              carbo_dose_redcap, carbo_dose_cre_cys),
+      n = Inf)
+```
+
+```{r}
+#| label: plot-boxplot-dd
+ggplot(final_master, aes(y = dose_discrepancy)) +
+  geom_boxplot(fill = "#1F78B4", alpha = 0.5, outlier.color = "red", outlier.size = 2) +
+  labs(title = "Dose Discrepancy: Boxplot with Outliers",
+       y = "Dose Discrepancy (mg): Actual - Predicted",
+       subtitle = "Red points = IQR outliers") +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+```
+
+## 7.4 Scatter by Sex
 
 ```{r}
 #| label: plot-scatter-sex
@@ -495,7 +533,7 @@ ggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = 
   theme_bw() + theme(panel.grid.minor = element_blank())
 ```
 
-## 7.4 Scatter by BMI
+## 7.5 Scatter by BMI
 
 ```{r}
 #| label: plot-scatter-bmi
@@ -509,7 +547,7 @@ ggplot(final_master, aes(x = carbo_dose_cre_cys, y = carbo_dose_redcap, color = 
   theme_bw() + theme(panel.grid.minor = element_blank())
 ```
 
-## 7.5 Scatter by Age
+## 7.6 Scatter by Age
 
 ```{r}
 #| label: plot-scatter-age
