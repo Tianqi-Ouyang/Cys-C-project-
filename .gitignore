@@ -5,3 +5,6 @@
 *.rds
 /.quarto/
 **/*.quarto_ipynb
+Data/
+Reference code/
+*.csv

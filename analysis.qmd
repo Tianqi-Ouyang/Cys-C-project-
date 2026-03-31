@@ -527,3 +527,258 @@ ggcuminc(fit_side_effect) +
   ) +
   scale_color_manual(values = c("red", "blue"))
 ```
+
+# 9 LOESS Plots: Carboplatin AUC < 4 Cohort
+
+```{r}
+#| label: carbo-lt4-subset
+# Subset to carboplatin patients with AUC < 4
+fm_lt4 <- final_master %>%
+  filter(carbo_AUC_cat == "<4")
+
+# Recompute percentile and decile within this subset
+fm_lt4 <- fm_lt4 %>%
+  mutate(
+    dd_percentile_lt4 = ntile(dose_discrepancy, 100),
+    dd_decile_lt4     = ntile(dose_discrepancy, 10)
+  ) %>%
+  group_by(dd_decile_lt4) %>%
+  mutate(
+    anemia_2_rate_decile_lt4             = mean(Anemia_g2_90days, na.rm = TRUE),
+    anemia_3_rate_decile_lt4             = mean(Anemia_g3_90days, na.rm = TRUE),
+    throm_2_rate_decile_lt4              = mean(Throm_g2_90days, na.rm = TRUE),
+    throm_3_rate_decile_lt4              = mean(Throm_g3_90days, na.rm = TRUE),
+    aki_2_rate_decile_lt4                = mean(AKI_g2_90days, na.rm = TRUE),
+    aki_3_rate_decile_lt4                = mean(AKI_g3_90days, na.rm = TRUE),
+    hos_rate_decile_lt4                  = mean(hosp_90, na.rm = TRUE),
+    platinum_related_hos_rate_decile_lt4 = mean(platinum_related_hosp, na.rm = TRUE),
+    death_rate_decile_lt4                = mean(death_90, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(dd_decile_lt4 = as.numeric(dd_decile_lt4))
+```
+
+```{r}
+#| label: carbo-lt4-vlines
+# Median dose discrepancy at P60 and P70 within the AUC < 4 subset
+median_dd_p60_lt4 <- median(
+  fm_lt4$dose_discrepancy[fm_lt4$dd_percentile_lt4 == 60], na.rm = TRUE)
+median_dd_p70_lt4 <- median(
+  fm_lt4$dose_discrepancy[fm_lt4$dd_percentile_lt4 == 70], na.rm = TRUE)
+
+pct_vlines_lt4 <- data.frame(
+  x     = c(60, 70),
+  label = c(paste0("P60: median ", round(median_dd_p60_lt4, 0), " mg"),
+            paste0("P70: median ", round(median_dd_p70_lt4, 0), " mg"))
+)
+```
+
+## 9.1 Grade 2 Anemia (AUC < 4)
+
+```{r}
+#| label: plot-anemia-2-lt4
+loess_plot(
+  data = fm_lt4, x = dd_percentile_lt4, y = Anemia_g2_90days,
+  x_point = dd_decile_lt4 * 10, y_point = anemia_2_rate_decile_lt4,
+  title = "Grade >= 2 Anemia (Carboplatin AUC < 4)",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Grade >= 2 Anemia",
+  vlines = pct_vlines_lt4
+)
+```
+
+## 9.2 Grade 3 Anemia (AUC < 4)
+
+```{r}
+#| label: plot-anemia-3-lt4
+loess_plot(
+  data = fm_lt4, x = dd_percentile_lt4, y = Anemia_g3_90days,
+  x_point = dd_decile_lt4 * 10, y_point = anemia_3_rate_decile_lt4,
+  title = "Grade >= 3 Anemia (Carboplatin AUC < 4)",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Grade >= 3 Anemia",
+  vlines = pct_vlines_lt4
+)
+```
+
+## 9.3 Grade 2 Thrombocytopenia (AUC < 4)
+
+```{r}
+#| label: plot-throm-2-lt4
+loess_plot(
+  data = fm_lt4, x = dd_percentile_lt4, y = Throm_g2_90days,
+  x_point = dd_decile_lt4 * 10, y_point = throm_2_rate_decile_lt4,
+  title = "Grade >= 2 Thrombocytopenia (Carboplatin AUC < 4)",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Grade >= 2 Thrombocytopenia",
+  vlines = pct_vlines_lt4
+)
+```
+
+## 9.4 Grade 3 Thrombocytopenia (AUC < 4)
+
+```{r}
+#| label: plot-throm-3-lt4
+loess_plot(
+  data = fm_lt4, x = dd_percentile_lt4, y = Throm_g3_90days,
+  x_point = dd_decile_lt4 * 10, y_point = throm_3_rate_decile_lt4,
+  title = "Grade >= 3 Thrombocytopenia (Carboplatin AUC < 4)",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Grade >= 3 Thrombocytopenia",
+  vlines = pct_vlines_lt4
+)
+```
+
+## 9.5 Grade 2 AKI (AUC < 4)
+
+```{r}
+#| label: plot-aki-2-lt4
+loess_plot(
+  data = fm_lt4, x = dd_percentile_lt4, y = AKI_g2_90days,
+  x_point = dd_decile_lt4 * 10, y_point = aki_2_rate_decile_lt4,
+  title = "Grade >= 2 Creatinine Increased (Carboplatin AUC < 4)",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Grade >= 2 Creatinine Increased",
+  vlines = pct_vlines_lt4
+)
+```
+
+## 9.6 Grade 3 AKI (AUC < 4)
+
+```{r}
+#| label: plot-aki-3-lt4
+loess_plot(
+  data = fm_lt4, x = dd_percentile_lt4, y = AKI_g3_90days,
+  x_point = dd_decile_lt4 * 10, y_point = aki_3_rate_decile_lt4,
+  title = "Grade >= 3 Creatinine Increased (Carboplatin AUC < 4)",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Grade >= 3 Creatinine Increased",
+  vlines = pct_vlines_lt4
+)
+```
+
+## 9.7 Overall Hospitalization (AUC < 4)
+
+```{r}
+#| label: plot-hosp-lt4
+loess_plot(
+  data = fm_lt4, x = dd_percentile_lt4, y = hosp_90,
+  x_point = dd_decile_lt4 * 10, y_point = hos_rate_decile_lt4,
+  title = "Overall Hospitalization (Carboplatin AUC < 4)",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Overall Hospitalization",
+  vlines = pct_vlines_lt4
+)
+```
+
+## 9.8 Platinum-Related Hospitalization (AUC < 4)
+
+```{r}
+#| label: plot-platinum-hosp-lt4
+loess_plot(
+  data = fm_lt4, x = dd_percentile_lt4, y = platinum_related_hosp,
+  x_point = dd_decile_lt4 * 10, y_point = platinum_related_hos_rate_decile_lt4,
+  title = "Hospitalization for Platinum-Associated AEs (Carboplatin AUC < 4)",
+  xlab = "Percentile of Dose Discrepancy (REDCap - CKD-EPI Cr-Cys)",
+  ylab = "Hospitalization for Platinum-Associated AEs",
+  vlines = pct_vlines_lt4
+)
+```
+
+# 10 LOESS Plots: AE Rates by Actual Dose Discrepancy — AUC < 4 Cohort
+
+## 10.1 Grade 2 Anemia (AUC < 4)
+
+```{r}
+#| label: plot-anemia-2-raw-lt4
+loess_plot_raw(
+  data = fm_lt4, x = dose_discrepancy, y = Anemia_g2_90days,
+  title = "Grade >= 2 Anemia (Carboplatin AUC < 4)",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Grade >= 2 Anemia"
+)
+```
+
+## 10.2 Grade 3 Anemia (AUC < 4)
+
+```{r}
+#| label: plot-anemia-3-raw-lt4
+loess_plot_raw(
+  data = fm_lt4, x = dose_discrepancy, y = Anemia_g3_90days,
+  title = "Grade >= 3 Anemia (Carboplatin AUC < 4)",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Grade >= 3 Anemia"
+)
+```
+
+## 10.3 Grade 2 Thrombocytopenia (AUC < 4)
+
+```{r}
+#| label: plot-throm-2-raw-lt4
+loess_plot_raw(
+  data = fm_lt4, x = dose_discrepancy, y = Throm_g2_90days,
+  title = "Grade >= 2 Thrombocytopenia (Carboplatin AUC < 4)",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Grade >= 2 Thrombocytopenia"
+)
+```
+
+## 10.4 Grade 3 Thrombocytopenia (AUC < 4)
+
+```{r}
+#| label: plot-throm-3-raw-lt4
+loess_plot_raw(
+  data = fm_lt4, x = dose_discrepancy, y = Throm_g3_90days,
+  title = "Grade >= 3 Thrombocytopenia (Carboplatin AUC < 4)",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Grade >= 3 Thrombocytopenia"
+)
+```
+
+## 10.5 Grade 2 AKI (AUC < 4)
+
+```{r}
+#| label: plot-aki-2-raw-lt4
+loess_plot_raw(
+  data = fm_lt4, x = dose_discrepancy, y = AKI_g2_90days,
+  title = "Grade >= 2 Creatinine Increased (Carboplatin AUC < 4)",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Grade >= 2 Creatinine Increased"
+)
+```
+
+## 10.6 Grade 3 AKI (AUC < 4)
+
+```{r}
+#| label: plot-aki-3-raw-lt4
+loess_plot_raw(
+  data = fm_lt4, x = dose_discrepancy, y = AKI_g3_90days,
+  title = "Grade >= 3 Creatinine Increased (Carboplatin AUC < 4)",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Grade >= 3 Creatinine Increased"
+)
+```
+
+## 10.7 Overall Hospitalization (AUC < 4)
+
+```{r}
+#| label: plot-hosp-raw-lt4
+loess_plot_raw(
+  data = fm_lt4, x = dose_discrepancy, y = hosp_90,
+  title = "Overall Hospitalization (Carboplatin AUC < 4)",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Overall Hospitalization"
+)
+```
+
+## 10.8 Platinum-Related Hospitalization (AUC < 4)
+
+```{r}
+#| label: plot-platinum-hosp-raw-lt4
+loess_plot_raw(
+  data = fm_lt4, x = dose_discrepancy, y = platinum_related_hosp,
+  title = "Hospitalization for Platinum-Associated AEs (Carboplatin AUC < 4)",
+  xlab = "Dose Discrepancy (mg): Actual - Predicted",
+  ylab = "Hospitalization for Platinum-Associated AEs"
+)
+```

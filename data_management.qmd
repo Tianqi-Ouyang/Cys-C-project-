@@ -499,7 +499,7 @@ dia_list_name <- function(data, listed_names, index_date, excluded_names = NULL,
 
 ```{r}
 #| label: load-redcap
-master <- read_csv('Data/CystatinCInPatientsO_DATA_2026-03-31_1025.csv')
+master <- read_csv('Data/CystatinCInPatientsO_DATA_2026-03-31_1136.csv')
 
 list <- read_excel('Data/N=596 for tianqi.xlsx')
 
@@ -645,6 +645,10 @@ n_no_labs       <- length(empis_no_labs)
 
 cat("Patients before RPDR lab exclusion:", nrow(final_master), "\n")
 cat("Patients with no RPDR labs (excluded):", n_no_labs, "\n")
+if (n_no_labs > 0) {
+  cat("  record_ids:",
+      paste(final_master$record_id[final_master$EMPI %in% empis_no_labs], collapse = ", "), "\n")
+}
 
 final_master <- final_master %>% filter(EMPI %in% empis_with_labs)
 master_lab   <- master_lab %>% filter(EMPI %in% empis_with_labs)
