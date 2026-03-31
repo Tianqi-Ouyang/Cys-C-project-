@@ -88,56 +88,56 @@
     "href": "analysis.html#grade-2-anemia-1",
     "title": "Analysis",
     "section": "6.1 Grade 2 Anemia",
-    "text": "6.1 Grade 2 Anemia\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = Anemia_g2_90days,\n  title = \"Grade &gt;= 2 Anemia\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Anemia\"\n)"
+    "text": "6.1 Grade 2 Anemia\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = Anemia_g2_90days,\n  title = \"Grade &gt;= 2 Anemia\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Anemia\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#grade-3-anemia-1",
     "href": "analysis.html#grade-3-anemia-1",
     "title": "Analysis",
     "section": "6.2 Grade 3 Anemia",
-    "text": "6.2 Grade 3 Anemia\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = Anemia_g3_90days,\n  title = \"Grade &gt;= 3 Anemia\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Anemia\"\n)"
+    "text": "6.2 Grade 3 Anemia\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = Anemia_g3_90days,\n  title = \"Grade &gt;= 3 Anemia\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Anemia\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#grade-2-thrombocytopenia-1",
     "href": "analysis.html#grade-2-thrombocytopenia-1",
     "title": "Analysis",
     "section": "6.3 Grade 2 Thrombocytopenia",
-    "text": "6.3 Grade 2 Thrombocytopenia\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = Throm_g2_90days,\n  title = \"Grade &gt;= 2 Thrombocytopenia\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Thrombocytopenia\"\n)"
+    "text": "6.3 Grade 2 Thrombocytopenia\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = Throm_g2_90days,\n  title = \"Grade &gt;= 2 Thrombocytopenia\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Thrombocytopenia\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#grade-3-thrombocytopenia-1",
     "href": "analysis.html#grade-3-thrombocytopenia-1",
     "title": "Analysis",
     "section": "6.4 Grade 3 Thrombocytopenia",
-    "text": "6.4 Grade 3 Thrombocytopenia\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = Throm_g3_90days,\n  title = \"Grade &gt;= 3 Thrombocytopenia\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Thrombocytopenia\"\n)"
+    "text": "6.4 Grade 3 Thrombocytopenia\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = Throm_g3_90days,\n  title = \"Grade &gt;= 3 Thrombocytopenia\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Thrombocytopenia\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#grade-2-aki-1",
     "href": "analysis.html#grade-2-aki-1",
     "title": "Analysis",
     "section": "6.5 Grade 2 AKI",
-    "text": "6.5 Grade 2 AKI\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = AKI_g2_90days,\n  title = \"Grade &gt;= 2 Creatinine Increased\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Creatinine Increased\"\n)"
+    "text": "6.5 Grade 2 AKI\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = AKI_g2_90days,\n  title = \"Grade &gt;= 2 Creatinine Increased\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Creatinine Increased\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#grade-3-aki-1",
     "href": "analysis.html#grade-3-aki-1",
     "title": "Analysis",
     "section": "6.6 Grade 3 AKI",
-    "text": "6.6 Grade 3 AKI\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = AKI_g3_90days,\n  title = \"Grade &gt;= 3 Creatinine Increased\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Creatinine Increased\"\n)"
+    "text": "6.6 Grade 3 AKI\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = AKI_g3_90days,\n  title = \"Grade &gt;= 3 Creatinine Increased\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Creatinine Increased\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#overall-hospitalization-1",
     "href": "analysis.html#overall-hospitalization-1",
     "title": "Analysis",
     "section": "6.7 Overall Hospitalization",
-    "text": "6.7 Overall Hospitalization\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = hosp_90,\n  title = \"Overall Hospitalization\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Overall Hospitalization\"\n)"
+    "text": "6.7 Overall Hospitalization\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = hosp_90,\n  title = \"Overall Hospitalization\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Overall Hospitalization\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#platinum-related-hospitalization-1",
     "href": "analysis.html#platinum-related-hospitalization-1",
     "title": "Analysis",
     "section": "6.8 Platinum-Related Hospitalization",
-    "text": "6.8 Platinum-Related Hospitalization\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = platinum_related_hosp,\n  title = \"Hospitalization for Platinum-Associated AEs\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Hospitalization for Platinum-Associated AEs\"\n)"
+    "text": "6.8 Platinum-Related Hospitalization\n\n\nCode\nloess_plot_raw(\n  data = final_master, x = dose_discrepancy, y = platinum_related_hosp,\n  title = \"Hospitalization for Platinum-Associated AEs\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Hospitalization for Platinum-Associated AEs\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#actual-redcap-vs-predicted-ckd-epi-cr-cys-dose-scatter",
@@ -242,56 +242,56 @@
     "href": "analysis.html#grade-2-anemia-auc-4-1",
     "title": "Analysis",
     "section": "10.1 Grade 2 Anemia (AUC < 4)",
-    "text": "10.1 Grade 2 Anemia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Anemia_g2_90days,\n  title = \"Grade &gt;= 2 Anemia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Anemia\"\n)"
+    "text": "10.1 Grade 2 Anemia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Anemia_g2_90days,\n  title = \"Grade &gt;= 2 Anemia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Anemia\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#grade-3-anemia-auc-4-1",
     "href": "analysis.html#grade-3-anemia-auc-4-1",
     "title": "Analysis",
     "section": "10.2 Grade 3 Anemia (AUC < 4)",
-    "text": "10.2 Grade 3 Anemia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Anemia_g3_90days,\n  title = \"Grade &gt;= 3 Anemia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Anemia\"\n)"
+    "text": "10.2 Grade 3 Anemia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Anemia_g3_90days,\n  title = \"Grade &gt;= 3 Anemia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Anemia\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#grade-2-thrombocytopenia-auc-4-1",
     "href": "analysis.html#grade-2-thrombocytopenia-auc-4-1",
     "title": "Analysis",
     "section": "10.3 Grade 2 Thrombocytopenia (AUC < 4)",
-    "text": "10.3 Grade 2 Thrombocytopenia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Throm_g2_90days,\n  title = \"Grade &gt;= 2 Thrombocytopenia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Thrombocytopenia\"\n)"
+    "text": "10.3 Grade 2 Thrombocytopenia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Throm_g2_90days,\n  title = \"Grade &gt;= 2 Thrombocytopenia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Thrombocytopenia\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#grade-3-thrombocytopenia-auc-4-1",
     "href": "analysis.html#grade-3-thrombocytopenia-auc-4-1",
     "title": "Analysis",
     "section": "10.4 Grade 3 Thrombocytopenia (AUC < 4)",
-    "text": "10.4 Grade 3 Thrombocytopenia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Throm_g3_90days,\n  title = \"Grade &gt;= 3 Thrombocytopenia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Thrombocytopenia\"\n)"
+    "text": "10.4 Grade 3 Thrombocytopenia (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = Throm_g3_90days,\n  title = \"Grade &gt;= 3 Thrombocytopenia (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Thrombocytopenia\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#grade-2-aki-auc-4-1",
     "href": "analysis.html#grade-2-aki-auc-4-1",
     "title": "Analysis",
     "section": "10.5 Grade 2 AKI (AUC < 4)",
-    "text": "10.5 Grade 2 AKI (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = AKI_g2_90days,\n  title = \"Grade &gt;= 2 Creatinine Increased (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Creatinine Increased\"\n)"
+    "text": "10.5 Grade 2 AKI (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = AKI_g2_90days,\n  title = \"Grade &gt;= 2 Creatinine Increased (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 2 Creatinine Increased\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#grade-3-aki-auc-4-1",
     "href": "analysis.html#grade-3-aki-auc-4-1",
     "title": "Analysis",
     "section": "10.6 Grade 3 AKI (AUC < 4)",
-    "text": "10.6 Grade 3 AKI (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = AKI_g3_90days,\n  title = \"Grade &gt;= 3 Creatinine Increased (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Creatinine Increased\"\n)"
+    "text": "10.6 Grade 3 AKI (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = AKI_g3_90days,\n  title = \"Grade &gt;= 3 Creatinine Increased (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Grade &gt;= 3 Creatinine Increased\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#overall-hospitalization-auc-4-1",
     "href": "analysis.html#overall-hospitalization-auc-4-1",
     "title": "Analysis",
     "section": "10.7 Overall Hospitalization (AUC < 4)",
-    "text": "10.7 Overall Hospitalization (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = hosp_90,\n  title = \"Overall Hospitalization (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Overall Hospitalization\"\n)"
+    "text": "10.7 Overall Hospitalization (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = hosp_90,\n  title = \"Overall Hospitalization (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Overall Hospitalization\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "analysis.html#platinum-related-hospitalization-auc-4-1",
     "href": "analysis.html#platinum-related-hospitalization-auc-4-1",
     "title": "Analysis",
     "section": "10.8 Platinum-Related Hospitalization (AUC < 4)",
-    "text": "10.8 Platinum-Related Hospitalization (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = platinum_related_hosp,\n  title = \"Hospitalization for Platinum-Associated AEs (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Hospitalization for Platinum-Associated AEs\"\n)"
+    "text": "10.8 Platinum-Related Hospitalization (AUC &lt; 4)\n\n\nCode\nloess_plot_raw(\n  data = fm_lt4, x = dose_discrepancy, y = platinum_related_hosp,\n  title = \"Hospitalization for Platinum-Associated AEs (Carboplatin AUC &lt; 4)\",\n  xlab = \"Dose Discrepancy (mg): Actual - Predicted\",\n  ylab = \"Hospitalization for Platinum-Associated AEs\",\n  vlines = raw_vlines\n)"
   },
   {
     "objectID": "index.html",

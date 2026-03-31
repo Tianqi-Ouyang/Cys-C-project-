@@ -192,8 +192,8 @@ loess_plot <- function(data, x, y, x_point, y_point, title, xlab, ylab,
   p
 }
 
-loess_plot_raw <- function(data, x, y, title, xlab, ylab) {
-  ggplot(data, aes(x = {{x}}, y = {{y}})) +
+loess_plot_raw <- function(data, x, y, title, xlab, ylab, vlines = NULL) {
+  p <- ggplot(data, aes(x = {{x}}, y = {{y}})) +
     geom_smooth(method = "loess", se = TRUE, span = 0.75, color = "blue", linewidth = 1.5) +
     scale_y_continuous(labels = percent_format(accuracy = 1)) +
     labs(title = title, x = xlab, y = ylab) +
@@ -205,6 +205,14 @@ loess_plot_raw <- function(data, x, y, title, xlab, ylab) {
       axis.text.y   = element_text(size = 10),
       plot.title     = element_text(size = 13, face = "bold")
     )
+  if (!is.null(vlines)) {
+    p <- p +
+      geom_vline(data = vlines, aes(xintercept = x),
+                 linetype = "dashed", color = "red", linewidth = 0.7) +
+      geom_text(data = vlines, aes(x = x, y = Inf, label = label),
+                vjust = 1.5, hjust = -0.1, size = 3.2, color = "red")
+  }
+  p
 }
 ```
 
@@ -332,6 +340,14 @@ loess_plot(
 
 # 6 LOESS Plots: AE Rates by Actual Dose Discrepancy (mg)
 
+```{r}
+#| label: raw-vline-data
+raw_vlines <- data.frame(
+  x     = c(25, 50, 75),
+  label = c("25 mg", "50 mg", "75 mg")
+)
+```
+
 ## 6.1 Grade 2 Anemia
 
 ```{r}
@@ -340,7 +356,8 @@ loess_plot_raw(
   data = final_master, x = dose_discrepancy, y = Anemia_g2_90days,
   title = "Grade >= 2 Anemia",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 2 Anemia"
+  ylab = "Grade >= 2 Anemia",
+  vlines = raw_vlines
 )
 ```
 
@@ -352,7 +369,8 @@ loess_plot_raw(
   data = final_master, x = dose_discrepancy, y = Anemia_g3_90days,
   title = "Grade >= 3 Anemia",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 3 Anemia"
+  ylab = "Grade >= 3 Anemia",
+  vlines = raw_vlines
 )
 ```
 
@@ -364,7 +382,8 @@ loess_plot_raw(
   data = final_master, x = dose_discrepancy, y = Throm_g2_90days,
   title = "Grade >= 2 Thrombocytopenia",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 2 Thrombocytopenia"
+  ylab = "Grade >= 2 Thrombocytopenia",
+  vlines = raw_vlines
 )
 ```
 
@@ -376,7 +395,8 @@ loess_plot_raw(
   data = final_master, x = dose_discrepancy, y = Throm_g3_90days,
   title = "Grade >= 3 Thrombocytopenia",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 3 Thrombocytopenia"
+  ylab = "Grade >= 3 Thrombocytopenia",
+  vlines = raw_vlines
 )
 ```
 
@@ -388,7 +408,8 @@ loess_plot_raw(
   data = final_master, x = dose_discrepancy, y = AKI_g2_90days,
   title = "Grade >= 2 Creatinine Increased",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 2 Creatinine Increased"
+  ylab = "Grade >= 2 Creatinine Increased",
+  vlines = raw_vlines
 )
 ```
 
@@ -400,7 +421,8 @@ loess_plot_raw(
   data = final_master, x = dose_discrepancy, y = AKI_g3_90days,
   title = "Grade >= 3 Creatinine Increased",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 3 Creatinine Increased"
+  ylab = "Grade >= 3 Creatinine Increased",
+  vlines = raw_vlines
 )
 ```
 
@@ -412,7 +434,8 @@ loess_plot_raw(
   data = final_master, x = dose_discrepancy, y = hosp_90,
   title = "Overall Hospitalization",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Overall Hospitalization"
+  ylab = "Overall Hospitalization",
+  vlines = raw_vlines
 )
 ```
 
@@ -424,7 +447,8 @@ loess_plot_raw(
   data = final_master, x = dose_discrepancy, y = platinum_related_hosp,
   title = "Hospitalization for Platinum-Associated AEs",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Hospitalization for Platinum-Associated AEs"
+  ylab = "Hospitalization for Platinum-Associated AEs",
+  vlines = raw_vlines
 )
 ```
 
@@ -695,7 +719,8 @@ loess_plot_raw(
   data = fm_lt4, x = dose_discrepancy, y = Anemia_g2_90days,
   title = "Grade >= 2 Anemia (Carboplatin AUC < 4)",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 2 Anemia"
+  ylab = "Grade >= 2 Anemia",
+  vlines = raw_vlines
 )
 ```
 
@@ -707,7 +732,8 @@ loess_plot_raw(
   data = fm_lt4, x = dose_discrepancy, y = Anemia_g3_90days,
   title = "Grade >= 3 Anemia (Carboplatin AUC < 4)",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 3 Anemia"
+  ylab = "Grade >= 3 Anemia",
+  vlines = raw_vlines
 )
 ```
 
@@ -719,7 +745,8 @@ loess_plot_raw(
   data = fm_lt4, x = dose_discrepancy, y = Throm_g2_90days,
   title = "Grade >= 2 Thrombocytopenia (Carboplatin AUC < 4)",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 2 Thrombocytopenia"
+  ylab = "Grade >= 2 Thrombocytopenia",
+  vlines = raw_vlines
 )
 ```
 
@@ -731,7 +758,8 @@ loess_plot_raw(
   data = fm_lt4, x = dose_discrepancy, y = Throm_g3_90days,
   title = "Grade >= 3 Thrombocytopenia (Carboplatin AUC < 4)",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 3 Thrombocytopenia"
+  ylab = "Grade >= 3 Thrombocytopenia",
+  vlines = raw_vlines
 )
 ```
 
@@ -743,7 +771,8 @@ loess_plot_raw(
   data = fm_lt4, x = dose_discrepancy, y = AKI_g2_90days,
   title = "Grade >= 2 Creatinine Increased (Carboplatin AUC < 4)",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 2 Creatinine Increased"
+  ylab = "Grade >= 2 Creatinine Increased",
+  vlines = raw_vlines
 )
 ```
 
@@ -755,7 +784,8 @@ loess_plot_raw(
   data = fm_lt4, x = dose_discrepancy, y = AKI_g3_90days,
   title = "Grade >= 3 Creatinine Increased (Carboplatin AUC < 4)",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Grade >= 3 Creatinine Increased"
+  ylab = "Grade >= 3 Creatinine Increased",
+  vlines = raw_vlines
 )
 ```
 
@@ -767,7 +797,8 @@ loess_plot_raw(
   data = fm_lt4, x = dose_discrepancy, y = hosp_90,
   title = "Overall Hospitalization (Carboplatin AUC < 4)",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Overall Hospitalization"
+  ylab = "Overall Hospitalization",
+  vlines = raw_vlines
 )
 ```
 
@@ -779,6 +810,7 @@ loess_plot_raw(
   data = fm_lt4, x = dose_discrepancy, y = platinum_related_hosp,
   title = "Hospitalization for Platinum-Associated AEs (Carboplatin AUC < 4)",
   xlab = "Dose Discrepancy (mg): Actual - Predicted",
-  ylab = "Hospitalization for Platinum-Associated AEs"
+  ylab = "Hospitalization for Platinum-Associated AEs",
+  vlines = raw_vlines
 )
 ```
