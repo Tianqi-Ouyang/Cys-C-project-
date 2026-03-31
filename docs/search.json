@@ -403,7 +403,7 @@
     "href": "data_management.html#redcap-export",
     "title": "Data Management",
     "section": "4.1 REDCap export",
-    "text": "4.1 REDCap export\n\n\nCode\nmaster &lt;- read_csv('Data/CystatinCInPatientsO_DATA_2026-03-30_1137.csv') \n\nlist &lt;- read_excel('data/list.xlsx')\n\n# Rename empi to EMPI (uppercase for RPDR compatibility)\nmaster &lt;- master %&gt;% rename(EMPI = empi)\n\n# Keep only patients whose EMPI appears in the list\nmaster &lt;- master %&gt;% filter(EMPI %in% list$EMPI)"
+    "text": "4.1 REDCap export\n\n\nCode\nmaster &lt;- read_csv('Data/CystatinCInPatientsO_DATA_2026-03-31_1025.csv')\n\nlist &lt;- read_excel('Data/N=596 for tianqi.xlsx')\n\n# Rename empi to EMPI (uppercase for RPDR compatibility)\nmaster &lt;- master %&gt;% rename(EMPI = empi)\n\n# Keep only patients whose EMPI appears in the list\nmaster &lt;- master %&gt;% filter(EMPI %in% list$EMPI)"
   },
   {
     "objectID": "data_management.html#standardise-column-names-rename-ed-hosp-variables",
@@ -487,7 +487,7 @@
     "href": "data_management.html#exclusion-filter-missing-cystatin-c-or-platinum-type",
     "title": "Data Management",
     "section": "5.4 Exclusion filter: missing cystatin C or platinum type",
-    "text": "5.4 Exclusion filter: missing cystatin C or platinum type\n\n\nCode\n# 3 patients missing baseline cystatin C, 1 missing platinum group → exclude\nfinal_master &lt;- final_master %&gt;%\n  mutate(cys_c_baseline = as.numeric(cys_c_baseline))\n\ncat(\"Missing cystatin C — record_id:\",\n    paste(final_master$record_id[is.na(final_master$cys_c_baseline)], collapse = \", \"), \"\\n\")\n\n\nMissing cystatin C — record_id: 877 \n\n\nCode\ncat(\"Missing platinum group — record_id:\",\n    paste(final_master$record_id[is.na(final_master$platin_group)], collapse = \", \"), \"\\n\")\n\n\nMissing platinum group — record_id:  \n\n\nCode\nfinal_master &lt;- final_master %&gt;%\n  filter(!is.na(cys_c_baseline)) %&gt;%\n  filter(!is.na(platin_group))"
+    "text": "5.4 Exclusion filter: missing cystatin C or platinum type\n\n\nCode\n# Exclude patients missing baseline cystatin C or platinum group\nfinal_master &lt;- final_master %&gt;%\n  mutate(cys_c_baseline = as.numeric(cys_c_baseline))\n\ncat(\"Missing cystatin C — record_id:\",\n    paste(final_master$record_id[is.na(final_master$cys_c_baseline)], collapse = \", \"), \"\\n\")\n\n\nMissing cystatin C — record_id: 877 \n\n\nCode\ncat(\"Missing platinum group — record_id:\",\n    paste(final_master$record_id[is.na(final_master$platin_group)], collapse = \", \"), \"\\n\")\n\n\nMissing platinum group — record_id:  \n\n\nCode\nfinal_master &lt;- final_master %&gt;%\n  filter(!is.na(cys_c_baseline)) %&gt;%\n  filter(!is.na(platin_group))"
   },
   {
     "objectID": "data_management.html#exposure-variables",
