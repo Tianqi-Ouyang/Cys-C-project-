@@ -50,7 +50,7 @@ table_one <- final_master %>%
     carbo_AUC, carbo_AUC_cat, high_dose,
     ici, Bevacizumab, Paclitaxel, Pemetrexed, Doxorubicin, Etoposide,
     Gemcitabine, Pertuzumab, Trastuzumab, Docetaxel, Administered_alone,
-    hiv_rpdr, thyroid,
+    hiv_rpdr, thyroid, smoking, steroids,
     cci, ecog_score, bmi, bmi_cat,
     pre_HGB_45days, pre_PLT_45days, pre_ALB_45days,
     baseline_cys_c, baseline_cre,
@@ -64,16 +64,75 @@ table_one <- final_master %>%
 table_one
 ```
 
-## 3.1 Incidence Outcomes
+## 3.1 Table 1 by Carboplatin AUC Category
+
+```{r}
+#| label: table1-carbo-auc-cat
+table1_vars <- c(
+  "age", "age_cat", "sex", "race", "ethnicity", "tumor_stage", "cancer_type_cat_7",
+  "carbo_AUC", "high_dose",
+  "ici", "Bevacizumab", "Paclitaxel", "Pemetrexed", "Doxorubicin", "Etoposide",
+  "Gemcitabine", "Pertuzumab", "Trastuzumab", "Docetaxel", "Administered_alone",
+  "hiv_rpdr", "thyroid", "smoking", "steroids",
+  "cci", "ecog_score", "bmi", "bmi_cat",
+  "pre_HGB_45days", "pre_PLT_45days", "pre_ALB_45days",
+  "baseline_cys_c", "baseline_cre",
+  "baseline_cre_egfr", "baseline_cys_c_egfr",
+  "ckd_epi_gfr_cre_cys", "ckd_epi_gfr_cre_cys_unindex",
+  "carbo_dose_redcap", "carbo_dose_cre_cys", "dose_discrepancy", "dose_diff_pct"
+)
+
+final_master %>%
+  dplyr::select(all_of(table1_vars), carbo_AUC_cat) %>%
+  tbl_summary(
+    by = carbo_AUC_cat,
+    statistic = list(age ~ "{mean} ({sd})")
+  ) %>%
+  add_overall() %>%
+  add_p(test.args = list(all_categorical() ~ list(simulate.p.value = TRUE)))
+```
+
+## 3.2 Table 1 by Dose Discrepancy > 25 mg
+
+```{r}
+#| label: table1-dd-gt25
+final_master %>%
+  dplyr::select(all_of(table1_vars), dd_gt25) %>%
+  tbl_summary(
+    by = dd_gt25,
+    statistic = list(age ~ "{mean} ({sd})")
+  ) %>%
+  add_overall() %>%
+  add_p(test.args = list(all_categorical() ~ list(simulate.p.value = TRUE)))
+```
+
+## 3.3 Table 1 by Dose Discrepancy > 50 mg
+
+```{r}
+#| label: table1-dd-gt50
+final_master %>%
+  dplyr::select(all_of(table1_vars), dd_gt50) %>%
+  tbl_summary(
+    by = dd_gt50,
+    statistic = list(age ~ "{mean} ({sd})")
+  ) %>%
+  add_overall() %>%
+  add_p(test.args = list(all_categorical() ~ list(simulate.p.value = TRUE)))
+```
+
+## 3.4 Incidence Outcomes
 
 ```{r}
 #| label: table1-incidence
+outcome_vars <- c("Anemia_g2_90days", "Anemia_g3_90days",
+                   "Throm_g2_90days", "Throm_g3_90days",
+                   "AKI_g2_90days", "AKI_g3_90days",
+                   "grade_2_aes", "grade_3_aes",
+                   "hosp_90", "platinum_related_hosp", "death_90")
+
+# Overall
 table_one_incidence <- final_master %>%
-  select(Anemia_g2_90days, Anemia_g3_90days,
-         Throm_g2_90days, Throm_g3_90days,
-         AKI_g2_90days, AKI_g3_90days,
-         grade_2_aes, grade_3_aes,
-         hosp_90, platinum_related_hosp, death_90) %>%
+  select(all_of(outcome_vars)) %>%
   tbl_summary(
     statistic = list(
       all_continuous() ~ "{mean} ({sd})",
@@ -85,6 +144,27 @@ table_one_incidence <- final_master %>%
     )
   )
 table_one_incidence
+```
+
+## 3.5 Incidence Outcomes by Carboplatin AUC Category
+
+```{r}
+#| label: table1-incidence-carbo-auc
+final_master %>%
+  select(all_of(outcome_vars), carbo_AUC_cat) %>%
+  tbl_summary(
+    by = carbo_AUC_cat,
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = list(
+      all_continuous() ~ 1,
+      all_categorical() ~ 1
+    )
+  ) %>%
+  add_overall() %>%
+  add_p(test.args = list(all_categorical() ~ list(simulate.p.value = TRUE)))
 ```
 
 # 4 Dose Distribution
@@ -780,4 +860,195 @@ loess_plot_raw(
   ylab = "Hospitalization for Platinum-Associated AEs",
   vlines = raw_vlines
 )
+```
+
+# 11 Fine-Gray Competing Risk Regression Models
+
+Adjusted for covariates from the reference analysis (excluding `egfr_cock`):
+`age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score`.
+Anemia models add `pre_HGB_45days`; thrombocytopenia models add `pre_PLT_45days`;
+composite grade 2/3 AE models add both.
+
+## 11.1 Platinum-Related Hospitalization (Side Effect)
+
+```{r}
+#| label: fg-side-effect
+tidycmprsk::crr(
+  Surv(cmp_time_side_effect, cmp_status_side_effect) ~ dd_gt25 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 11.2 Grade 2 Anemia
+
+```{r}
+#| label: fg-anemia-2
+tidycmprsk::crr(
+  Surv(cmp_time_anemia_2, cmp_status_anemia_2) ~ dd_gt25 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 11.3 Grade 3 Anemia
+
+```{r}
+#| label: fg-anemia-3
+tidycmprsk::crr(
+  Surv(cmp_time_anemia_3, cmp_status_anemia_3) ~ dd_gt25 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 11.4 Grade 2 Thrombocytopenia
+
+```{r}
+#| label: fg-throm-2
+tidycmprsk::crr(
+  Surv(cmp_time_throm_2, cmp_status_throm_2) ~ dd_gt25 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_PLT_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 11.5 Grade 3 Thrombocytopenia
+
+```{r}
+#| label: fg-throm-3
+tidycmprsk::crr(
+  Surv(cmp_time_throm_3, cmp_status_throm_3) ~ dd_gt25 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_PLT_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 11.6 Grade 2 AKI
+
+```{r}
+#| label: fg-aki-2
+tidycmprsk::crr(
+  Surv(cmp_time_aki_2, cmp_status_aki_2) ~ dd_gt25 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 11.7 Grade 3 AKI
+
+```{r}
+#| label: fg-aki-3
+tidycmprsk::crr(
+  Surv(cmp_time_aki_3, cmp_status_aki_3) ~ dd_gt25 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 11.8 Composite Grade 2 AEs
+
+```{r}
+#| label: fg-grade-2-aes
+tidycmprsk::crr(
+  Surv(cmp_time_grade_2_aes, cmp_status_grade_2_aes) ~ dd_gt25 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days + pre_PLT_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 11.9 Composite Grade 3 AEs
+
+```{r}
+#| label: fg-grade-3-aes
+tidycmprsk::crr(
+  Surv(cmp_time_grade_3_aes, cmp_status_grade_3_aes) ~ dd_gt25 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days + pre_PLT_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+# 12 Fine-Gray Models: Dose Discrepancy > 50 mg
+
+Same models as Section 11, using `dd_gt50` as the exposure.
+
+## 12.1 Platinum-Related Hospitalization (Side Effect)
+
+```{r}
+#| label: fg50-side-effect
+tidycmprsk::crr(
+  Surv(cmp_time_side_effect, cmp_status_side_effect) ~ dd_gt50 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 12.2 Grade 2 Anemia
+
+```{r}
+#| label: fg50-anemia-2
+tidycmprsk::crr(
+  Surv(cmp_time_anemia_2, cmp_status_anemia_2) ~ dd_gt50 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 12.3 Grade 3 Anemia
+
+```{r}
+#| label: fg50-anemia-3
+tidycmprsk::crr(
+  Surv(cmp_time_anemia_3, cmp_status_anemia_3) ~ dd_gt50 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 12.4 Grade 2 Thrombocytopenia
+
+```{r}
+#| label: fg50-throm-2
+tidycmprsk::crr(
+  Surv(cmp_time_throm_2, cmp_status_throm_2) ~ dd_gt50 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_PLT_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 12.5 Grade 3 Thrombocytopenia
+
+```{r}
+#| label: fg50-throm-3
+tidycmprsk::crr(
+  Surv(cmp_time_throm_3, cmp_status_throm_3) ~ dd_gt50 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_PLT_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 12.6 Grade 2 AKI
+
+```{r}
+#| label: fg50-aki-2
+tidycmprsk::crr(
+  Surv(cmp_time_aki_2, cmp_status_aki_2) ~ dd_gt50 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 12.7 Grade 3 AKI
+
+```{r}
+#| label: fg50-aki-3
+tidycmprsk::crr(
+  Surv(cmp_time_aki_3, cmp_status_aki_3) ~ dd_gt50 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 12.8 Composite Grade 2 AEs
+
+```{r}
+#| label: fg50-grade-2-aes
+tidycmprsk::crr(
+  Surv(cmp_time_grade_2_aes, cmp_status_grade_2_aes) ~ dd_gt50 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days + pre_PLT_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
+```
+
+## 12.9 Composite Grade 3 AEs
+
+```{r}
+#| label: fg50-grade-3-aes
+tidycmprsk::crr(
+  Surv(cmp_time_grade_3_aes, cmp_status_grade_3_aes) ~ dd_gt50 + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + high_dose + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days + pre_PLT_45days,
+  failcode = 1, data = final_master
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3))
 ```

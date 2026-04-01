@@ -117,6 +117,8 @@ Hospitalization reasons 1–11 per REDCap codebook:
 | `score` | Charlson comorbidity index weighted score (from RPDR ICD codes via `comorbidity` package) |
 | `cci` | Charlson category: "mild" (score 1–2), "moderate" (3–4), "severe" (≥5) |
 | `thyroid` | Binary: 1 if thyroid disease in RPDR diagnoses or medications |
+| `smoking` | Binary: 1 if smoking/tobacco use in RPDR diagnoses |
+| `steroids` | Binary: 1 if corticosteroid use in RPDR medications |
 | `hiv_rpdr` | Binary: 1 if HIV in RPDR diagnoses or medications |
 | `bmi` | Body mass index: weight(kg) / height(m)² |
 | `bmi_cat` | 1=Underweight (<18.5), 2=Normal (18.5–25), 3=Overweight (25–30), 4=Obese (≥30) |
@@ -149,6 +151,8 @@ should be — the discrepancy between actual and predicted may relate to adverse
 | `carbo_dose_cre_cys` | Predicted dose (mg) from CKD-EPI Cr-Cys: AUC × (eGFR Cr-Cys unindexed + 25) |
 | `dose_discrepancy` | Actual − predicted (mg): `carbo_dose_redcap − carbo_dose_cre_cys` |
 | `dose_diff_pct` | (actual − predicted) / predicted × 100 (%) |
+| `dd_gt25` | Binary factor: 1 if dose_discrepancy > 25 mg, 0 otherwise |
+| `dd_gt50` | Binary factor: 1 if dose_discrepancy > 50 mg, 0 otherwise |
 | `ecog_score_cat2` | ECOG binary: "0" vs ">=1" |
 | `bmi_30` | BMI binary: "<30" vs ">=30" |
 | `age_70` | Age binary: "<70" vs ">=70" |
@@ -1145,6 +1149,8 @@ final_master <- final_master %>%
     carbo_dose_cre_cys = carbo_AUC * (ckd_epi_gfr_cre_cys_unindex_cap125 + 25),
     dose_discrepancy   = carbo_dose_redcap - carbo_dose_cre_cys,
     dose_diff_pct      = (carbo_dose_redcap - carbo_dose_cre_cys) / carbo_dose_cre_cys * 100,
+    dd_gt25            = factor(ifelse(!is.na(dose_discrepancy) & dose_discrepancy > 25, 1, 0)),
+    dd_gt50            = factor(ifelse(!is.na(dose_discrepancy) & dose_discrepancy > 50, 1, 0)),
     ecog_score_cat2    = ifelse(ecog_score == 0, "0", ">=1"),
     bmi_30 = factor(ifelse(bmi < 30, "<30", ">=30")),
     age_70 = factor(ifelse(age < 70, "<70", ">=70"))
@@ -1192,7 +1198,49 @@ final_master <- final_master %>%
   mutate(thyroid = ifelse(EMPI %in% thyroid_final$EMPI, 1, 0))
 ```
 
-## 5.12 HIV from RPDR (hiv_rpdr)
+## 5.12 Smoking status (RPDR diagnosis)
+
+```{r}
+#| label: clean-smoking
+# smoking: 1 if tobacco/smoking-related diagnosis found before baseline
+smoking_terms <- c(
+  "tobacco use", "tobacco dependence", "tobacco abuse",
+  "nicotine dependence", "nicotine use",
+  "smoking", "smoker", "cigarette"
+)
+
+smoking_final <- dia_list_name(
+  master_dia,
+  listed_names = smoking_terms,
+  index_date   = baseline_sample_date
+)
+
+final_master <- final_master %>%
+  mutate(smoking = ifelse(EMPI %in% smoking_final$EMPI, 1, 0))
+```
+
+## 5.13 Corticosteroid use (RPDR medication)
+
+```{r}
+#| label: clean-steroids
+# steroids: 1 if corticosteroid medication dispensed before baseline
+steroid_med_list <- c(
+  "Prednisone", "Prednisolone", "Methylprednisolone", "Medrol",
+  "Dexamethasone", "Decadron", "Hydrocortisone", "Cortisol",
+  "Budesonide", "Triamcinolone", "Betamethasone", "Fludrocortisone",
+  "Cortisone"
+)
+
+steroid_final <- master_med %>%
+  filter(Medication_Date <= baseline_sample_date) %>%
+  filter(grepl(paste(steroid_med_list, collapse = "|"), Medication, ignore.case = TRUE)) %>%
+  distinct(EMPI)
+
+final_master <- final_master %>%
+  mutate(steroids = ifelse(EMPI %in% steroid_final$EMPI, 1, 0))
+```
+
+## 5.14 HIV from RPDR (hiv_rpdr)
 
 ```{r}
 #| label: clean-hiv-rpdr
