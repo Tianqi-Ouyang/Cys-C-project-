@@ -722,6 +722,20 @@ ckd_epi_cre_cys_gfr <- function(creatinine, cystatin_c, male, age) {
 ```
 
 ```{r}
+#| label: fn-pipeline-cockcroft
+# Cockcroft-Gault creatinine clearance (mL/min)
+# Female factor = 0.85; male = 1.0
+Cockcroft <- function(age, weight, male, cre) {
+  if (male == 0) {
+    value <- (140 - age) * weight * 0.85 / (72 * cre)
+  } else {
+    value <- (140 - age) * weight / (72 * cre)
+  }
+  return(value)
+}
+```
+
+```{r}
 #| label: fn-pipeline-unindex
 # Adjust indexed eGFR for body surface area
 unindex <- function(value, bsa) {
@@ -787,7 +801,8 @@ final_master <- final_master %>%
     baseline_cre_egfr_unindexed  = mapply(unindex, baseline_cre_egfr, BSA),
     baseline_cys_c_egfr_unindexed = mapply(unindex, baseline_cys_c_egfr, BSA),
     ckd_epi_gfr_cre_cys_unindex  = mapply(unindex, ckd_epi_gfr_cre_cys, BSA),
-    ckd_epi_gfr_cre_cys_unindex_cap125 = pmin(ckd_epi_gfr_cre_cys_unindex, 125)
+    ckd_epi_gfr_cre_cys_unindex_cap125 = pmin(ckd_epi_gfr_cre_cys_unindex, 125),
+    cockcroft                          = mapply(Cockcroft, age, weight, male, baseline_creatinine)
   )
 ```
 
