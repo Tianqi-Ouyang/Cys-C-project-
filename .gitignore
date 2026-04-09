@@ -1,6 +1,6 @@
 .DS_Store
 *.html
-!docs/*.html
+!docs/**/*.html
 *.xlsx
 *.xls
 *.pdf
