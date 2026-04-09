@@ -1467,11 +1467,14 @@ saveRDS(final_master, "jiaxuan_final_master.rds")
 
 # 6 Missing Data — Table 1 Variables
 
+Variables that are NA by design for a platinum subgroup (`carbo_AUC`/`carbo_AUC_cat` for cisplatin patients; `cis_dose`/`cis_dose_cat` for carboplatin patients) are excluded from this table.
+
 ```{r}
 #| label: jx-missing-data
-table1_vars <- c(
+# Variables shared by all patients (not platinum-type-specific)
+shared_vars <- c(
   "age", "age_cat", "sex", "race", "ethnicity", "tumor_stage", "cancer_type_cat_7",
-  "platin_group", "carbo_AUC", "carbo_AUC_cat",
+  "platin_group",
   "ici", "Bevacizumab", "Paclitaxel", "Pemetrexed", "Doxorubicin", "Etoposide",
   "Gemcitabine", "Pertuzumab", "Trastuzumab", "Docetaxel", "Administered_alone",
   "hiv_rpdr", "thyroid", "smoking", "steroids",
@@ -1483,12 +1486,34 @@ table1_vars <- c(
   "cockcroft"
 )
 
-final_master %>%
-  dplyr::select(any_of(table1_vars)) %>%
+# Shared variables: missing across all patients
+shared_missing <- final_master %>%
+  dplyr::select(any_of(shared_vars)) %>%
   summarise(across(everything(), ~ sum(is.na(.)))) %>%
   tidyr::pivot_longer(everything(), names_to = "variable", values_to = "n_missing") %>%
-  mutate(pct_missing = round(100 * n_missing / nrow(final_master), 1)) %>%
-  filter(n_missing > 0) %>%
+  mutate(pct_missing = round(100 * n_missing / nrow(final_master), 1),
+         note = "") %>%
+  filter(n_missing > 0)
+
+# Platinum-type-specific: check within their own subgroup
+carbo_pts <- final_master %>% filter(platin_group == "Carboplatin")
+cis_pts   <- final_master %>% filter(platin_group == "Cisplatin")
+
+platin_missing <- tibble(
+  variable   = c("carbo_AUC", "carbo_AUC_cat", "cis_dose", "cis_dose_cat"),
+  n_missing  = c(sum(is.na(carbo_pts$carbo_AUC)),
+                 sum(is.na(carbo_pts$carbo_AUC_cat)),
+                 sum(is.na(cis_pts$cis_dose)),
+                 sum(is.na(cis_pts$cis_dose_cat))),
+  pct_missing = round(100 * n_missing /
+                 c(nrow(carbo_pts), nrow(carbo_pts), nrow(cis_pts), nrow(cis_pts)), 1),
+  note = c(paste0("of ", nrow(carbo_pts), " carbo pts"),
+           paste0("of ", nrow(carbo_pts), " carbo pts"),
+           paste0("of ", nrow(cis_pts), " cis pts"),
+           paste0("of ", nrow(cis_pts), " cis pts"))
+) %>% filter(n_missing > 0)
+
+bind_rows(shared_missing, platin_missing) %>%
   arrange(desc(n_missing)) %>%
   knitr::kable(caption = "Missing data — Table 1 variables (non-zero only)")
 ```

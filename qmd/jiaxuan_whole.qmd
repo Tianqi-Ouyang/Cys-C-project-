@@ -34,7 +34,7 @@ dat <- dat %>%
 dat %>%
   dplyr::select(
     age, age_cat, sex, race, ethnicity, tumor_stage, cancer_type_cat_7,
-    platin_group, carbo_AUC, carbo_AUC_cat,
+    platin_group, carbo_AUC, carbo_AUC_cat, cis_dose,
     ici, Bevacizumab, Paclitaxel, Pemetrexed, Doxorubicin, Etoposide,
     Gemcitabine, Pertuzumab, Trastuzumab, Docetaxel, Administered_alone,
     hiv_rpdr, thyroid, smoking, steroids,
