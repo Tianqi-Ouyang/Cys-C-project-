@@ -3,8 +3,9 @@ project:
   output-dir: docs
   render:
     - index.qmd
-    - data_management.qmd
-    - analysis.qmd
+    - qmd/data_management.qmd
+    - qmd/analysis.qmd
+    - qmd/redcap_formulas.qmd
 
 website:
   title: "Cystatin C / Creatinine Ratio – Platinum AE"
@@ -12,10 +13,14 @@ website:
     left:
       - href: index.qmd
         text: Summary
-      - href: data_management.qmd
+      - href: qmd/data_management.qmd
         text: Data Management
-      - href: analysis.qmd
+      - href: qmd/analysis.qmd
         text: Analysis
+      - text: Side Requests
+        menu:
+          - href: qmd/redcap_formulas.qmd
+            text: REDCap Formulas
 
 format:
   html:
@@ -28,3 +33,7 @@ execute:
   eval: false
   warning: false
   message: false
+
+knitr:
+  opts_knit:
+    root.dir: "/Users/to909/Desktop/Meg/Cystain C redcap"
