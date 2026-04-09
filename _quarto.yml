@@ -5,7 +5,9 @@ project:
     - index.qmd
     - qmd/data_management.qmd
     - qmd/analysis.qmd
-    - qmd/redcap_formulas.qmd
+    - qmd/jiaxuan_data.qmd
+    - qmd/jiaxuan_whole.qmd
+    - qmd/jiaxuan_carbo.qmd
 
 website:
   title: "Cystatin C / Creatinine Ratio – Platinum AE"
@@ -17,10 +19,14 @@ website:
         text: Data Management
       - href: qmd/analysis.qmd
         text: Analysis
-      - text: Side Requests
+      - text: Jiaxuan Project
         menu:
-          - href: qmd/redcap_formulas.qmd
-            text: REDCap Formulas
+          - href: qmd/jiaxuan_data.qmd
+            text: Data Management
+          - href: qmd/jiaxuan_whole.qmd
+            text: Whole Cohort
+          - href: qmd/jiaxuan_carbo.qmd
+            text: Carboplatin Cohort
 
 format:
   html:

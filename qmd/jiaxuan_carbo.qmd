@@ -1,0 +1,442 @@
+---
+title: "Jiaxuan Project — Carboplatin Cohort"
+author: "Tianqi Ouyang"
+date: "2026-04-09"
+execute:
+  eval: true
+  warning: false
+  message: false
+---
+
+# 1 Setup
+
+```{r}
+#| label: setup-jx-carbo
+library(tidyverse)
+library(scales)
+library(ggplot2)
+library(tidycmprsk)
+library(ggsurvfit)
+library(gtsummary)
+
+# Load whole-cohort data, then keep only carboplatin patients
+dat <- readRDS("jiaxuan_final_master.rds") %>%
+  filter(platin_group == "Carboplatin")
+
+cat("Carboplatin cohort N =", nrow(dat), "\n")
+```
+
+# 2 Table 1: Baseline Characteristics (Carboplatin Only)
+
+```{r}
+#| label: jx-table1-carbo
+dat %>%
+  dplyr::select(
+    age, age_cat, sex, race, ethnicity, tumor_stage, cancer_type_cat_7,
+    carbo_AUC, carbo_AUC_cat,
+    ici, Bevacizumab, Paclitaxel, Pemetrexed, Doxorubicin, Etoposide,
+    Gemcitabine, Pertuzumab, Trastuzumab, Docetaxel, Administered_alone,
+    hiv_rpdr, thyroid, smoking, steroids,
+    cci, ecog_score, bmi, bmi_cat,
+    pre_HGB_45days, pre_PLT_45days, pre_ALB_45days,
+    baseline_cys_c, baseline_cre, cr_cys,
+    baseline_cre_egfr, baseline_cys_c_egfr,
+    ckd_epi_gfr_cre_cys, ckd_epi_gfr_cre_cys_unindex,
+    cockcroft
+  ) %>%
+  tbl_summary(
+    statistic = list(age ~ "{mean} ({sd})")
+  )
+```
+
+# 3 LOESS Plots by eGFR-CG
+
+```{r}
+#| label: jx-carbo-loess-fn
+loess_plot <- function(data, x, y, title, xlab, ylab) {
+  ggplot(data, aes(x = {{x}}, y = {{y}})) +
+    geom_smooth(method = "loess", se = TRUE, span = 0.75,
+                color = "blue", linewidth = 1.5) +
+    scale_y_continuous(labels = percent_format(accuracy = 1)) +
+    labs(title = title, x = xlab, y = ylab) +
+    theme_minimal(base_size = 12) +
+    theme(
+      axis.title.x  = element_text(size = 11),
+      axis.title.y  = element_text(size = 11),
+      axis.text.x   = element_text(size = 10),
+      axis.text.y   = element_text(size = 10),
+      plot.title     = element_text(size = 13, face = "bold")
+    )
+}
+```
+
+## 3.1 Anemia Grade 2
+
+```{r}
+#| label: jx-carbo-loess-cg-anemia2
+loess_plot(dat, cockcroft, Anemia_g2_90days,
+           "Grade 2 Anemia by eGFR-CG (Carbo)", "Cockcroft-Gault CrCl (mL/min)", "Anemia G2 Rate")
+```
+
+## 3.2 Anemia Grade 3
+
+```{r}
+#| label: jx-carbo-loess-cg-anemia3
+loess_plot(dat, cockcroft, Anemia_g3_90days,
+           "Grade 3 Anemia by eGFR-CG (Carbo)", "Cockcroft-Gault CrCl (mL/min)", "Anemia G3 Rate")
+```
+
+## 3.3 Thrombocytopenia Grade 2
+
+```{r}
+#| label: jx-carbo-loess-cg-throm2
+loess_plot(dat, cockcroft, Throm_g2_90days,
+           "Grade 2 Thrombocytopenia by eGFR-CG (Carbo)", "Cockcroft-Gault CrCl (mL/min)", "Throm G2 Rate")
+```
+
+## 3.4 Thrombocytopenia Grade 3
+
+```{r}
+#| label: jx-carbo-loess-cg-throm3
+loess_plot(dat, cockcroft, Throm_g3_90days,
+           "Grade 3 Thrombocytopenia by eGFR-CG (Carbo)", "Cockcroft-Gault CrCl (mL/min)", "Throm G3 Rate")
+```
+
+## 3.5 AKI Grade 2
+
+```{r}
+#| label: jx-carbo-loess-cg-aki2
+loess_plot(dat, cockcroft, AKI_g2_90days,
+           "Grade 2 AKI by eGFR-CG (Carbo)", "Cockcroft-Gault CrCl (mL/min)", "AKI G2 Rate")
+```
+
+## 3.6 AKI Grade 3
+
+```{r}
+#| label: jx-carbo-loess-cg-aki3
+loess_plot(dat, cockcroft, AKI_g3_90days,
+           "Grade 3 AKI by eGFR-CG (Carbo)", "Cockcroft-Gault CrCl (mL/min)", "AKI G3 Rate")
+```
+
+# 4 LOESS Plots by eGFR CR-CYS
+
+## 4.1 Anemia Grade 2
+
+```{r}
+#| label: jx-carbo-loess-crcys-anemia2
+loess_plot(dat, ckd_epi_gfr_cre_cys_unindex, Anemia_g2_90days,
+           "Grade 2 Anemia by eGFR CR-CYS (Carbo)", "CKD-EPI CR-CYS eGFR (mL/min)", "Anemia G2 Rate")
+```
+
+## 4.2 Anemia Grade 3
+
+```{r}
+#| label: jx-carbo-loess-crcys-anemia3
+loess_plot(dat, ckd_epi_gfr_cre_cys_unindex, Anemia_g3_90days,
+           "Grade 3 Anemia by eGFR CR-CYS (Carbo)", "CKD-EPI CR-CYS eGFR (mL/min)", "Anemia G3 Rate")
+```
+
+## 4.3 Thrombocytopenia Grade 2
+
+```{r}
+#| label: jx-carbo-loess-crcys-throm2
+loess_plot(dat, ckd_epi_gfr_cre_cys_unindex, Throm_g2_90days,
+           "Grade 2 Thrombocytopenia by eGFR CR-CYS (Carbo)", "CKD-EPI CR-CYS eGFR (mL/min)", "Throm G2 Rate")
+```
+
+## 4.4 Thrombocytopenia Grade 3
+
+```{r}
+#| label: jx-carbo-loess-crcys-throm3
+loess_plot(dat, ckd_epi_gfr_cre_cys_unindex, Throm_g3_90days,
+           "Grade 3 Thrombocytopenia by eGFR CR-CYS (Carbo)", "CKD-EPI CR-CYS eGFR (mL/min)", "Throm G3 Rate")
+```
+
+## 4.5 AKI Grade 2
+
+```{r}
+#| label: jx-carbo-loess-crcys-aki2
+loess_plot(dat, ckd_epi_gfr_cre_cys_unindex, AKI_g2_90days,
+           "Grade 2 AKI by eGFR CR-CYS (Carbo)", "CKD-EPI CR-CYS eGFR (mL/min)", "AKI G2 Rate")
+```
+
+## 4.6 AKI Grade 3
+
+```{r}
+#| label: jx-carbo-loess-crcys-aki3
+loess_plot(dat, ckd_epi_gfr_cre_cys_unindex, AKI_g3_90days,
+           "Grade 3 AKI by eGFR CR-CYS (Carbo)", "CKD-EPI CR-CYS eGFR (mL/min)", "AKI G3 Rate")
+```
+
+# 5 Fine-Gray Models — eGFR-CG as Continuous Predictor (Carboplatin)
+
+Adjusted for: `age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score`.
+Anemia models add `pre_HGB_45days`; thrombocytopenia models add `pre_PLT_45days`.
+
+## 5.1 Anemia Grade 2
+
+```{r}
+#| label: jx-carbo-fg-cg-anemia2
+tidycmprsk::crr(
+  Surv(cmp_time_anemia_2, cmp_status_anemia_2) ~ cockcroft + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 5.2 Anemia Grade 3
+
+```{r}
+#| label: jx-carbo-fg-cg-anemia3
+tidycmprsk::crr(
+  Surv(cmp_time_anemia_3, cmp_status_anemia_3) ~ cockcroft + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 5.3 Thrombocytopenia Grade 2
+
+```{r}
+#| label: jx-carbo-fg-cg-throm2
+tidycmprsk::crr(
+  Surv(cmp_time_throm_2, cmp_status_throm_2) ~ cockcroft + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_PLT_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 5.4 Thrombocytopenia Grade 3
+
+```{r}
+#| label: jx-carbo-fg-cg-throm3
+tidycmprsk::crr(
+  Surv(cmp_time_throm_3, cmp_status_throm_3) ~ cockcroft + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_PLT_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 5.5 AKI Grade 2
+
+```{r}
+#| label: jx-carbo-fg-cg-aki2
+tidycmprsk::crr(
+  Surv(cmp_time_aki_2, cmp_status_aki_2) ~ cockcroft + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_CRE_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 5.6 AKI Grade 3
+
+```{r}
+#| label: jx-carbo-fg-cg-aki3
+tidycmprsk::crr(
+  Surv(cmp_time_aki_3, cmp_status_aki_3) ~ cockcroft + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_CRE_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 5.7 Composite Grade 2 AEs
+
+```{r}
+#| label: jx-carbo-fg-cg-grade2
+tidycmprsk::crr(
+  Surv(cmp_time_grade_2_aes, cmp_status_grade_2_aes) ~ cockcroft + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days + pre_PLT_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 5.8 Composite Grade 3 AEs
+
+```{r}
+#| label: jx-carbo-fg-cg-grade3
+tidycmprsk::crr(
+  Surv(cmp_time_grade_3_aes, cmp_status_grade_3_aes) ~ cockcroft + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days + pre_PLT_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+# 6 Fine-Gray Models — eGFR CR-CYS as Continuous Predictor (Carboplatin)
+
+Same covariates as Section 5, replacing `cockcroft` with `ckd_epi_gfr_cre_cys_unindex`.
+
+## 6.1 Anemia Grade 2
+
+```{r}
+#| label: jx-carbo-fg-crcys-anemia2
+tidycmprsk::crr(
+  Surv(cmp_time_anemia_2, cmp_status_anemia_2) ~ ckd_epi_gfr_cre_cys_unindex + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 6.2 Anemia Grade 3
+
+```{r}
+#| label: jx-carbo-fg-crcys-anemia3
+tidycmprsk::crr(
+  Surv(cmp_time_anemia_3, cmp_status_anemia_3) ~ ckd_epi_gfr_cre_cys_unindex + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 6.3 Thrombocytopenia Grade 2
+
+```{r}
+#| label: jx-carbo-fg-crcys-throm2
+tidycmprsk::crr(
+  Surv(cmp_time_throm_2, cmp_status_throm_2) ~ ckd_epi_gfr_cre_cys_unindex + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_PLT_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 6.4 Thrombocytopenia Grade 3
+
+```{r}
+#| label: jx-carbo-fg-crcys-throm3
+tidycmprsk::crr(
+  Surv(cmp_time_throm_3, cmp_status_throm_3) ~ ckd_epi_gfr_cre_cys_unindex + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_PLT_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 6.5 AKI Grade 2
+
+```{r}
+#| label: jx-carbo-fg-crcys-aki2
+tidycmprsk::crr(
+  Surv(cmp_time_aki_2, cmp_status_aki_2) ~ ckd_epi_gfr_cre_cys_unindex + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_CRE_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 6.6 AKI Grade 3
+
+```{r}
+#| label: jx-carbo-fg-crcys-aki3
+tidycmprsk::crr(
+  Surv(cmp_time_aki_3, cmp_status_aki_3) ~ ckd_epi_gfr_cre_cys_unindex + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_CRE_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 6.7 Composite Grade 2 AEs
+
+```{r}
+#| label: jx-carbo-fg-crcys-grade2
+tidycmprsk::crr(
+  Surv(cmp_time_grade_2_aes, cmp_status_grade_2_aes) ~ ckd_epi_gfr_cre_cys_unindex + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days + pre_PLT_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+## 6.8 Composite Grade 3 AEs
+
+```{r}
+#| label: jx-carbo-fg-crcys-grade3
+tidycmprsk::crr(
+  Surv(cmp_time_grade_3_aes, cmp_status_grade_3_aes) ~ ckd_epi_gfr_cre_cys_unindex + age + sex + bmi + smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel + Pemetrexed + Gemcitabine + ici + score + pre_HGB_45days + pre_PLT_45days,
+  failcode = 1, data = dat
+) %>% tbl_regression(exp = TRUE, pvalue_fun = function(x) style_pvalue(x, digits = 3)) %>% add_n()
+```
+
+# 7 Model Diagnostics
+
+## 7.1 Events per Variable (EPV)
+
+Models with EPV < 10 are at risk of instability; EPV < 5 should not be reported without penalisation.
+
+```{r}
+#| label: jx-epv-carbo
+outcomes <- c("anemia_2", "anemia_3", "throm_2", "throm_3",
+              "aki_2", "aki_3", "grade_2_aes", "grade_3_aes")
+
+epv_table <- purrr::map_dfr(outcomes, function(out) {
+
+  status_col <- paste0("cmp_status_", out)
+  n_pred <- case_when(
+    grepl("anemia", out)  ~ 15L,
+    grepl("throm", out)   ~ 15L,
+    grepl("aki", out)     ~ 15L,
+    TRUE                  ~ 16L
+  )
+  tibble(
+    outcome      = out,
+    N            = sum(!is.na(dat[[status_col]])),
+    events       = sum(dat[[status_col]] == 1, na.rm = TRUE),
+    deaths       = sum(dat[[status_col]] == 2, na.rm = TRUE),
+    n_predictors = n_pred,
+    EPV          = round(events / n_pred, 1)
+  )
+})
+
+epv_table %>%
+  knitr::kable(caption = "Events per variable — Carboplatin Cohort")
+```
+
+## 7.2 Collinearity — VIF (Cockcroft-Gault Model)
+
+VIF > 5 = concerning; VIF > 10 = problematic.
+
+```{r}
+#| label: jx-vif-cg-carbo
+library(car)
+
+vif_dat <- dat %>%
+  select(grade_2_aes, cockcroft, age, sex, bmi, smoking, steroids, thyroid,
+         tumor_stage, ecog_score_cat2, Paclitaxel, Pemetrexed, Gemcitabine,
+         ici, score, pre_HGB_45days, pre_PLT_45days) %>%
+  drop_na()
+
+vif_cg <- glm(grade_2_aes ~ cockcroft + age + sex + bmi + smoking + steroids +
+                 thyroid + tumor_stage + ecog_score_cat2 + Paclitaxel +
+                 Pemetrexed + Gemcitabine + ici + score +
+                 pre_HGB_45days + pre_PLT_45days,
+               data = vif_dat, family = binomial)
+
+vif_res <- vif(vif_cg)
+if (is.matrix(vif_res)) {
+  vif_res %>% as.data.frame() %>% rownames_to_column("term") %>%
+    arrange(desc(`GVIF^(1/(2*Df))`)) %>% knitr::kable(digits = 2, caption = "VIF — CG model (carboplatin)")
+} else {
+  tibble(term = names(vif_res), VIF = vif_res) %>%
+    arrange(desc(VIF)) %>% knitr::kable(digits = 2, caption = "VIF — CG model (carboplatin)")
+}
+```
+
+## 7.3 Collinearity — VIF (CKD-EPI CR-CYS Model)
+
+```{r}
+#| label: jx-vif-crcys-carbo
+vif_dat2 <- dat %>%
+  select(grade_2_aes, ckd_epi_gfr_cre_cys_unindex, age, sex, bmi, smoking,
+         steroids, thyroid, tumor_stage, ecog_score_cat2, Paclitaxel,
+         Pemetrexed, Gemcitabine, ici, score, pre_HGB_45days, pre_PLT_45days) %>%
+  drop_na()
+
+vif_crcys <- glm(grade_2_aes ~ ckd_epi_gfr_cre_cys_unindex + age + sex + bmi +
+                    smoking + steroids + thyroid + tumor_stage + ecog_score_cat2 +
+                    Paclitaxel + Pemetrexed + Gemcitabine + ici + score +
+                    pre_HGB_45days + pre_PLT_45days,
+                  data = vif_dat2, family = binomial)
+
+vif_res2 <- vif(vif_crcys)
+if (is.matrix(vif_res2)) {
+  vif_res2 %>% as.data.frame() %>% rownames_to_column("term") %>%
+    arrange(desc(`GVIF^(1/(2*Df))`)) %>% knitr::kable(digits = 2, caption = "VIF — CKD-EPI CR-CYS model (carboplatin)")
+} else {
+  tibble(term = names(vif_res2), VIF = vif_res2) %>%
+    arrange(desc(VIF)) %>% knitr::kable(digits = 2, caption = "VIF — CKD-EPI CR-CYS model (carboplatin)")
+}
+```
+
+## 7.4 Correlation Matrix — Continuous Predictors
+
+```{r}
+#| label: jx-cormat-carbo
+cor_vars <- dat %>%
+  select(cockcroft, ckd_epi_gfr_cre_cys_unindex, age, bmi, score,
+         pre_HGB_45days, pre_PLT_45days) %>%
+  drop_na()
+
+cor(cor_vars) %>%
+  round(3) %>%
+  knitr::kable(caption = "Pearson correlation — continuous predictors (carboplatin)")
+```
