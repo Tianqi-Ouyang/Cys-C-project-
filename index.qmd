@@ -15,7 +15,7 @@ date: "2026-03-31"
 | | Details |
 |---|---|
 | **Data sources** | REDCap export + RPDR (Dia, Lab, Med) |
-| **REDCap export** | `CystatinCInPatientsO_DATA_2026-04-07_0523.csv` |
+| **REDCap export** | `CystatinCInPatientsO_DATA_2026-04-09_1028.csv` |
 | **Patient list** | `N=596 for tianqi.xlsx` (EMPI filter applied to REDCap) |
 | **RPDR pull** | `Carboplatin Paper/RPDR 2026-03-19/mes98_03182614492143216` |
 | **RPDR lab groups** | ALB, CRE, HGB, PLT, GHBA1C |
@@ -69,7 +69,7 @@ date: "2026-03-31"
 
 | File | Description |
 |---|---|
-| `CystatinCInPatientsO_DATA_2026-04-07_0523.csv` | REDCap export |
+| `CystatinCInPatientsO_DATA_2026-04-09_1028.csv` | REDCap export |
 | `N=596 for tianqi.xlsx` | EMPI inclusion list |
 | `mes98_03182614492143216_Dia.txt` | RPDR Diagnoses |
 | `mes98_03182614492143216_Lab.txt` | RPDR Labs (ALB, CRE, HGB, PLT, GHBA1C) |

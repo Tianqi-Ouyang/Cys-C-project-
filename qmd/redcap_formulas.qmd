@@ -16,7 +16,7 @@ format:
 
 # 1 Overview
 
-This document lists the variable names and formulas used to compute kidney function estimates and predicted platinum dosing. The Excel file (`redcap_formulas.xlsx`) contains patient-level computed values with `record_id` from the full REDCap export (`CystatinCInPatientsO_DATA_2026-04-07_0523.csv`, N=974).
+This document lists the variable names and formulas used to compute kidney function estimates and predicted platinum dosing. The Excel file (`redcap_formulas.xlsx`) contains patient-level computed values with `record_id` from the full REDCap export (`CystatinCInPatientsO_DATA_2026-04-09_1028.csv`, N=974).
 
 ## Missing Data
 
@@ -218,7 +218,7 @@ kable(formulas, caption = "eGFR and Predicted Dosing Formulas")
 library(openxlsx)
 
 # Load full REDCap export (whole cohort, N=974)
-redcap <- read.csv("Data/CystatinCInPatientsO_DATA_2026-04-07_0523.csv",
+redcap <- read.csv("Data/CystatinCInPatientsO_DATA_2026-04-09_1028.csv",
                     stringsAsFactors = FALSE)
 
 # --- eGFR functions (same as data_management.qmd) ---
