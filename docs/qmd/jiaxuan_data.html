@@ -234,6 +234,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#charlson-comorbidity-index" id="toc-charlson-comorbidity-index" class="nav-link" data-scroll-target="#charlson-comorbidity-index">5.14 Charlson Comorbidity Index</a></li>
   <li><a href="#competing-risk-variables" id="toc-competing-risk-variables" class="nav-link" data-scroll-target="#competing-risk-variables">5.15 Competing risk variables</a></li>
   </ul></li>
+  <li><a href="#missing-data-table-1-variables" id="toc-missing-data-table-1-variables" class="nav-link" data-scroll-target="#missing-data-table-1-variables">6 Missing Data — Table 1 Variables</a>
+  <ul>
+  <li><a href="#note-record-911-all-rpdr-pre-baseline-labs-missing" id="toc-note-record-911-all-rpdr-pre-baseline-labs-missing" class="nav-link" data-scroll-target="#note-record-911-all-rpdr-pre-baseline-labs-missing">6.1 Note: Record 911 — All RPDR Pre-Baseline Labs Missing</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -2233,6 +2237,86 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb56-45"><a href="#cb56-45" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_master, <span class="st">"jiaxuan_final_master.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
+</section>
+</section>
+<section id="missing-data-table-1-variables" class="level1">
+<h1>6 Missing Data — Table 1 Variables</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>table1_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"age"</span>, <span class="st">"age_cat"</span>, <span class="st">"sex"</span>, <span class="st">"race"</span>, <span class="st">"ethnicity"</span>, <span class="st">"tumor_stage"</span>, <span class="st">"cancer_type_cat_7"</span>,</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"platin_group"</span>, <span class="st">"carbo_AUC"</span>, <span class="st">"carbo_AUC_cat"</span>,</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ici"</span>, <span class="st">"Bevacizumab"</span>, <span class="st">"Paclitaxel"</span>, <span class="st">"Pemetrexed"</span>, <span class="st">"Doxorubicin"</span>, <span class="st">"Etoposide"</span>,</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Gemcitabine"</span>, <span class="st">"Pertuzumab"</span>, <span class="st">"Trastuzumab"</span>, <span class="st">"Docetaxel"</span>, <span class="st">"Administered_alone"</span>,</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"hiv_rpdr"</span>, <span class="st">"thyroid"</span>, <span class="st">"smoking"</span>, <span class="st">"steroids"</span>,</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cci"</span>, <span class="st">"ecog_score"</span>, <span class="st">"bmi"</span>, <span class="st">"bmi_cat"</span>,</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"pre_HGB_45days"</span>, <span class="st">"pre_PLT_45days"</span>, <span class="st">"pre_ALB_45days"</span>, <span class="st">"pre_CRE_45days"</span>,</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"baseline_cys_c"</span>, <span class="st">"baseline_cre"</span>, <span class="st">"cr_cys"</span>,</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"baseline_cre_egfr"</span>, <span class="st">"baseline_cys_c_egfr"</span>,</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ckd_epi_gfr_cre_cys"</span>, <span class="st">"ckd_epi_gfr_cre_cys_unindex"</span>,</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cockcroft"</span></span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>final_master <span class="sc">%&gt;%</span></span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="fu">any_of</span>(table1_vars)) <span class="sc">%&gt;%</span></span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">%&gt;%</span></span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"n_missing"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pct_missing =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> n_missing <span class="sc">/</span> <span class="fu">nrow</span>(final_master), <span class="dv">1</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_missing <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n_missing)) <span class="sc">%&gt;%</span></span>
+<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="at">caption =</span> <span class="st">"Missing data — Table 1 variables (non-zero only)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Missing data — Table 1 variables (non-zero only)</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">pct_missing</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">carbo_AUC</td>
+<td style="text-align: right;">348</td>
+<td style="text-align: right;">36.9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">carbo_AUC_cat</td>
+<td style="text-align: right;">348</td>
+<td style="text-align: right;">36.9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">pre_HGB_45days</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pre_PLT_45days</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">pre_ALB_45days</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pre_CRE_45days</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<section id="note-record-911-all-rpdr-pre-baseline-labs-missing" class="level2">
+<h2 class="anchored" data-anchor-id="note-record-911-all-rpdr-pre-baseline-labs-missing">6.1 Note: Record 911 — All RPDR Pre-Baseline Labs Missing</h2>
+<p>Record 911 (<code>baseline_sample_date</code> = 2025-08-19) has valid REDCap baseline labs (<code>baseline_cre</code> = 0.93, <code>baseline_cys_c</code> = 0.88, <code>cockcroft</code> = 83.4) but <strong>all RPDR pre-baseline labs are NA</strong> (<code>pre_HGB_45days</code>, <code>pre_PLT_45days</code>, <code>pre_ALB_45days</code>, <code>pre_CRE_45days</code>).</p>
+<p><strong>Root cause:</strong> This patient has 73 RPDR lab records, but the closest labs before baseline were drawn on 2025-02-11 — <strong>189 days before baseline</strong>, well outside the 45-day <code>pre_lab()</code> window. No RPDR labs exist between 2025-07-05 and 2025-08-19.</p>
+<p><strong>Impact:</strong> This patient is dropped from Fine-Gray models via complete-case analysis whenever <code>pre_HGB_45days</code>, <code>pre_PLT_45days</code>, or <code>pre_CRE_45days</code> appears as a covariate (i.e., all models except base-only AKI models). Their <code>cockcroft</code>, <code>ckd_epi_gfr_cre_cys_unindex</code>, and <code>egfr_ratio</code> are valid.</p>
 
 
 </section>

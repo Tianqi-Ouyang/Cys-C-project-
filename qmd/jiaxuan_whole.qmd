@@ -50,34 +50,6 @@ dat %>%
   )
 ```
 
-## 2.1 Missing Data — Table 1 Variables
-
-```{r}
-#| label: jx-missing-whole
-table1_vars <- c(
-  "age", "age_cat", "sex", "race", "ethnicity", "tumor_stage", "cancer_type_cat_7",
-  "platin_group", "carbo_AUC", "carbo_AUC_cat",
-  "ici", "Bevacizumab", "Paclitaxel", "Pemetrexed", "Doxorubicin", "Etoposide",
-  "Gemcitabine", "Pertuzumab", "Trastuzumab", "Docetaxel", "Administered_alone",
-  "hiv_rpdr", "thyroid", "smoking", "steroids",
-  "cci", "ecog_score", "bmi", "bmi_cat",
-  "pre_HGB_45days", "pre_PLT_45days", "pre_ALB_45days",
-  "baseline_cys_c", "baseline_cre", "cr_cys",
-  "baseline_cre_egfr", "baseline_cys_c_egfr",
-  "ckd_epi_gfr_cre_cys", "ckd_epi_gfr_cre_cys_unindex",
-  "cockcroft", "egfr_ratio"
-)
-
-dat %>%
-  select(any_of(table1_vars)) %>%
-  summarise(across(everything(), ~ sum(is.na(.)))) %>%
-  pivot_longer(everything(), names_to = "variable", values_to = "n_missing") %>%
-  mutate(pct_missing = round(100 * n_missing / nrow(dat), 1)) %>%
-  filter(n_missing > 0) %>%
-  arrange(desc(n_missing)) %>%
-  knitr::kable(caption = "Missing data — Table 1 variables (non-zero only)")
-```
-
 # 3 LOESS Plots by eGFR-CG / eGFR CR-CYS Ratio
 
 `egfr_ratio = cockcroft / ckd_epi_gfr_cre_cys_unindex`
