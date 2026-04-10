@@ -1241,19 +1241,25 @@ final_master <- final_master %>%
 
 ```{r}
 #| label: clean-steroids
-# steroids: 1 if corticosteroid medication dispensed within 45 days before baseline
+# steroids: 1 if corticosteroid medication dispensed within 45 days before baseline.
+# The exclusion list (no_steroid_names) follows the reference definition in
+# "Reference code/prospective cys.Rmd": drop inhaled, nebulized, topical,
+# ophthalmic, and Symbicort dispensings so the flag reflects systemic
+# corticosteroid use, not puffers / creams / eye drops.
 steroid_med_list <- c(
   "Prednisone", "Prednisolone", "Methylprednisolone", "Medrol",
   "Dexamethasone", "Decadron", "Hydrocortisone", "Cortisol",
   "Budesonide", "Triamcinolone", "Betamethasone", "Fludrocortisone",
   "Cortisone"
 )
+no_steroid_names <- c("Inhaler", "Nebulization", "Ointment", "Ophthalmic", "Symbicort")
 
 steroid_final <- master_med %>%
   filter(!is.na(Medication_Date),
          Medication_Date <= baseline_sample_date,
          Medication_Date >= baseline_sample_date - 45) %>%
-  filter(grepl(paste(steroid_med_list, collapse = "|"), Medication, ignore.case = TRUE)) %>%
+  filter(grepl(paste(steroid_med_list, collapse = "|"), Medication, ignore.case = TRUE),
+         !grepl(paste(no_steroid_names, collapse = "|"), Medication, ignore.case = TRUE)) %>%
   distinct(EMPI)
 
 final_master <- final_master %>%
