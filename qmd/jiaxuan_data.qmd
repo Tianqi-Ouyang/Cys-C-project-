@@ -1463,6 +1463,13 @@ final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_11, e
 final_master <- final_master %>%
   mutate(across(contains("cmp_status_"), as.factor))
 
+# Drop record 911 — all RPDR pre-baseline labs are NA (see Section 6.1 note).
+# This patient's nearest RPDR labs are ~189 days before baseline, well outside
+# the 45-day pre_lab() window, so they are dropped from every Fine-Gray model
+# via complete-case analysis anyway. Removing them up front keeps the cohort
+# denominator consistent across tables and plots.
+final_master <- final_master %>% filter(record_id != 911)
+
 # Save final_master for use by analysis.qmd
 saveRDS(final_master, "jiaxuan_final_master.rds")
 ```

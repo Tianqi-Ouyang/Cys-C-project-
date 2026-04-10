@@ -2235,8 +2235,15 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb56-41"><a href="#cb56-41" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
 <span id="cb56-42"><a href="#cb56-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"cmp_status_"</span>), as.factor))</span>
 <span id="cb56-43"><a href="#cb56-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-44"><a href="#cb56-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Save final_master for use by analysis.qmd</span></span>
-<span id="cb56-45"><a href="#cb56-45" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_master, <span class="st">"jiaxuan_final_master.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb56-44"><a href="#cb56-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop record 911 — all RPDR pre-baseline labs are NA (see Section 6.1 note).</span></span>
+<span id="cb56-45"><a href="#cb56-45" aria-hidden="true" tabindex="-1"></a><span class="co"># This patient's nearest RPDR labs are ~189 days before baseline, well outside</span></span>
+<span id="cb56-46"><a href="#cb56-46" aria-hidden="true" tabindex="-1"></a><span class="co"># the 45-day pre_lab() window, so they are dropped from every Fine-Gray model</span></span>
+<span id="cb56-47"><a href="#cb56-47" aria-hidden="true" tabindex="-1"></a><span class="co"># via complete-case analysis anyway. Removing them up front keeps the cohort</span></span>
+<span id="cb56-48"><a href="#cb56-48" aria-hidden="true" tabindex="-1"></a><span class="co"># denominator consistent across tables and plots.</span></span>
+<span id="cb56-49"><a href="#cb56-49" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">filter</span>(record_id <span class="sc">!=</span> <span class="dv">911</span>)</span>
+<span id="cb56-50"><a href="#cb56-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-51"><a href="#cb56-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Save final_master for use by analysis.qmd</span></span>
+<span id="cb56-52"><a href="#cb56-52" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_master, <span class="st">"jiaxuan_final_master.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -2306,34 +2313,10 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">pre_HGB_45days</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0.1</td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">pre_PLT_45days</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0.1</td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">pre_ALB_45days</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0.1</td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">pre_CRE_45days</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0.1</td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="odd">
 <td style="text-align: left;">cis_dose</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0.3</td>
-<td style="text-align: left;">of 348 cis pts</td>
+<td style="text-align: left;">of 347 cis pts</td>
 </tr>
 </tbody>
 </table>
