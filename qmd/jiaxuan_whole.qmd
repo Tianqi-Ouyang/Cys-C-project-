@@ -64,7 +64,7 @@ dat %>%
 
 `egfr_ratio = ckd_epi_gfr_cre_cys_unindex / cockcroft`, entered as a linear continuous predictor in a Fine-Gray competing-risk model (death is the competing event).
 
-Adjuster set (per project spec): `age, sex, score` (Charlson), `ecog_score_cat2, cockcroft` (CG-CrCl), `cancer_type_cat_7, tumor_stage, platin_group` (cis vs carbo), `high_dose` (platinum dose high vs low), `Paclitaxel, Pemetrexed, Gemcitabine` (platinum partners), `bmi, smoking, thyroid`. Anemia models additionally adjust for `pre_HGB_45days`; thrombocytopenia for `pre_PLT_45days`; AKI and composite models do not add baseline labs.
+Adjuster set (per project spec): `age, sex, score` (Charlson), `ecog_score_cat2, cockcroft` (CG-CrCl), `cancer_type_cat_7, tumor_stage, platin_group` (cis vs carbo), `high_dose` (platinum dose high vs low), `Paclitaxel, Pemetrexed, Gemcitabine` (platinum partners), `bmi, smoking, steroids, thyroid`. Anemia models additionally adjust for `pre_HGB_45days`; thrombocytopenia for `pre_PLT_45days`; AKI and composite models do not add baseline labs.
 
 ```{r}
 #| label: jx-fg-helper
@@ -72,7 +72,7 @@ fg_model <- function(time_var, status_var, pred_var, pre_labs = NULL) {
   adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
            "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
            "Paclitaxel","Pemetrexed","Gemcitabine",
-           "bmi","smoking","thyroid")
+           "bmi","smoking","steroids","thyroid")
   # Drop cockcroft from adjusters when it (or its rescaled version) is the predictor
   if (pred_var %in% c("cockcroft","cockcroft_per10")) {
     adj <- setdiff(adj, "cockcroft")
@@ -256,7 +256,7 @@ plot_subhr <- function(time_var, status_var, extra_adj = NULL, outcome_label) {
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine",
-                "bmi","smoking","thyroid")
+                "bmi","smoking","steroids","thyroid")
   keep <- c("egfr_ratio", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
 
@@ -394,7 +394,7 @@ plot_subhr_linear <- function(time_var, status_var, extra_adj = NULL,
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine",
-                "bmi","smoking","thyroid")
+                "bmi","smoking","steroids","thyroid")
   keep <- c("egfr_ratio", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
 
@@ -639,13 +639,13 @@ vif_dat <- dat %>%
   select(grade_2_aes, egfr_ratio, age, sex, score, ecog_score_cat2, cockcroft,
          cancer_type_cat_7, tumor_stage, platin_group, high_dose,
          Paclitaxel, Pemetrexed, Gemcitabine,
-         bmi, smoking, thyroid) %>%
+         bmi, smoking, steroids, thyroid) %>%
   drop_na()
 
 vif_mod <- glm(grade_2_aes ~ egfr_ratio + age + sex + score + ecog_score_cat2 +
                  cockcroft + cancer_type_cat_7 + tumor_stage + platin_group +
                  high_dose + Paclitaxel + Pemetrexed + Gemcitabine +
-                 bmi + smoking + thyroid,
+                 bmi + smoking + steroids + thyroid,
                data = vif_dat, family = binomial)
 
 vif_res <- vif(vif_mod)
