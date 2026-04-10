@@ -64,7 +64,7 @@ dat %>%
 
 `egfr_ratio = ckd_epi_gfr_cre_cys_unindex / cockcroft`, entered as a linear continuous predictor in a Fine-Gray competing-risk model (death is the competing event).
 
-Adjuster set (per project spec): `age, sex, score` (Charlson), `ecog_score_cat2, cockcroft` (CG-CrCl), `cancer_type_cat_7, tumor_stage, platin_group` (cis vs carbo), `high_dose` (platinum dose high vs low), `Paclitaxel, Pemetrexed, Gemcitabine` (platinum partners), `bmi, smoking, steroids, thyroid`. Anemia models additionally adjust for `pre_HGB_45days`; thrombocytopenia for `pre_PLT_45days`; AKI and composite models do not add baseline labs. When the predictor is `cockcroft`, CG-CrCl is dropped from the adjuster list to avoid duplication.
+Adjuster set (per project spec): `age, sex, score` (Charlson), `ecog_score_cat2, cockcroft` (CG-CrCl), `cancer_type_cat_7, tumor_stage, platin_group` (cis vs carbo), `high_dose` (platinum dose high vs low), `Paclitaxel, Pemetrexed, Gemcitabine` (platinum partners), `bmi, smoking, steroids, thyroid`. Anemia models additionally adjust for `pre_HGB_45days`; thrombocytopenia for `pre_PLT_45days`; AKI and composite models do not add baseline labs.
 
 ```{r}
 #| label: jx-fg-helper
