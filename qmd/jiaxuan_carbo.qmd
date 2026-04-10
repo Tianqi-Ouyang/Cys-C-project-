@@ -12,6 +12,9 @@ execute:
 
 ```{r}
 #| label: setup-jx-carbo
+# Force UTF-8 locale so kable captions and other strings render real Unicode
+# (e.g. em-dash) instead of <U+2014> escape sequences.
+Sys.setlocale("LC_ALL", "en_US.UTF-8")
 library(tidyverse)
 library(scales)
 library(ggplot2)
@@ -124,21 +127,14 @@ fg_model("cmp_time_throm_3", "cmp_status_throm_3", "egfr_ratio", "pre_PLT_45days
 fg_model("cmp_time_aki_2", "cmp_status_aki_2", "egfr_ratio")
 ```
 
-## 3.6 AKI Grade 3
-
-```{r}
-#| label: jx-carbo-fg-ratio-aki3
-fg_model("cmp_time_aki_3", "cmp_status_aki_3", "egfr_ratio")
-```
-
-## 3.7 Composite Grade 2 AEs
+## 3.6 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-carbo-fg-ratio-grade2
 fg_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "egfr_ratio")
 ```
 
-## 3.8 Composite Grade 3 AEs
+## 3.7 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-carbo-fg-ratio-grade3
@@ -184,21 +180,14 @@ fg_model("cmp_time_throm_3", "cmp_status_throm_3", "cockcroft_per10", "pre_PLT_4
 fg_model("cmp_time_aki_2", "cmp_status_aki_2", "cockcroft_per10")
 ```
 
-## 4.6 AKI Grade 3
-
-```{r}
-#| label: jx-carbo-fg-cg-aki3
-fg_model("cmp_time_aki_3", "cmp_status_aki_3", "cockcroft_per10")
-```
-
-## 4.7 Composite Grade 2 AEs
+## 4.6 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-carbo-fg-cg-grade2
 fg_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "cockcroft_per10")
 ```
 
-## 4.8 Composite Grade 3 AEs
+## 4.7 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-carbo-fg-cg-grade3
@@ -244,21 +233,14 @@ fg_model("cmp_time_throm_3", "cmp_status_throm_3", "ckd_epi_per10", "pre_PLT_45d
 fg_model("cmp_time_aki_2", "cmp_status_aki_2", "ckd_epi_per10")
 ```
 
-## 5.6 AKI Grade 3
-
-```{r}
-#| label: jx-carbo-fg-epi-aki3
-fg_model("cmp_time_aki_3", "cmp_status_aki_3", "ckd_epi_per10")
-```
-
-## 5.7 Composite Grade 2 AEs
+## 5.6 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-carbo-fg-epi-grade2
 fg_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "ckd_epi_per10")
 ```
 
-## 5.8 Composite Grade 3 AEs
+## 5.7 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-carbo-fg-epi-grade3
@@ -383,17 +365,7 @@ plot_subhr("cmp_time_aki_2", "cmp_status_aki_2",
            NULL, "AKI Grade 2 (Carboplatin)")
 ```
 
-## 6.6 AKI Grade 3
-
-```{r}
-#| label: jx-carbo-subhr-aki3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_aki_3", "cmp_status_aki_3",
-           NULL, "AKI Grade 3 (Carboplatin)")
-```
-
-## 6.7 Composite Grade 2 AEs
+## 6.6 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-carbo-subhr-grade2
@@ -403,7 +375,7 @@ plot_subhr("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
            NULL, "Composite Grade 2 AEs (Carboplatin)")
 ```
 
-## 6.8 Composite Grade 3 AEs
+## 6.7 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-carbo-subhr-grade3
@@ -532,17 +504,7 @@ plot_subhr_linear("cmp_time_aki_2", "cmp_status_aki_2",
                   NULL, "AKI Grade 2 (Carboplatin)", "ratio")
 ```
 
-## 7.6 AKI Grade 3
-
-```{r}
-#| label: jx-carbo-linsubhr-aki3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_aki_3", "cmp_status_aki_3",
-                  NULL, "AKI Grade 3 (Carboplatin)", "ratio")
-```
-
-## 7.7 Composite Grade 2 AEs
+## 7.6 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-carbo-linsubhr-grade2
@@ -552,7 +514,7 @@ plot_subhr_linear("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                   NULL, "Composite Grade 2 AEs (Carboplatin)", "ratio")
 ```
 
-## 7.8 Composite Grade 3 AEs
+## 7.7 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-carbo-linsubhr-grade3
@@ -616,17 +578,7 @@ plot_subhr_linear("cmp_time_aki_2", "cmp_status_aki_2",
                   NULL, "AKI Grade 2 (Carboplatin)", "percentile")
 ```
 
-## 8.6 AKI Grade 3
-
-```{r}
-#| label: jx-carbo-linsubhr-pct-aki3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_aki_3", "cmp_status_aki_3",
-                  NULL, "AKI Grade 3 (Carboplatin)", "percentile")
-```
-
-## 8.7 Composite Grade 2 AEs
+## 8.6 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-carbo-linsubhr-pct-grade2
@@ -636,7 +588,7 @@ plot_subhr_linear("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                   NULL, "Composite Grade 2 AEs (Carboplatin)", "percentile")
 ```
 
-## 8.8 Composite Grade 3 AEs
+## 8.7 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-carbo-linsubhr-pct-grade3
@@ -655,7 +607,7 @@ Models with EPV < 10 are at risk of instability; EPV < 5 should not be reported 
 ```{r}
 #| label: jx-epv-carbo
 outcomes <- c("anemia_2", "anemia_3", "throm_2", "throm_3",
-              "aki_2", "aki_3", "grade_2_aes", "grade_3_aes")
+              "aki_2", "grade_2_aes", "grade_3_aes")
 
 epv_table <- purrr::map_dfr(outcomes, function(out) {
   status_col <- paste0("cmp_status_", out)
