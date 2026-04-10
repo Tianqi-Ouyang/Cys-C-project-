@@ -14,7 +14,7 @@ execute:
 #| label: setup-jx-whole
 # Force UTF-8 locale so kable captions and other strings render real Unicode
 # (e.g. em-dash) instead of <U+2014> escape sequences.
-Sys.setlocale("LC_ALL", "en_US.UTF-8")
+invisible(Sys.setlocale("LC_ALL", "en_US.UTF-8"))
 library(tidyverse)
 library(scales)
 library(ggplot2)

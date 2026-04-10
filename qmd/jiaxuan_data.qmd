@@ -177,7 +177,7 @@ Status coding: 0=censored (alive, no event by 90 days), 1=event occurred, 2=deat
 #| include: false
 # Force UTF-8 locale so kable captions and other strings render real Unicode
 # (e.g. em-dash) instead of <U+2014> escape sequences.
-Sys.setlocale("LC_ALL", "en_US.UTF-8")
+invisible(Sys.setlocale("LC_ALL", "en_US.UTF-8"))
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
