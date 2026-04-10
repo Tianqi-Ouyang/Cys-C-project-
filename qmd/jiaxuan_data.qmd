@@ -118,7 +118,7 @@ Hospitalization reasons 1–11 per REDCap codebook:
 | `cci` | Charlson category: "mild" (score 1–2), "moderate" (3–4), "severe" (≥5) |
 | `thyroid` | Binary: 1 if thyroid disease in RPDR diagnoses or medications |
 | `smoking` | Binary: 1 if smoking/tobacco use in RPDR diagnoses |
-| `steroids` | Binary: 1 if corticosteroid use in RPDR medications |
+| `steroids` | Binary: 1 if corticosteroid dispensed within 45 days before baseline |
 | `hiv_rpdr` | Binary: 1 if HIV in RPDR diagnoses or medications |
 | `bmi` | Body mass index: weight(kg) / height(m)² |
 | `bmi_cat` | 1=Underweight (<18.5), 2=Normal (18.5–25), 3=Overweight (25–30), 4=Obese (≥30) |
@@ -135,7 +135,7 @@ Hospitalization reasons 1–11 per REDCap codebook:
 | `carbo_AUC` | Carboplatin AUC (from `platin_dose` for carboplatin patients; NA for cisplatin) |
 | `cis_dose` | Cisplatin dose in mg/m² (from `platin_dose` for cisplatin patients; NA for carboplatin) |
 | `high_dose` | Binary factor: 1=High-dose (carbo AUC ≥ 5 OR cisplatin ≥ 75 mg/m²), 0=Low-dose |
-| `carbo_AUC_cat` | Carboplatin AUC category: "<4" or ">=4" |
+| `carbo_AUC_cat` | Carboplatin AUC category: "<3" or ">=3" |
 | `cis_dose_cat` | Cisplatin dose category: 1=<75 mg/m², 2=≥75 mg/m², 0=not cisplatin |
 | `cis_group` | Cisplatin dose tier: 1=<40 mg/m², 2=40–60 mg/m², 3=≥60 mg/m² |
 
@@ -1110,7 +1110,7 @@ table(final_master$cancer_type_cat_7)
 # carbo_AUC: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²
 # cis_group: cisplatin dose tier (1=<40, 2=40–60, 3=≥60 mg/m²)
 # dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)
-# carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin
+# carbo_AUC_cat: "<3" vs ">=3" (factor, NA if not carboplatin)
 # cis_dose_cat: 1=<75 mg/m², 2=≥75, 0=not cisplatin
 final_master <- final_master %>%
   mutate(
@@ -1130,10 +1130,10 @@ final_master <- final_master %>%
       TRUE ~ NA_real_
     )),
     carbo_AUC_cat = factor(case_when(
-      carbo_AUC < 4  ~ "<4",
-      carbo_AUC >= 4 ~ ">=4",
+      carbo_AUC < 3  ~ "<3",
+      carbo_AUC >= 3 ~ ">=3",
       TRUE ~ NA_character_
-    ), levels = c("<4", ">=4")),
+    ), levels = c("<3", ">=3")),
     cis_dose_cat = case_when(
       cis_dose <  75 ~ 1,
       cis_dose >= 75 ~ 2,
@@ -1238,7 +1238,7 @@ final_master <- final_master %>%
 
 ```{r}
 #| label: clean-steroids
-# steroids: 1 if corticosteroid medication dispensed before baseline
+# steroids: 1 if corticosteroid medication dispensed within 45 days before baseline
 steroid_med_list <- c(
   "Prednisone", "Prednisolone", "Methylprednisolone", "Medrol",
   "Dexamethasone", "Decadron", "Hydrocortisone", "Cortisol",
@@ -1247,7 +1247,9 @@ steroid_med_list <- c(
 )
 
 steroid_final <- master_med %>%
-  filter(Medication_Date <= baseline_sample_date) %>%
+  filter(!is.na(Medication_Date),
+         Medication_Date <= baseline_sample_date,
+         Medication_Date >= baseline_sample_date - 45) %>%
   filter(grepl(paste(steroid_med_list, collapse = "|"), Medication, ignore.case = TRUE)) %>%
   distinct(EMPI)
 

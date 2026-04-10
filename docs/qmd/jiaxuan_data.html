@@ -646,7 +646,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td><code>steroids</code></td>
-<td>Binary: 1 if corticosteroid use in RPDR medications</td>
+<td>Binary: 1 if corticosteroid dispensed within 45 days before baseline</td>
 </tr>
 <tr class="even">
 <td><code>hiv_rpdr</code></td>
@@ -711,7 +711,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><code>carbo_AUC_cat</code></td>
-<td>Carboplatin AUC category: “&lt;4” or “&gt;=4”</td>
+<td>Carboplatin AUC category: “&lt;3” or “&gt;=3”</td>
 </tr>
 <tr class="odd">
 <td><code>cis_dose_cat</code></td>
@@ -1856,7 +1856,7 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_AUC: carboplatin AUC (from platin_dose); cis_dose: cisplatin mg/m²</span></span>
 <span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="co"># cis_group: cisplatin dose tier (1=&lt;40, 2=40–60, 3=≥60 mg/m²)</span></span>
 <span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># dose_1: high-dose flag (carbo AUC≥5 OR cisplatin≥75 mg/m²)</span></span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_AUC_cat: 1=AUC≤4, 2=AUC≥5, 0=not carboplatin</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="co"># carbo_AUC_cat: "&lt;3" vs "&gt;=3" (factor, NA if not carboplatin)</span></span>
 <span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="co"># cis_dose_cat: 1=&lt;75 mg/m², 2=≥75, 0=not cisplatin</span></span>
 <span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
 <span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
@@ -1876,10 +1876,10 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_real_</span></span>
 <span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a>    )),</span>
 <span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">carbo_AUC_cat =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
-<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&lt;</span> <span class="dv">4</span>  <span class="sc">~</span> <span class="st">"&lt;4"</span>,</span>
-<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&gt;=</span> <span class="dv">4</span> <span class="sc">~</span> <span class="st">"&gt;=4"</span>,</span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&lt;</span> <span class="dv">3</span>  <span class="sc">~</span> <span class="st">"&lt;3"</span>,</span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>      carbo_AUC <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"&gt;=3"</span>,</span>
 <span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a>    ), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;4"</span>, <span class="st">"&gt;=4"</span>)),</span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a>    ), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;3"</span>, <span class="st">"&gt;=3"</span>)),</span>
 <span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_dose_cat =</span> <span class="fu">case_when</span>(</span>
 <span id="cb46-30"><a href="#cb46-30" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
 <span id="cb46-31"><a href="#cb46-31" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
@@ -2000,7 +2000,7 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># steroids: 1 if corticosteroid medication dispensed before baseline</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># steroids: 1 if corticosteroid medication dispensed within 45 days before baseline</span></span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>steroid_med_list <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
 <span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Prednisone"</span>, <span class="st">"Prednisolone"</span>, <span class="st">"Methylprednisolone"</span>, <span class="st">"Medrol"</span>,</span>
 <span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Dexamethasone"</span>, <span class="st">"Decadron"</span>, <span class="st">"Hydrocortisone"</span>, <span class="st">"Cortisol"</span>,</span>
@@ -2009,12 +2009,14 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>steroid_final <span class="ot">&lt;-</span> master_med <span class="sc">%&gt;%</span></span>
-<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Medication_Date <span class="sc">&lt;=</span> baseline_sample_date) <span class="sc">%&gt;%</span></span>
-<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="fu">paste</span>(steroid_med_list, <span class="at">collapse =</span> <span class="st">"|"</span>), Medication, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(EMPI)</span>
-<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">steroids =</span> <span class="fu">ifelse</span>(EMPI <span class="sc">%in%</span> steroid_final<span class="sc">$</span>EMPI, <span class="dv">1</span>, <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Medication_Date),</span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>         Medication_Date <span class="sc">&lt;=</span> baseline_sample_date,</span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>         Medication_Date <span class="sc">&gt;=</span> baseline_sample_date <span class="sc">-</span> <span class="dv">45</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="fu">paste</span>(steroid_med_list, <span class="at">collapse =</span> <span class="st">"|"</span>), Medication, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(EMPI)</span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">steroids =</span> <span class="fu">ifelse</span>(EMPI <span class="sc">%in%</span> steroid_final<span class="sc">$</span>EMPI, <span class="dv">1</span>, <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
