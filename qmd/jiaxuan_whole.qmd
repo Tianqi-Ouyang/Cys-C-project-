@@ -140,6 +140,13 @@ fg_model("cmp_time_throm_3", "cmp_status_throm_3", "egfr_ratio_per10", "pre_PLT_
 fg_model("cmp_time_aki_2", "cmp_status_aki_2", "egfr_ratio_per10")
 ```
 
+## 3.5b AKI (KDIGO)
+
+```{r}
+#| label: jx-fg-ratio-akikdigo
+fg_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "egfr_ratio_per10")
+```
+
 ## 3.6 Composite Grade 2 AEs
 
 ```{r}
@@ -212,6 +219,13 @@ fg_model("cmp_time_throm_3", "cmp_status_throm_3", "cockcroft_per10", "pre_PLT_4
 fg_model("cmp_time_aki_2", "cmp_status_aki_2", "cockcroft_per10")
 ```
 
+## 4.5b AKI (KDIGO)
+
+```{r}
+#| label: jx-fg-cg-akikdigo
+fg_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "cockcroft_per10")
+```
+
 ## 4.6 Composite Grade 2 AEs
 
 ```{r}
@@ -282,6 +296,13 @@ fg_model("cmp_time_throm_3", "cmp_status_throm_3", "ckd_epi_per10", "pre_PLT_45d
 ```{r}
 #| label: jx-fg-epi-aki2
 fg_model("cmp_time_aki_2", "cmp_status_aki_2", "ckd_epi_per10")
+```
+
+## 5.5b AKI (KDIGO)
+
+```{r}
+#| label: jx-fg-epi-akikdigo
+fg_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "ckd_epi_per10")
 ```
 
 ## 5.6 Composite Grade 2 AEs
@@ -485,6 +506,16 @@ plot_subhr("cmp_time_throm_3", "cmp_status_throm_3",
 #| fig-height: 4
 plot_subhr("cmp_time_aki_2", "cmp_status_aki_2",
            NULL, "AKI Grade 2")
+```
+
+## 6.5b AKI (KDIGO)
+
+```{r}
+#| label: jx-subhr-akikdigo
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
+           NULL, "AKI (KDIGO)")
 ```
 
 ## 6.6 Composite Grade 2 AEs
@@ -712,6 +743,16 @@ plot_subhr_linear("cmp_time_aki_2", "cmp_status_aki_2",
                   NULL, "AKI Grade 2", "ratio")
 ```
 
+## 7.5b AKI (KDIGO)
+
+```{r}
+#| label: jx-linsubhr-akikdigo
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
+                  NULL, "AKI (KDIGO)", "ratio")
+```
+
 ## 7.6 Composite Grade 2 AEs
 
 ```{r}
@@ -814,6 +855,16 @@ plot_subhr_linear("cmp_time_aki_2", "cmp_status_aki_2",
                   NULL, "AKI Grade 2", "percentile")
 ```
 
+## 8.5b AKI (KDIGO)
+
+```{r}
+#| label: jx-linsubhr-pct-akikdigo
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
+                  NULL, "AKI (KDIGO)", "percentile")
+```
+
 ## 8.6 Composite Grade 2 AEs
 
 ```{r}
@@ -871,7 +922,7 @@ plot_cox_linear("time_to_death_90", "death_90",
 ```{r}
 #| label: jx-epv-whole
 outcomes <- c("anemia_2", "anemia_3", "throm_2", "throm_3",
-              "aki_2", "grade_2_aes", "grade_3_aes",
+              "aki_2", "aki_kdigo", "grade_2_aes", "grade_3_aes",
               "any_hosp", "side_effect", "death_90")
 
 epv_table <- purrr::map_dfr(outcomes, function(out) {

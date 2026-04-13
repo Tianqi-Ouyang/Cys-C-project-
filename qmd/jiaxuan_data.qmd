@@ -79,6 +79,7 @@ These variables are stored as numeric codes in the REDCap CSV and labeled in sec
 | `Throm_g3_90days` | Binary: 1 if PLT < 50 ×10³/µL within 90 days (CTCAE grade ≥ 3) |
 | `AKI_g2_90days` | Binary: 1 if creatinine > 1.5× pre-baseline within 90 days (CTCAE grade ≥ 2) |
 | `AKI_g3_90days` | Binary: 1 if creatinine > 3× pre-baseline within 90 days (CTCAE grade ≥ 3) |
+| `AKI_kdigo_90days` | Binary: 1 if CRE ≥ 1.5× pre-baseline OR ≥ 0.3 mg/dL increase within any 2-day window, within 90 days (KDIGO) |
 | `grade_2_aes` | Composite binary: 1 if any of anemia/throm/AKI grade ≥ 2 |
 | `grade_3_aes` | Composite binary: 1 if any of anemia/throm/AKI grade ≥ 3 |
 | `time_to_anemia_2` … `time_to_aki_3` | Days from baseline to each AE (90 if no event) |
@@ -717,7 +718,7 @@ cat("Patients after RPDR lab exclusion:", nrow(final_master), "\n")
 | `pre_CRE_45days` | `pre_lab()` | Baseline CRE for AKI grading |
 | `post_Anemia_2/3_cutpoint_90days` | `post_lab_less_than_cutpoint()` | Grade 2/3 anemia (HGB) |
 | `post_Throm_2/3_cutpoint_90days` | `post_lab_less_than_cutpoint()` | Grade 2/3 thrombocytopenia (PLT) |
-| `post_AKI_2/3_cutpoint_90days` | CRE > 1.5×/3× pre-baseline CRE | Grade 2/3 AKI (KDIGO) |
+| `post_AKI_2/3_cutpoint_90days` | CRE > 1.5×/3× pre-baseline CRE | Grade 2/3 AKI (CTCAE) |
 
 
 ```{r}
@@ -868,7 +869,7 @@ Throm_g3_value <- post_lab_less_than_cutpoint(
   data = master_lab, days = 90, index_date = baseline_sample_date,
   Group_ID = "PLT", Group_ID_name = "Throm_3", cutpoint = 50)    # PLT < 50×10^9/L
 
-# AKI grade 2: post-baseline CRE > 1.5 × pre-baseline CRE (KDIGO)
+# AKI grade 2: post-baseline CRE > 1.5 × pre-baseline CRE (CTCAE)
 AKI_g2_value <- master_lab %>%
   merge(pre_CRE_45days, by = "EMPI", all.x = TRUE) %>%
   filter(Group_Id == "CRE") %>%
@@ -884,7 +885,55 @@ AKI_g2_value <- master_lab %>%
   rename(post_AKI_2_cutpoint_90days      = Result,
          post_AKI_2_cutpoint_90days_date = Seq_Date_Time)
 
-# AKI grade 3: post-baseline CRE > 3 × pre-baseline CRE (KDIGO)
+# AKI (KDIGO): Rule 1 — CRE >= 1.5 × pre-baseline CRE
+#              Rule 2 — any 2-day window with CRE increase >= 0.3 mg/dL
+# Either rule triggers AKI; first qualifying date is used.
+aki_kdigo_cre <- master_lab %>%
+  merge(pre_CRE_45days, by = "EMPI", all.x = TRUE) %>%
+  filter(Group_Id == "CRE") %>%
+  filter(grepl("^[><]?\\d+\\.?\\d* ?$", Result)) %>%
+  mutate(Result = as.numeric(parse_number(Result))) %>%
+  filter(!is.na(Result), !is.na(pre_CRE_45days)) %>%
+  filter(Seq_Date_Time > baseline_sample_date,
+         Seq_Date_Time <= baseline_sample_date + 90) %>%
+  arrange(EMPI, Seq_Date_Time)
+
+# Rule 1: CRE >= 1.5 × pre-baseline
+aki_rule1 <- aki_kdigo_cre %>%
+  filter(Result >= 1.5 * pre_CRE_45days) %>%
+  distinct(EMPI, .keep_all = TRUE) %>%
+  select(EMPI, aki_date_r1 = Seq_Date_Time, aki_value_r1 = Result)
+
+# Rule 2: within any 2-day window, CRE increased by >= 0.3 from lowest CRE in prior 2 days
+aki_rule2 <- aki_kdigo_cre %>%
+  group_by(EMPI) %>%
+  mutate(
+    lowest_cre_2d = purrr::map_dbl(seq_along(Seq_Date_Time), function(i) {
+      window <- Result[Seq_Date_Time >= (Seq_Date_Time[i] - 2) &
+                       Seq_Date_Time < Seq_Date_Time[i]]
+      if (length(window) == 0) NA_real_ else min(window, na.rm = TRUE)
+    })
+  ) %>%
+  ungroup() %>%
+  filter(!is.na(lowest_cre_2d), Result >= lowest_cre_2d + 0.3) %>%
+  arrange(EMPI, Seq_Date_Time) %>%
+  distinct(EMPI, .keep_all = TRUE) %>%
+  select(EMPI, aki_date_r2 = Seq_Date_Time, aki_value_r2 = Result)
+
+# Combine: earliest date from either rule
+AKI_kdigo_value <- merge(aki_rule1, aki_rule2, by = "EMPI", all = TRUE) %>%
+  mutate(
+    post_AKI_kdigo_cutpoint_90days_date = pmin(aki_date_r1, aki_date_r2, na.rm = TRUE),
+    post_AKI_kdigo_cutpoint_90days = case_when(
+      is.na(aki_date_r2) ~ aki_value_r1,
+      is.na(aki_date_r1) ~ aki_value_r2,
+      aki_date_r1 <= aki_date_r2 ~ aki_value_r1,
+      TRUE ~ aki_value_r2
+    )
+  ) %>%
+  select(EMPI, post_AKI_kdigo_cutpoint_90days, post_AKI_kdigo_cutpoint_90days_date)
+
+# AKI grade 3: post-baseline CRE > 3 × pre-baseline CRE (CTCAE)
 AKI_g3_value <- master_lab %>%
   merge(pre_CRE_45days, by = "EMPI", all.x = TRUE) %>%
   filter(Group_Id == "CRE") %>%
@@ -907,7 +956,8 @@ final_master <- final_master %>%
   merge(Throm_g2_value,  by = "EMPI", all.x = TRUE) %>%
   merge(Throm_g3_value,  by = "EMPI", all.x = TRUE) %>%
   merge(AKI_g2_value,    by = "EMPI", all.x = TRUE) %>%
-  merge(AKI_g3_value,    by = "EMPI", all.x = TRUE)
+  merge(AKI_g3_value,    by = "EMPI", all.x = TRUE) %>%
+  merge(AKI_kdigo_value, by = "EMPI", all.x = TRUE)
 ```
 
 ---
@@ -971,7 +1021,8 @@ final_master <- final_master %>%
     Throm_g2_90days  = ifelse(!is.na(post_Throm_2_cutpoint_90days),  1, 0),
     Throm_g3_90days  = ifelse(!is.na(post_Throm_3_cutpoint_90days),  1, 0),
     AKI_g2_90days    = ifelse(!is.na(post_AKI_2_cutpoint_90days),    1, 0),
-    AKI_g3_90days    = ifelse(!is.na(post_AKI_3_cutpoint_90days),    1, 0)
+    AKI_g3_90days    = ifelse(!is.na(post_AKI_3_cutpoint_90days),    1, 0),
+    AKI_kdigo_90days = ifelse(!is.na(post_AKI_kdigo_cutpoint_90days), 1, 0)
   )
 
 # Time-to-AE in days; NA (no event) replaced with 90 (censored)
@@ -982,12 +1033,14 @@ final_master <- final_master %>%
     time_to_throm_2  = post_Throm_2_cutpoint_90days_date  - baseline_sample_date,
     time_to_throm_3  = post_Throm_3_cutpoint_90days_date  - baseline_sample_date,
     time_to_aki_2    = post_AKI_2_cutpoint_90days_date    - baseline_sample_date,
-    time_to_aki_3    = post_AKI_3_cutpoint_90days_date    - baseline_sample_date
+    time_to_aki_3    = post_AKI_3_cutpoint_90days_date    - baseline_sample_date,
+    time_to_aki_kdigo = post_AKI_kdigo_cutpoint_90days_date - baseline_sample_date
   ) %>%
   mutate(across(
     c(time_to_anemia_2, time_to_anemia_3,
       time_to_throm_2,  time_to_throm_3,
-      time_to_aki_2,    time_to_aki_3),
+      time_to_aki_2,    time_to_aki_3,
+      time_to_aki_kdigo),
     ~ ifelse(is.na(.), 90, as.numeric(.))   # no-event patients censored at 90 days
   ))
 
@@ -1478,6 +1531,7 @@ final_master <- cmp_variable(final_master, event_time = time_to_throm_2,  event_
 final_master <- cmp_variable(final_master, event_time = time_to_throm_3,  event_status = Throm_g3_90days,  name = "throm_3")
 final_master <- cmp_variable(final_master, event_time = time_to_aki_2,    event_status = AKI_g2_90days,    name = "aki_2")
 final_master <- cmp_variable(final_master, event_time = time_to_aki_3,    event_status = AKI_g3_90days,    name = "aki_3")
+final_master <- cmp_variable(final_master, event_time = time_to_aki_kdigo, event_status = AKI_kdigo_90days, name = "aki_kdigo")
 # Composite AE: use the earliest event time across anemia/throm/AKI
 final_master <- final_master %>%
   mutate(
