@@ -118,7 +118,7 @@ Hospitalization reasons 1–11 per REDCap codebook:
 | `cci` | Charlson category: "mild" (score 1–2), "moderate" (3–4), "severe" (≥5) |
 | `thyroid` | Binary: 1 if thyroid disease in RPDR diagnoses or medications |
 | `smoking` | Binary: 1 if smoking/tobacco use in RPDR diagnoses |
-| `steroids` | Binary: 1 if corticosteroid dispensed within 45 days before baseline |
+| `steroids` | Binary: 1 if corticosteroid dispensed within 30 days before baseline |
 | `hiv_rpdr` | Binary: 1 if HIV in RPDR diagnoses or medications |
 | `bmi` | Body mass index: weight(kg) / height(m)² |
 | `bmi_cat` | 1=Underweight (<18.5), 2=Normal (18.5–25), 3=Overweight (25–30), 4=Obese (≥30) |
@@ -586,6 +586,43 @@ side_effect <- side_effect %>% mutate(
 )
 ```
 
+## 4.4b Create overall hospitalization variable (any reason 1–11)
+
+```{r}
+#| label: load-overall-hosp
+# any_hosp = 1 if hospitalized for ANY reason (1–11) within 90 days
+overall_hosp <- master %>%
+  select(record_id, matches("^event_hosp_\\d+$"), matches("^time_to_event_hosp_\\d+$")) %>%
+  rowwise() %>%
+  mutate(
+    any_hosp = if_else(any(c_across(starts_with("event_hosp_")) == 1, na.rm = TRUE), 1, 0),
+    time_to_any_hosp = {
+      if (any_hosp == 1) {
+        events <- c_across(starts_with("event_hosp_"))
+        times  <- c_across(starts_with("time_to_event_hosp_"))
+        valid  <- which(events == 1 & !is.na(times))
+        if (length(valid) > 0) min(times[valid], na.rm = TRUE) else NA_real_
+      } else {
+        NA_real_
+      }
+    }
+  ) %>%
+  ungroup() %>% select(record_id, any_hosp, time_to_any_hosp)
+
+# Censor at 90 days
+overall_hosp <- overall_hosp %>% mutate(
+  any_hosp = case_when(
+    any_hosp == 1 & time_to_any_hosp > 90 ~ 0,
+    TRUE ~ any_hosp
+  ),
+  time_to_any_hosp = case_when(
+    any_hosp == 1 & time_to_any_hosp > 90 ~ 90,
+    any_hosp == 0 ~ 90,
+    TRUE ~ time_to_any_hosp
+  )
+)
+```
+
 ## 4.5 Create final_master (merge side_effect and drug indicators)
 
 ```{r}
@@ -593,7 +630,8 @@ side_effect <- side_effect %>% mutate(
 # Cohort filtering (excl. missing cystatin C / platinum) happens in section 5.4.
 # eGFR and AE outcomes are now computed from RPDR in sections 4.8–4.9.
 final_master <- master %>%
-  merge(side_effect, by = "record_id", all.x = TRUE)
+  merge(side_effect, by = "record_id", all.x = TRUE) %>%
+  merge(overall_hosp, by = "record_id", all.x = TRUE)
 
 final_master <- create_drug_indicators(final_master)
 ```
@@ -1241,7 +1279,7 @@ final_master <- final_master %>%
 
 ```{r}
 #| label: clean-steroids
-# steroids: 1 if corticosteroid medication dispensed within 45 days before baseline.
+# steroids: 1 if corticosteroid medication dispensed within 30 days before baseline.
 # The exclusion list (no_steroid_names) follows the reference definition in
 # "Reference code/prospective cys.Rmd": drop inhaled, nebulized, topical,
 # ophthalmic, and Symbicort dispensings so the flag reflects systemic
@@ -1257,7 +1295,7 @@ no_steroid_names <- c("Inhaler", "Nebulization", "Ointment", "Ophthalmic", "Symb
 steroid_final <- master_med %>%
   filter(!is.na(Medication_Date),
          Medication_Date <= baseline_sample_date,
-         Medication_Date >= baseline_sample_date - 45) %>%
+         Medication_Date >= baseline_sample_date - 30) %>%
   filter(grepl(paste(steroid_med_list, collapse = "|"), Medication, ignore.case = TRUE),
          !grepl(paste(no_steroid_names, collapse = "|"), Medication, ignore.case = TRUE)) %>%
   distinct(EMPI)
@@ -1467,6 +1505,9 @@ final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_9,  e
 final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_10, event_status = event_hosp_10, name = "hosp_10")
 final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_11, event_status = event_hosp_11, name = "hosp_11")
 
+# Overall hospitalization (any reason 1–11)
+final_master <- cmp_variable(final_master,
+  event_time = time_to_any_hosp, event_status = any_hosp, name = "any_hosp")
 
 # Convert all cmp_status_* columns to factor (required by tidycmprsk)
 final_master <- final_master %>%
