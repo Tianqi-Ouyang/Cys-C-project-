@@ -65,6 +65,10 @@ dat %>%
 
 `egfr_ratio = ckd_epi_gfr_cre_cys_unindex / cockcroft`, rescaled ×10 so that HRs are reported **per 0.1-unit increase** in the ratio. Entered as a linear continuous predictor in a Fine-Gray competing-risk model (death is the competing event).
 
+**Interpretation guide.** The numerator (CKD-EPI Cr-Cys) estimates GFR from both creatinine and cystatin C and is considered closer to true GFR. The denominator (Cockcroft-Gault) estimates creatinine clearance from creatinine alone and is influenced by muscle mass. A **lower ratio** means cystatin C detects worse kidney function than creatinine alone suggests — the CG formula overestimates GFR, possibly because low muscle mass produces artificially low creatinine. This discrepancy is a marker of occult kidney impairment or sarcopenia. A **higher ratio** means the two estimates agree more closely, indicating less hidden vulnerability.
+
+*Example:* if subHR = 0.86 per 0.1-unit increase for grade 2 anemia, this means each 0.1-unit increase in the eGFR ratio is associated with a 14% lower subdistribution hazard of grade 2 anemia within 90 days, after adjustment for covariates. Patients whose cystatin C-inclusive eGFR was closer to or exceeded their creatinine-only estimate — indicating less occult kidney impairment — had lower anemia risk. Conversely, patients in whom CG overestimates kidney function relative to the combined Cr-Cys equation (low ratio) are more vulnerable to platinum toxicity, because their true renal clearance is worse than the dosing formula assumes.
+
 Adjuster set (per project spec): `age, sex, score` (Charlson), `ecog_score_cat2, cockcroft` (CG-CrCl), `cancer_type_cat_7, tumor_stage, platin_group` (cis vs carbo), `high_dose` (platinum dose high vs low), `Paclitaxel, Pemetrexed, Gemcitabine` (platinum partners), `bmi, smoking, steroids, thyroid`. Anemia models additionally adjust for `pre_HGB_45days`; thrombocytopenia for `pre_PLT_45days`; AKI and composite models do not add baseline labs.
 
 ```{r}
