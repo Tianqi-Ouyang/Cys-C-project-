@@ -341,122 +341,11 @@ fg_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_ratio_per10", e
 cox_model("time_to_death_90", "death_90", "egfr_ratio_per10", egfr_adj = "ckd_epi")
 ```
 
-# 6 subHR Curves — Dose Discrepancy
+# 6 subHR Curves — eGFR Ratio
 
 ```{r}
 #| label: jx-subhr-helper
 suppressPackageStartupMessages(library(splines))
-
-plot_subhr <- function(time_var, status_var, extra_adj = NULL, outcome_label) {
-  base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
-                "cancer_type_cat_7","tumor_stage","high_dose",
-                "Paclitaxel","Pemetrexed","Gemcitabine",
-                "bmi","smoking","steroids","thyroid")
-  keep <- c("dose_discrepancy", time_var, status_var, base_adj, extra_adj)
-  d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
-
-  ns_b <- ns(d$dose_discrepancy, df = 3)
-  knots_in <- attr(ns_b, "knots")
-  bdry     <- attr(ns_b, "Boundary.knots")
-  colnames(ns_b) <- c("ns1","ns2","ns3")
-
-  adj_df <- d[, c(base_adj, extra_adj), drop = FALSE]
-  X_adj <- model.matrix(~ ., data = adj_df)[, -1, drop = FALSE]
-  X <- cbind(as.matrix(ns_b), X_adj)
-
-  stat_num <- suppressWarnings(as.integer(as.character(d[[status_var]])))
-  time_num <- as.numeric(d[[time_var]])
-
-  fit <- cmprsk::crr(ftime = time_num, fstatus = stat_num,
-                     cov1 = X, failcode = 1)
-
-  grid_x <- seq(quantile(d$dose_discrepancy, 0.02, na.rm = TRUE),
-                quantile(d$dose_discrepancy, 0.98, na.rm = TRUE),
-                length.out = 100)
-  ref_x  <- median(d$dose_discrepancy, na.rm = TRUE)
-
-  ns_grid <- predict(ns(d$dose_discrepancy, knots = knots_in, Boundary.knots = bdry),
-                     grid_x)
-  ns_ref  <- predict(ns(d$dose_discrepancy, knots = knots_in, Boundary.knots = bdry),
-                     ref_x)
-  ns_diff <- sweep(as.matrix(ns_grid), 2, as.vector(ns_ref), "-")
-
-  coef_ns <- fit$coef[1:3]
-  V_ns    <- fit$var[1:3, 1:3]
-
-  log_hr <- as.vector(ns_diff %*% coef_ns)
-  se     <- sqrt(pmax(diag(ns_diff %*% V_ns %*% t(ns_diff)), 0))
-
-  df_plot <- tibble(
-    discrepancy = grid_x,
-    subhr = exp(log_hr),
-    lcl   = exp(log_hr - 1.96 * se),
-    ucl   = exp(log_hr + 1.96 * se)
-  )
-
-  ggplot(df_plot, aes(x = discrepancy, y = subhr)) +
-    geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "steelblue") +
-    geom_line(color = "steelblue", linewidth = 1) +
-    geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
-    geom_vline(xintercept = ref_x, linetype = "dotted", color = "grey40") +
-    labs(x = "Dose Discrepancy (mg)",
-         y = "subHR (95% CI)",
-         title = outcome_label) +
-    coord_cartesian(ylim = c(0, 4)) +
-    theme_minimal(base_size = 11)
-}
-
-plot_cox_spline <- function(time_var, status_var, extra_adj = NULL, outcome_label) {
-  base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
-                "cancer_type_cat_7","tumor_stage","high_dose",
-                "Paclitaxel","Pemetrexed","Gemcitabine",
-                "bmi","smoking","steroids","thyroid")
-  keep <- c("dose_discrepancy", time_var, status_var, base_adj, extra_adj)
-  d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
-
-  fmla <- as.formula(paste0(
-    "Surv(", time_var, ", ", status_var, ") ~ ns(dose_discrepancy, df = 3) + ",
-    paste(c(base_adj, extra_adj), collapse = " + ")
-  ))
-  fit <- survival::coxph(fmla, data = d)
-
-  grid_x <- seq(quantile(d$dose_discrepancy, 0.02, na.rm = TRUE),
-                quantile(d$dose_discrepancy, 0.98, na.rm = TRUE),
-                length.out = 100)
-  ref_x  <- median(d$dose_discrepancy, na.rm = TRUE)
-
-  ns_b     <- ns(d$dose_discrepancy, df = 3)
-  knots_in <- attr(ns_b, "knots")
-  bdry     <- attr(ns_b, "Boundary.knots")
-
-  ns_grid <- predict(ns(d$dose_discrepancy, knots = knots_in, Boundary.knots = bdry), grid_x)
-  ns_ref  <- predict(ns(d$dose_discrepancy, knots = knots_in, Boundary.knots = bdry), ref_x)
-  ns_diff <- sweep(as.matrix(ns_grid), 2, as.vector(ns_ref), "-")
-
-  coef_ns <- coef(fit)[1:3]
-  V_ns    <- vcov(fit)[1:3, 1:3]
-
-  log_hr <- as.vector(ns_diff %*% coef_ns)
-  se     <- sqrt(pmax(diag(ns_diff %*% V_ns %*% t(ns_diff)), 0))
-
-  df_plot <- tibble(
-    discrepancy = grid_x,
-    hr    = exp(log_hr),
-    lcl   = exp(log_hr - 1.96 * se),
-    ucl   = exp(log_hr + 1.96 * se)
-  )
-
-  ggplot(df_plot, aes(x = discrepancy, y = hr)) +
-    geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "steelblue") +
-    geom_line(color = "steelblue", linewidth = 1) +
-    geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
-    geom_vline(xintercept = ref_x, linetype = "dotted", color = "grey40") +
-    labs(x = "Dose Discrepancy (mg)",
-         y = "HR (95% CI)",
-         title = outcome_label) +
-    coord_cartesian(ylim = c(0, 4)) +
-    theme_minimal(base_size = 11)
-}
 
 plot_subhr_ratio <- function(time_var, status_var, extra_adj = NULL, outcome_label) {
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
@@ -573,118 +462,6 @@ plot_cox_spline_ratio <- function(time_var, status_var, extra_adj = NULL, outcom
 ## 6.1 Anemia Grade 2
 
 ```{r}
-#| label: jx-subhr-anemia2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_anemia_2", "cmp_status_anemia_2",
-           "pre_HGB_45days", "Anemia Grade 2")
-```
-
-## 6.2 Anemia Grade 3
-
-```{r}
-#| label: jx-subhr-anemia3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_anemia_3", "cmp_status_anemia_3",
-           "pre_HGB_45days", "Anemia Grade 3")
-```
-
-## 6.3 Thrombocytopenia Grade 2
-
-```{r}
-#| label: jx-subhr-throm2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_throm_2", "cmp_status_throm_2",
-           "pre_PLT_45days", "Thrombocytopenia Grade 2")
-```
-
-## 6.4 Thrombocytopenia Grade 3
-
-```{r}
-#| label: jx-subhr-throm3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_throm_3", "cmp_status_throm_3",
-           "pre_PLT_45days", "Thrombocytopenia Grade 3")
-```
-
-## 6.5 AKI Grade 2
-
-```{r}
-#| label: jx-subhr-aki2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_aki_2", "cmp_status_aki_2",
-           NULL, "AKI Grade 2")
-```
-
-## 6.6 AKI (KDIGO)
-
-```{r}
-#| label: jx-subhr-akikdigo
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
-           NULL, "AKI (KDIGO)")
-```
-
-## 6.7 Composite Grade 2 AEs
-
-```{r}
-#| label: jx-subhr-grade2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
-           NULL, "Composite Grade 2 AEs")
-```
-
-## 6.8 Composite Grade 3 AEs
-
-```{r}
-#| label: jx-subhr-grade3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
-           NULL, "Composite Grade 3 AEs")
-```
-
-## 6.9 Overall Hospitalization
-
-```{r}
-#| label: jx-subhr-anyhosp
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_any_hosp", "cmp_status_any_hosp",
-           NULL, "Overall Hospitalization")
-```
-
-## 6.10 Platinum-Related Hospitalization
-
-```{r}
-#| label: jx-subhr-sideeffect
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr("cmp_time_side_effect", "cmp_status_side_effect",
-           NULL, "Platinum-Related Hospitalization")
-```
-
-## 6.11 90-Day Death (Cox PH)
-
-```{r}
-#| label: jx-cox-spline-death
-#| fig-width: 6
-#| fig-height: 4
-plot_cox_spline("time_to_death_90", "death_90",
-                NULL, "90-Day Death (Cox PH)")
-```
-
-# 7 subHR Curves — eGFR Ratio
-
-## 7.1 Anemia Grade 2
-
-```{r}
 #| label: jx-subhr-ratio-anemia2
 #| fig-width: 6
 #| fig-height: 4
@@ -692,7 +469,7 @@ plot_subhr_ratio("cmp_time_anemia_2", "cmp_status_anemia_2",
                  "pre_HGB_45days", "Anemia Grade 2")
 ```
 
-## 7.2 Anemia Grade 3
+## 6.2 Anemia Grade 3
 
 ```{r}
 #| label: jx-subhr-ratio-anemia3
@@ -702,7 +479,7 @@ plot_subhr_ratio("cmp_time_anemia_3", "cmp_status_anemia_3",
                  "pre_HGB_45days", "Anemia Grade 3")
 ```
 
-## 7.3 Thrombocytopenia Grade 2
+## 6.3 Thrombocytopenia Grade 2
 
 ```{r}
 #| label: jx-subhr-ratio-throm2
@@ -712,7 +489,7 @@ plot_subhr_ratio("cmp_time_throm_2", "cmp_status_throm_2",
                  "pre_PLT_45days", "Thrombocytopenia Grade 2")
 ```
 
-## 7.4 Thrombocytopenia Grade 3
+## 6.4 Thrombocytopenia Grade 3
 
 ```{r}
 #| label: jx-subhr-ratio-throm3
@@ -722,7 +499,7 @@ plot_subhr_ratio("cmp_time_throm_3", "cmp_status_throm_3",
                  "pre_PLT_45days", "Thrombocytopenia Grade 3")
 ```
 
-## 7.5 AKI Grade 2
+## 6.5 AKI Grade 2
 
 ```{r}
 #| label: jx-subhr-ratio-aki2
@@ -732,7 +509,7 @@ plot_subhr_ratio("cmp_time_aki_2", "cmp_status_aki_2",
                  NULL, "AKI Grade 2")
 ```
 
-## 7.6 AKI (KDIGO)
+## 6.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-subhr-ratio-akikdigo
@@ -742,7 +519,7 @@ plot_subhr_ratio("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                  NULL, "AKI (KDIGO)")
 ```
 
-## 7.7 Composite Grade 2 AEs
+## 6.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-subhr-ratio-grade2
@@ -752,7 +529,7 @@ plot_subhr_ratio("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                  NULL, "Composite Grade 2 AEs")
 ```
 
-## 7.8 Composite Grade 3 AEs
+## 6.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-subhr-ratio-grade3
@@ -762,7 +539,7 @@ plot_subhr_ratio("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                  NULL, "Composite Grade 3 AEs")
 ```
 
-## 7.9 Overall Hospitalization
+## 6.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-subhr-ratio-anyhosp
@@ -772,7 +549,7 @@ plot_subhr_ratio("cmp_time_any_hosp", "cmp_status_any_hosp",
                  NULL, "Overall Hospitalization")
 ```
 
-## 7.10 Platinum-Related Hospitalization
+## 6.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-subhr-ratio-sideeffect
@@ -782,7 +559,7 @@ plot_subhr_ratio("cmp_time_side_effect", "cmp_status_side_effect",
                  NULL, "Platinum-Related Hospitalization")
 ```
 
-## 7.11 90-Day Death (Cox PH)
+## 6.11 90-Day Death (Cox PH)
 
 ```{r}
 #| label: jx-cox-spline-ratio-death
@@ -792,126 +569,10 @@ plot_cox_spline_ratio("time_to_death_90", "death_90",
                       NULL, "90-Day Death (Cox PH)")
 ```
 
-# 8 Linear subHR Curves — Dose Discrepancy (raw scale)
+# 7 Linear subHR Curves — eGFR Ratio (raw scale)
 
 ```{r}
 #| label: jx-linsubhr-helper
-plot_subhr_linear <- function(time_var, status_var, extra_adj = NULL,
-                              outcome_label, x_axis = c("discrepancy","percentile")) {
-  x_axis <- match.arg(x_axis)
-  base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
-                "cancer_type_cat_7","tumor_stage","high_dose",
-                "Paclitaxel","Pemetrexed","Gemcitabine",
-                "bmi","smoking","steroids","thyroid")
-  keep <- c("dose_discrepancy", time_var, status_var, base_adj, extra_adj)
-  d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
-
-  adj_df <- d[, c(base_adj, extra_adj), drop = FALSE]
-  X_adj <- model.matrix(~ ., data = adj_df)[, -1, drop = FALSE]
-  X <- cbind(dose_discrepancy = d$dose_discrepancy, X_adj)
-
-  stat_num <- suppressWarnings(as.integer(as.character(d[[status_var]])))
-  time_num <- as.numeric(d[[time_var]])
-
-  fit <- cmprsk::crr(ftime = time_num, fstatus = stat_num,
-                     cov1 = X, failcode = 1)
-
-  beta   <- fit$coef[1]
-  V_beta <- fit$var[1, 1]
-
-  ref_x  <- median(d$dose_discrepancy, na.rm = TRUE)
-  grid_x <- seq(quantile(d$dose_discrepancy, 0.02, na.rm = TRUE),
-                quantile(d$dose_discrepancy, 0.98, na.rm = TRUE),
-                length.out = 100)
-
-  log_hr <- beta * (grid_x - ref_x)
-  se     <- sqrt((grid_x - ref_x)^2 * V_beta)
-
-  if (x_axis == "percentile") {
-    ecdf_fn      <- ecdf(d$dose_discrepancy)
-    grid_display <- ecdf_fn(grid_x) * 100
-    ref_display  <- ecdf_fn(ref_x)  * 100
-    xlab <- "Percentile of Dose Discrepancy"
-  } else {
-    grid_display <- grid_x
-    ref_display  <- ref_x
-    xlab <- "Dose Discrepancy (mg)"
-  }
-
-  df_plot <- tibble(
-    x     = grid_display,
-    subhr = exp(log_hr),
-    lcl   = exp(log_hr - 1.96 * se),
-    ucl   = exp(log_hr + 1.96 * se)
-  )
-
-  ggplot(df_plot, aes(x = x, y = subhr)) +
-    geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "darkorange") +
-    geom_line(color = "darkorange", linewidth = 1) +
-    geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
-    geom_vline(xintercept = ref_display, linetype = "dotted", color = "grey40") +
-    labs(x = xlab, y = "subHR (95% CI)", title = outcome_label) +
-    coord_cartesian(ylim = c(0, 4)) +
-    theme_minimal(base_size = 11)
-}
-
-plot_cox_linear <- function(time_var, status_var, extra_adj = NULL,
-                            outcome_label, x_axis = c("discrepancy","percentile")) {
-  x_axis <- match.arg(x_axis)
-  base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
-                "cancer_type_cat_7","tumor_stage","high_dose",
-                "Paclitaxel","Pemetrexed","Gemcitabine",
-                "bmi","smoking","steroids","thyroid")
-  keep <- c("dose_discrepancy", time_var, status_var, base_adj, extra_adj)
-  d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
-
-  fmla <- as.formula(paste0(
-    "Surv(", time_var, ", ", status_var, ") ~ dose_discrepancy + ",
-    paste(c(base_adj, extra_adj), collapse = " + ")
-  ))
-  fit <- survival::coxph(fmla, data = d)
-
-  beta   <- coef(fit)["dose_discrepancy"]
-  V_beta <- vcov(fit)["dose_discrepancy", "dose_discrepancy"]
-
-  ref_x  <- median(d$dose_discrepancy, na.rm = TRUE)
-  grid_x <- seq(quantile(d$dose_discrepancy, 0.02, na.rm = TRUE),
-                quantile(d$dose_discrepancy, 0.98, na.rm = TRUE),
-                length.out = 100)
-
-  log_hr <- beta * (grid_x - ref_x)
-  se     <- sqrt((grid_x - ref_x)^2 * V_beta)
-
-  if (x_axis == "percentile") {
-    ecdf_fn      <- ecdf(d$dose_discrepancy)
-    grid_display <- ecdf_fn(grid_x) * 100
-    ref_display  <- ecdf_fn(ref_x)  * 100
-    xlab <- "Percentile of Dose Discrepancy"
-  } else {
-    grid_display <- grid_x
-    ref_display  <- ref_x
-    xlab <- "Dose Discrepancy (mg)"
-  }
-
-  df_plot <- tibble(
-    x   = grid_display,
-    hr  = exp(log_hr),
-    lcl = exp(log_hr - 1.96 * se),
-    ucl = exp(log_hr + 1.96 * se)
-  )
-
-  ggplot(df_plot, aes(x = x, y = hr)) +
-    geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "darkorange") +
-    geom_line(color = "darkorange", linewidth = 1) +
-    geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
-    geom_vline(xintercept = ref_display, linetype = "dotted", color = "grey40") +
-    labs(x = xlab, y = "HR (95% CI)", title = outcome_label) +
-    coord_cartesian(
-      ylim = c(0, 4)
-    ) +
-    theme_minimal(base_size = 11)
-}
-
 plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
                                     outcome_label, x_axis = c("ratio","percentile")) {
   x_axis <- match.arg(x_axis)
@@ -1039,119 +700,7 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
 }
 ```
 
-## 8.1 Anemia Grade 2
-
-```{r}
-#| label: jx-linsubhr-anemia2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_anemia_2", "cmp_status_anemia_2",
-                  "pre_HGB_45days", "Anemia Grade 2", "discrepancy")
-```
-
-## 8.2 Anemia Grade 3
-
-```{r}
-#| label: jx-linsubhr-anemia3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_anemia_3", "cmp_status_anemia_3",
-                  "pre_HGB_45days", "Anemia Grade 3", "discrepancy")
-```
-
-## 8.3 Thrombocytopenia Grade 2
-
-```{r}
-#| label: jx-linsubhr-throm2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_throm_2", "cmp_status_throm_2",
-                  "pre_PLT_45days", "Thrombocytopenia Grade 2", "discrepancy")
-```
-
-## 8.4 Thrombocytopenia Grade 3
-
-```{r}
-#| label: jx-linsubhr-throm3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_throm_3", "cmp_status_throm_3",
-                  "pre_PLT_45days", "Thrombocytopenia Grade 3", "discrepancy")
-```
-
-## 8.5 AKI Grade 2
-
-```{r}
-#| label: jx-linsubhr-aki2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_aki_2", "cmp_status_aki_2",
-                  NULL, "AKI Grade 2", "discrepancy")
-```
-
-## 8.6 AKI (KDIGO)
-
-```{r}
-#| label: jx-linsubhr-akikdigo
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
-                  NULL, "AKI (KDIGO)", "discrepancy")
-```
-
-## 8.7 Composite Grade 2 AEs
-
-```{r}
-#| label: jx-linsubhr-grade2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
-                  NULL, "Composite Grade 2 AEs", "discrepancy")
-```
-
-## 8.8 Composite Grade 3 AEs
-
-```{r}
-#| label: jx-linsubhr-grade3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
-                  NULL, "Composite Grade 3 AEs", "discrepancy")
-```
-
-## 8.9 Overall Hospitalization
-
-```{r}
-#| label: jx-linsubhr-anyhosp
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_any_hosp", "cmp_status_any_hosp",
-                  NULL, "Overall Hospitalization", "discrepancy")
-```
-
-## 8.10 Platinum-Related Hospitalization
-
-```{r}
-#| label: jx-linsubhr-sideeffect
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_side_effect", "cmp_status_side_effect",
-                  NULL, "Platinum-Related Hospitalization", "discrepancy")
-```
-
-## 8.11 90-Day Death (Cox PH)
-
-```{r}
-#| label: jx-cox-linear-death
-#| fig-width: 6
-#| fig-height: 4
-plot_cox_linear("time_to_death_90", "death_90",
-                NULL, "90-Day Death (Cox PH)", "discrepancy")
-```
-
-# 9 Linear subHR Curves — eGFR Ratio (raw scale)
-
-## 9.1 Anemia Grade 2
+## 7.1 Anemia Grade 2
 
 ```{r}
 #| label: jx-linsubhr-ratio-anemia2
@@ -1161,7 +710,7 @@ plot_subhr_linear_ratio("cmp_time_anemia_2", "cmp_status_anemia_2",
                         "pre_HGB_45days", "Anemia Grade 2", "ratio")
 ```
 
-## 9.2 Anemia Grade 3
+## 7.2 Anemia Grade 3
 
 ```{r}
 #| label: jx-linsubhr-ratio-anemia3
@@ -1171,7 +720,7 @@ plot_subhr_linear_ratio("cmp_time_anemia_3", "cmp_status_anemia_3",
                         "pre_HGB_45days", "Anemia Grade 3", "ratio")
 ```
 
-## 9.3 Thrombocytopenia Grade 2
+## 7.3 Thrombocytopenia Grade 2
 
 ```{r}
 #| label: jx-linsubhr-ratio-throm2
@@ -1181,7 +730,7 @@ plot_subhr_linear_ratio("cmp_time_throm_2", "cmp_status_throm_2",
                         "pre_PLT_45days", "Thrombocytopenia Grade 2", "ratio")
 ```
 
-## 9.4 Thrombocytopenia Grade 3
+## 7.4 Thrombocytopenia Grade 3
 
 ```{r}
 #| label: jx-linsubhr-ratio-throm3
@@ -1191,7 +740,7 @@ plot_subhr_linear_ratio("cmp_time_throm_3", "cmp_status_throm_3",
                         "pre_PLT_45days", "Thrombocytopenia Grade 3", "ratio")
 ```
 
-## 9.5 AKI Grade 2
+## 7.5 AKI Grade 2
 
 ```{r}
 #| label: jx-linsubhr-ratio-aki2
@@ -1201,7 +750,7 @@ plot_subhr_linear_ratio("cmp_time_aki_2", "cmp_status_aki_2",
                         NULL, "AKI Grade 2", "ratio")
 ```
 
-## 9.6 AKI (KDIGO)
+## 7.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-linsubhr-ratio-akikdigo
@@ -1211,7 +760,7 @@ plot_subhr_linear_ratio("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                         NULL, "AKI (KDIGO)", "ratio")
 ```
 
-## 9.7 Composite Grade 2 AEs
+## 7.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-linsubhr-ratio-grade2
@@ -1221,7 +770,7 @@ plot_subhr_linear_ratio("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                         NULL, "Composite Grade 2 AEs", "ratio")
 ```
 
-## 9.8 Composite Grade 3 AEs
+## 7.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-linsubhr-ratio-grade3
@@ -1231,7 +780,7 @@ plot_subhr_linear_ratio("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                         NULL, "Composite Grade 3 AEs", "ratio")
 ```
 
-## 9.9 Overall Hospitalization
+## 7.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-ratio-anyhosp
@@ -1241,7 +790,7 @@ plot_subhr_linear_ratio("cmp_time_any_hosp", "cmp_status_any_hosp",
                         NULL, "Overall Hospitalization", "ratio")
 ```
 
-## 9.10 Platinum-Related Hospitalization
+## 7.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-ratio-sideeffect
@@ -1251,7 +800,7 @@ plot_subhr_linear_ratio("cmp_time_side_effect", "cmp_status_side_effect",
                         NULL, "Platinum-Related Hospitalization", "ratio")
 ```
 
-## 9.11 90-Day Death (Cox PH)
+## 7.11 90-Day Death (Cox PH)
 
 ```{r}
 #| label: jx-cox-linear-ratio-death
@@ -1261,121 +810,9 @@ plot_cox_linear_ratio("time_to_death_90", "death_90",
                       NULL, "90-Day Death (Cox PH)", "ratio")
 ```
 
-# 10 Linear subHR Curves — Dose Discrepancy (percentile x-axis)
+# 8 Linear subHR Curves — eGFR Ratio (percentile x-axis)
 
-## 10.1 Anemia Grade 2
-
-```{r}
-#| label: jx-linsubhr-pct-anemia2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_anemia_2", "cmp_status_anemia_2",
-                  "pre_HGB_45days", "Anemia Grade 2", "percentile")
-```
-
-## 10.2 Anemia Grade 3
-
-```{r}
-#| label: jx-linsubhr-pct-anemia3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_anemia_3", "cmp_status_anemia_3",
-                  "pre_HGB_45days", "Anemia Grade 3", "percentile")
-```
-
-## 10.3 Thrombocytopenia Grade 2
-
-```{r}
-#| label: jx-linsubhr-pct-throm2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_throm_2", "cmp_status_throm_2",
-                  "pre_PLT_45days", "Thrombocytopenia Grade 2", "percentile")
-```
-
-## 10.4 Thrombocytopenia Grade 3
-
-```{r}
-#| label: jx-linsubhr-pct-throm3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_throm_3", "cmp_status_throm_3",
-                  "pre_PLT_45days", "Thrombocytopenia Grade 3", "percentile")
-```
-
-## 10.5 AKI Grade 2
-
-```{r}
-#| label: jx-linsubhr-pct-aki2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_aki_2", "cmp_status_aki_2",
-                  NULL, "AKI Grade 2", "percentile")
-```
-
-## 10.6 AKI (KDIGO)
-
-```{r}
-#| label: jx-linsubhr-pct-akikdigo
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
-                  NULL, "AKI (KDIGO)", "percentile")
-```
-
-## 10.7 Composite Grade 2 AEs
-
-```{r}
-#| label: jx-linsubhr-pct-grade2
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
-                  NULL, "Composite Grade 2 AEs", "percentile")
-```
-
-## 10.8 Composite Grade 3 AEs
-
-```{r}
-#| label: jx-linsubhr-pct-grade3
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
-                  NULL, "Composite Grade 3 AEs", "percentile")
-```
-
-## 10.9 Overall Hospitalization
-
-```{r}
-#| label: jx-linsubhr-pct-anyhosp
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_any_hosp", "cmp_status_any_hosp",
-                  NULL, "Overall Hospitalization", "percentile")
-```
-
-## 10.10 Platinum-Related Hospitalization
-
-```{r}
-#| label: jx-linsubhr-pct-sideeffect
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear("cmp_time_side_effect", "cmp_status_side_effect",
-                  NULL, "Platinum-Related Hospitalization", "percentile")
-```
-
-## 10.11 90-Day Death (Cox PH)
-
-```{r}
-#| label: jx-cox-linear-pct-death
-#| fig-width: 6
-#| fig-height: 4
-plot_cox_linear("time_to_death_90", "death_90",
-                NULL, "90-Day Death (Cox PH)", "percentile")
-```
-
-# 11 Linear subHR Curves — eGFR Ratio (percentile x-axis)
-
-## 11.1 Anemia Grade 2
+## 8.1 Anemia Grade 2
 
 ```{r}
 #| label: jx-linsubhr-pct-ratio-anemia2
@@ -1385,7 +822,7 @@ plot_subhr_linear_ratio("cmp_time_anemia_2", "cmp_status_anemia_2",
                         "pre_HGB_45days", "Anemia Grade 2", "percentile")
 ```
 
-## 11.2 Anemia Grade 3
+## 8.2 Anemia Grade 3
 
 ```{r}
 #| label: jx-linsubhr-pct-ratio-anemia3
@@ -1395,7 +832,7 @@ plot_subhr_linear_ratio("cmp_time_anemia_3", "cmp_status_anemia_3",
                         "pre_HGB_45days", "Anemia Grade 3", "percentile")
 ```
 
-## 11.3 Thrombocytopenia Grade 2
+## 8.3 Thrombocytopenia Grade 2
 
 ```{r}
 #| label: jx-linsubhr-pct-ratio-throm2
@@ -1405,7 +842,7 @@ plot_subhr_linear_ratio("cmp_time_throm_2", "cmp_status_throm_2",
                         "pre_PLT_45days", "Thrombocytopenia Grade 2", "percentile")
 ```
 
-## 11.4 Thrombocytopenia Grade 3
+## 8.4 Thrombocytopenia Grade 3
 
 ```{r}
 #| label: jx-linsubhr-pct-ratio-throm3
@@ -1415,7 +852,7 @@ plot_subhr_linear_ratio("cmp_time_throm_3", "cmp_status_throm_3",
                         "pre_PLT_45days", "Thrombocytopenia Grade 3", "percentile")
 ```
 
-## 11.5 AKI Grade 2
+## 8.5 AKI Grade 2
 
 ```{r}
 #| label: jx-linsubhr-pct-ratio-aki2
@@ -1425,7 +862,7 @@ plot_subhr_linear_ratio("cmp_time_aki_2", "cmp_status_aki_2",
                         NULL, "AKI Grade 2", "percentile")
 ```
 
-## 11.6 AKI (KDIGO)
+## 8.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-linsubhr-pct-ratio-akikdigo
@@ -1435,7 +872,7 @@ plot_subhr_linear_ratio("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                         NULL, "AKI (KDIGO)", "percentile")
 ```
 
-## 11.7 Composite Grade 2 AEs
+## 8.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-linsubhr-pct-ratio-grade2
@@ -1445,7 +882,7 @@ plot_subhr_linear_ratio("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                         NULL, "Composite Grade 2 AEs", "percentile")
 ```
 
-## 11.8 Composite Grade 3 AEs
+## 8.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-linsubhr-pct-ratio-grade3
@@ -1455,7 +892,7 @@ plot_subhr_linear_ratio("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                         NULL, "Composite Grade 3 AEs", "percentile")
 ```
 
-## 11.9 Overall Hospitalization
+## 8.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-pct-ratio-anyhosp
@@ -1465,7 +902,7 @@ plot_subhr_linear_ratio("cmp_time_any_hosp", "cmp_status_any_hosp",
                         NULL, "Overall Hospitalization", "percentile")
 ```
 
-## 11.10 Platinum-Related Hospitalization
+## 8.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-pct-ratio-sideeffect
@@ -1475,7 +912,7 @@ plot_subhr_linear_ratio("cmp_time_side_effect", "cmp_status_side_effect",
                         NULL, "Platinum-Related Hospitalization", "percentile")
 ```
 
-## 11.11 90-Day Death (Cox PH)
+## 8.11 90-Day Death (Cox PH)
 
 ```{r}
 #| label: jx-cox-linear-pct-ratio-death
@@ -1485,43 +922,9 @@ plot_cox_linear_ratio("time_to_death_90", "death_90",
                       NULL, "90-Day Death (Cox PH)", "percentile")
 ```
 
-# 12 Scatter Plots — Dose Discrepancy vs eGFR
+# 9 Model Diagnostics
 
-## 12.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)
-
-```{r}
-#| label: jx-scatter-discrepancy-epi
-#| fig-width: 6
-#| fig-height: 4
-ggplot(dat %>% filter(!is.na(dose_discrepancy)),
-       aes(x = ckd_epi_gfr_cre_cys_unindex, y = dose_discrepancy)) +
-  geom_point(alpha = 0.3) +
-  geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
-  labs(x = "CKD-EPI Cr-Cys eGFR (unindexed, mL/min)",
-       y = "Dose Discrepancy (mg)",
-       title = "Dose Discrepancy vs CKD-EPI Cr-Cys eGFR") +
-  theme_minimal(base_size = 11)
-```
-
-## 12.2 Dose Discrepancy vs Cockcroft-Gault
-
-```{r}
-#| label: jx-scatter-discrepancy-cg
-#| fig-width: 6
-#| fig-height: 4
-ggplot(dat %>% filter(!is.na(dose_discrepancy)),
-       aes(x = cockcroft, y = dose_discrepancy)) +
-  geom_point(alpha = 0.3) +
-  geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
-  labs(x = "Cockcroft-Gault eGFR (mL/min)",
-       y = "Dose Discrepancy (mg)",
-       title = "Dose Discrepancy vs Cockcroft-Gault eGFR") +
-  theme_minimal(base_size = 11)
-```
-
-# 13 Model Diagnostics
-
-## 13.1 Events per Variable (EPV)
+## 9.1 Events per Variable (EPV)
 
 ```{r}
 #| label: jx-epv-whole
@@ -1530,27 +933,38 @@ outcomes <- c("anemia_2", "anemia_3", "throm_2", "throm_3",
               "any_hosp", "side_effect", "death_90")
 
 epv_table <- purrr::map_dfr(outcomes, function(out) {
-  status_col <- paste0("cmp_status_", out)
   n_pred <- case_when(
     grepl("anemia", out) ~ 17L,
     grepl("throm", out)  ~ 17L,
     TRUE                 ~ 16L
   )
-  tibble(
-    outcome      = out,
-    N            = sum(!is.na(dat[[status_col]])),
-    events       = sum(dat[[status_col]] == 1, na.rm = TRUE),
-    deaths       = sum(dat[[status_col]] == 2, na.rm = TRUE),
-    n_predictors = n_pred,
-    EPV          = round(events / n_pred, 1)
-  )
+  if (out == "death_90") {
+    tibble(
+      outcome      = out,
+      N            = sum(!is.na(dat[["death_90"]])),
+      events       = sum(dat[["death_90"]] == 1, na.rm = TRUE),
+      deaths       = NA_integer_,
+      n_predictors = n_pred,
+      EPV          = round(events / n_pred, 1)
+    )
+  } else {
+    status_col <- paste0("cmp_status_", out)
+    tibble(
+      outcome      = out,
+      N            = sum(!is.na(dat[[status_col]])),
+      events       = sum(dat[[status_col]] == 1, na.rm = TRUE),
+      deaths       = sum(dat[[status_col]] == 2, na.rm = TRUE),
+      n_predictors = n_pred,
+      EPV          = round(events / n_pred, 1)
+    )
+  }
 })
 
 epv_table %>%
   knitr::kable(caption = "Events per variable — Whole Cohort")
 ```
 
-## 13.2 Collinearity — VIF (eGFR Ratio Model)
+## 9.2 Collinearity — VIF (eGFR Ratio Model)
 
 ```{r}
 #| label: jx-vif-ratio-whole
@@ -1579,7 +993,7 @@ if (is.matrix(vif_res)) {
 }
 ```
 
-## 13.3 Correlation Matrix — Continuous Predictors
+## 9.3 Correlation Matrix — Continuous Predictors
 
 ```{r}
 #| label: jx-cormat-whole
