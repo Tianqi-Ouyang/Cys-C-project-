@@ -348,7 +348,7 @@ suppressPackageStartupMessages(library(splines))
 
 plot_subhr <- function(time_var, status_var, extra_adj = NULL, outcome_label) {
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
-                "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
+                "cancer_type_cat_7","tumor_stage","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine",
                 "bmi","smoking","steroids","thyroid")
   keep <- c("dose_discrepancy", time_var, status_var, base_adj, extra_adj)
@@ -407,7 +407,7 @@ plot_subhr <- function(time_var, status_var, extra_adj = NULL, outcome_label) {
 
 plot_cox_spline <- function(time_var, status_var, extra_adj = NULL, outcome_label) {
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
-                "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
+                "cancer_type_cat_7","tumor_stage","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine",
                 "bmi","smoking","steroids","thyroid")
   keep <- c("dose_discrepancy", time_var, status_var, base_adj, extra_adj)
@@ -576,7 +576,7 @@ plot_subhr_linear <- function(time_var, status_var, extra_adj = NULL,
                               outcome_label, x_axis = c("discrepancy","percentile")) {
   x_axis <- match.arg(x_axis)
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
-                "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
+                "cancer_type_cat_7","tumor_stage","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine",
                 "bmi","smoking","steroids","thyroid")
   keep <- c("dose_discrepancy", time_var, status_var, base_adj, extra_adj)
@@ -635,7 +635,7 @@ plot_cox_linear <- function(time_var, status_var, extra_adj = NULL,
                             outcome_label, x_axis = c("discrepancy","percentile")) {
   x_axis <- match.arg(x_axis)
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
-                "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
+                "cancer_type_cat_7","tumor_stage","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine",
                 "bmi","smoking","steroids","thyroid")
   keep <- c("dose_discrepancy", time_var, status_var, base_adj, extra_adj)

@@ -522,18 +522,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Binary: 1 if creatinine &gt; 3× pre-baseline within 90 days (CTCAE grade ≥ 3)</td>
 </tr>
 <tr class="odd">
+<td><code>AKI_kdigo_90days</code></td>
+<td>Binary: 1 if CRE ≥ 1.5× pre-baseline OR ≥ 0.3 mg/dL increase within any 2-day window, within 90 days (KDIGO)</td>
+</tr>
+<tr class="even">
 <td><code>grade_2_aes</code></td>
 <td>Composite binary: 1 if any of anemia/throm/AKI grade ≥ 2</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>grade_3_aes</code></td>
 <td>Composite binary: 1 if any of anemia/throm/AKI grade ≥ 3</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>time_to_anemia_2</code> … <code>time_to_aki_3</code></td>
 <td>Days from baseline to each AE (90 if no event)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>time_to_grade_2_aes</code> / <code>time_to_grade_3_aes</code></td>
 <td>Days to earliest composite AE (min across anemia/throm/AKI)</td>
 </tr>
@@ -1413,7 +1417,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tr class="odd">
 <td><code>post_AKI_2/3_cutpoint_90days</code></td>
 <td>CRE &gt; 1.5×/3× pre-baseline CRE</td>
-<td>Grade 2/3 AKI (KDIGO)</td>
+<td>Grade 2/3 AKI (CTCAE)</td>
 </tr>
 </tbody>
 </table>
@@ -1575,7 +1579,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> master_lab, <span class="at">days =</span> <span class="dv">90</span>, <span class="at">index_date =</span> baseline_sample_date,</span>
 <span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">Group_ID =</span> <span class="st">"PLT"</span>, <span class="at">Group_ID_name =</span> <span class="st">"Throm_3"</span>, <span class="at">cutpoint =</span> <span class="dv">50</span>)    <span class="co"># PLT &lt; 50×10^9/L</span></span>
 <span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a><span class="co"># AKI grade 2: post-baseline CRE &gt; 1.5 × pre-baseline CRE (KDIGO)</span></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a><span class="co"># AKI grade 2: post-baseline CRE &gt; 1.5 × pre-baseline CRE (CTCAE)</span></span>
 <span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>AKI_g2_value <span class="ot">&lt;-</span> master_lab <span class="sc">%&gt;%</span></span>
 <span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_CRE_45days, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Group_Id <span class="sc">==</span> <span class="st">"CRE"</span>) <span class="sc">%&gt;%</span></span>
@@ -1591,30 +1595,79 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">post_AKI_2_cutpoint_90days      =</span> Result,</span>
 <span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a>         <span class="at">post_AKI_2_cutpoint_90days_date =</span> Seq_Date_Time)</span>
 <span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a><span class="co"># AKI grade 3: post-baseline CRE &gt; 3 × pre-baseline CRE (KDIGO)</span></span>
-<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a>AKI_g3_value <span class="ot">&lt;-</span> master_lab <span class="sc">%&gt;%</span></span>
-<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_CRE_45days, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Group_Id <span class="sc">==</span> <span class="st">"CRE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"^[&gt;&lt;]?</span><span class="sc">\\</span><span class="st">d+</span><span class="sc">\\</span><span class="st">.?</span><span class="sc">\\</span><span class="st">d* ?$"</span>, Result)) <span class="sc">%&gt;%</span></span>
-<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Result =</span> <span class="fu">as.numeric</span>(<span class="fu">parse_number</span>(Result))) <span class="sc">%&gt;%</span></span>
-<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Result), <span class="sc">!</span><span class="fu">is.na</span>(pre_CRE_45days)) <span class="sc">%&gt;%</span></span>
-<span id="cb32-43"><a href="#cb32-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Seq_Date_Time <span class="sc">&gt;</span> baseline_sample_date,</span>
-<span id="cb32-44"><a href="#cb32-44" aria-hidden="true" tabindex="-1"></a>         Seq_Date_Time <span class="sc">&lt;=</span> baseline_sample_date <span class="sc">+</span> <span class="dv">90</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb32-45"><a href="#cb32-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Result <span class="sc">&gt;</span> <span class="dv">3</span> <span class="sc">*</span> pre_CRE_45days) <span class="sc">%&gt;%</span></span>
-<span id="cb32-46"><a href="#cb32-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(EMPI, Seq_Date_Time) <span class="sc">%&gt;%</span></span>
-<span id="cb32-47"><a href="#cb32-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(EMPI, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb32-48"><a href="#cb32-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(EMPI, Result, Seq_Date_Time) <span class="sc">%&gt;%</span></span>
-<span id="cb32-49"><a href="#cb32-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">post_AKI_3_cutpoint_90days      =</span> Result,</span>
-<span id="cb32-50"><a href="#cb32-50" aria-hidden="true" tabindex="-1"></a>         <span class="at">post_AKI_3_cutpoint_90days_date =</span> Seq_Date_Time)</span>
-<span id="cb32-51"><a href="#cb32-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-52"><a href="#cb32-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge AE outcomes into final_master</span></span>
-<span id="cb32-53"><a href="#cb32-53" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb32-54"><a href="#cb32-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(Anemia_g2_value, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb32-55"><a href="#cb32-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(Anemia_g3_value, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb32-56"><a href="#cb32-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(Throm_g2_value,  <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb32-57"><a href="#cb32-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(Throm_g3_value,  <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb32-58"><a href="#cb32-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(AKI_g2_value,    <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb32-59"><a href="#cb32-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(AKI_g3_value,    <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a><span class="co"># AKI (KDIGO): Rule 1 — CRE &gt;= 1.5 × pre-baseline CRE</span></span>
+<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a><span class="co">#              Rule 2 — any 2-day window with CRE increase &gt;= 0.3 mg/dL</span></span>
+<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Either rule triggers AKI; first qualifying date is used.</span></span>
+<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a>aki_kdigo_cre <span class="ot">&lt;-</span> master_lab <span class="sc">%&gt;%</span></span>
+<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_CRE_45days, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Group_Id <span class="sc">==</span> <span class="st">"CRE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"^[&gt;&lt;]?</span><span class="sc">\\</span><span class="st">d+</span><span class="sc">\\</span><span class="st">.?</span><span class="sc">\\</span><span class="st">d* ?$"</span>, Result)) <span class="sc">%&gt;%</span></span>
+<span id="cb32-43"><a href="#cb32-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Result =</span> <span class="fu">as.numeric</span>(<span class="fu">parse_number</span>(Result))) <span class="sc">%&gt;%</span></span>
+<span id="cb32-44"><a href="#cb32-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Result), <span class="sc">!</span><span class="fu">is.na</span>(pre_CRE_45days)) <span class="sc">%&gt;%</span></span>
+<span id="cb32-45"><a href="#cb32-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Seq_Date_Time <span class="sc">&gt;</span> baseline_sample_date,</span>
+<span id="cb32-46"><a href="#cb32-46" aria-hidden="true" tabindex="-1"></a>         Seq_Date_Time <span class="sc">&lt;=</span> baseline_sample_date <span class="sc">+</span> <span class="dv">90</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-47"><a href="#cb32-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(EMPI, Seq_Date_Time)</span>
+<span id="cb32-48"><a href="#cb32-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-49"><a href="#cb32-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Rule 1: CRE &gt;= 1.5 × pre-baseline</span></span>
+<span id="cb32-50"><a href="#cb32-50" aria-hidden="true" tabindex="-1"></a>aki_rule1 <span class="ot">&lt;-</span> aki_kdigo_cre <span class="sc">%&gt;%</span></span>
+<span id="cb32-51"><a href="#cb32-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Result <span class="sc">&gt;=</span> <span class="fl">1.5</span> <span class="sc">*</span> pre_CRE_45days) <span class="sc">%&gt;%</span></span>
+<span id="cb32-52"><a href="#cb32-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(EMPI, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-53"><a href="#cb32-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(EMPI, <span class="at">aki_date_r1 =</span> Seq_Date_Time, <span class="at">aki_value_r1 =</span> Result)</span>
+<span id="cb32-54"><a href="#cb32-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-55"><a href="#cb32-55" aria-hidden="true" tabindex="-1"></a><span class="co"># Rule 2: within any 2-day window, CRE increased by &gt;= 0.3 from lowest CRE in prior 2 days</span></span>
+<span id="cb32-56"><a href="#cb32-56" aria-hidden="true" tabindex="-1"></a>aki_rule2 <span class="ot">&lt;-</span> aki_kdigo_cre <span class="sc">%&gt;%</span></span>
+<span id="cb32-57"><a href="#cb32-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(EMPI) <span class="sc">%&gt;%</span></span>
+<span id="cb32-58"><a href="#cb32-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb32-59"><a href="#cb32-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">lowest_cre_2d =</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(<span class="fu">seq_along</span>(Seq_Date_Time), <span class="cf">function</span>(i) {</span>
+<span id="cb32-60"><a href="#cb32-60" aria-hidden="true" tabindex="-1"></a>      window <span class="ot">&lt;-</span> Result[Seq_Date_Time <span class="sc">&gt;=</span> (Seq_Date_Time[i] <span class="sc">-</span> <span class="dv">2</span>) <span class="sc">&amp;</span></span>
+<span id="cb32-61"><a href="#cb32-61" aria-hidden="true" tabindex="-1"></a>                       Seq_Date_Time <span class="sc">&lt;</span> Seq_Date_Time[i]]</span>
+<span id="cb32-62"><a href="#cb32-62" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">length</span>(window) <span class="sc">==</span> <span class="dv">0</span>) <span class="cn">NA_real_</span> <span class="cf">else</span> <span class="fu">min</span>(window, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb32-63"><a href="#cb32-63" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb32-64"><a href="#cb32-64" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb32-65"><a href="#cb32-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb32-66"><a href="#cb32-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(lowest_cre_2d), Result <span class="sc">&gt;=</span> lowest_cre_2d <span class="sc">+</span> <span class="fl">0.3</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-67"><a href="#cb32-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(EMPI, Seq_Date_Time) <span class="sc">%&gt;%</span></span>
+<span id="cb32-68"><a href="#cb32-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(EMPI, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-69"><a href="#cb32-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(EMPI, <span class="at">aki_date_r2 =</span> Seq_Date_Time, <span class="at">aki_value_r2 =</span> Result)</span>
+<span id="cb32-70"><a href="#cb32-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-71"><a href="#cb32-71" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine: earliest date from either rule</span></span>
+<span id="cb32-72"><a href="#cb32-72" aria-hidden="true" tabindex="-1"></a>AKI_kdigo_value <span class="ot">&lt;-</span> <span class="fu">merge</span>(aki_rule1, aki_rule2, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-73"><a href="#cb32-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb32-74"><a href="#cb32-74" aria-hidden="true" tabindex="-1"></a>    <span class="at">post_AKI_kdigo_cutpoint_90days_date =</span> <span class="fu">pmin</span>(aki_date_r1, aki_date_r2, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb32-75"><a href="#cb32-75" aria-hidden="true" tabindex="-1"></a>    <span class="at">post_AKI_kdigo_cutpoint_90days =</span> <span class="fu">case_when</span>(</span>
+<span id="cb32-76"><a href="#cb32-76" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(aki_date_r2) <span class="sc">~</span> aki_value_r1,</span>
+<span id="cb32-77"><a href="#cb32-77" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(aki_date_r1) <span class="sc">~</span> aki_value_r2,</span>
+<span id="cb32-78"><a href="#cb32-78" aria-hidden="true" tabindex="-1"></a>      aki_date_r1 <span class="sc">&lt;=</span> aki_date_r2 <span class="sc">~</span> aki_value_r1,</span>
+<span id="cb32-79"><a href="#cb32-79" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> aki_value_r2</span>
+<span id="cb32-80"><a href="#cb32-80" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb32-81"><a href="#cb32-81" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb32-82"><a href="#cb32-82" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(EMPI, post_AKI_kdigo_cutpoint_90days, post_AKI_kdigo_cutpoint_90days_date)</span>
+<span id="cb32-83"><a href="#cb32-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-84"><a href="#cb32-84" aria-hidden="true" tabindex="-1"></a><span class="co"># AKI grade 3: post-baseline CRE &gt; 3 × pre-baseline CRE (CTCAE)</span></span>
+<span id="cb32-85"><a href="#cb32-85" aria-hidden="true" tabindex="-1"></a>AKI_g3_value <span class="ot">&lt;-</span> master_lab <span class="sc">%&gt;%</span></span>
+<span id="cb32-86"><a href="#cb32-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(pre_CRE_45days, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-87"><a href="#cb32-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Group_Id <span class="sc">==</span> <span class="st">"CRE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-88"><a href="#cb32-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"^[&gt;&lt;]?</span><span class="sc">\\</span><span class="st">d+</span><span class="sc">\\</span><span class="st">.?</span><span class="sc">\\</span><span class="st">d* ?$"</span>, Result)) <span class="sc">%&gt;%</span></span>
+<span id="cb32-89"><a href="#cb32-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Result =</span> <span class="fu">as.numeric</span>(<span class="fu">parse_number</span>(Result))) <span class="sc">%&gt;%</span></span>
+<span id="cb32-90"><a href="#cb32-90" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Result), <span class="sc">!</span><span class="fu">is.na</span>(pre_CRE_45days)) <span class="sc">%&gt;%</span></span>
+<span id="cb32-91"><a href="#cb32-91" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Seq_Date_Time <span class="sc">&gt;</span> baseline_sample_date,</span>
+<span id="cb32-92"><a href="#cb32-92" aria-hidden="true" tabindex="-1"></a>         Seq_Date_Time <span class="sc">&lt;=</span> baseline_sample_date <span class="sc">+</span> <span class="dv">90</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-93"><a href="#cb32-93" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Result <span class="sc">&gt;</span> <span class="dv">3</span> <span class="sc">*</span> pre_CRE_45days) <span class="sc">%&gt;%</span></span>
+<span id="cb32-94"><a href="#cb32-94" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(EMPI, Seq_Date_Time) <span class="sc">%&gt;%</span></span>
+<span id="cb32-95"><a href="#cb32-95" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(EMPI, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-96"><a href="#cb32-96" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(EMPI, Result, Seq_Date_Time) <span class="sc">%&gt;%</span></span>
+<span id="cb32-97"><a href="#cb32-97" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">post_AKI_3_cutpoint_90days      =</span> Result,</span>
+<span id="cb32-98"><a href="#cb32-98" aria-hidden="true" tabindex="-1"></a>         <span class="at">post_AKI_3_cutpoint_90days_date =</span> Seq_Date_Time)</span>
+<span id="cb32-99"><a href="#cb32-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-100"><a href="#cb32-100" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge AE outcomes into final_master</span></span>
+<span id="cb32-101"><a href="#cb32-101" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb32-102"><a href="#cb32-102" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(Anemia_g2_value, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-103"><a href="#cb32-103" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(Anemia_g3_value, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-104"><a href="#cb32-104" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(Throm_g2_value,  <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-105"><a href="#cb32-105" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(Throm_g3_value,  <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-106"><a href="#cb32-106" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(AKI_g2_value,    <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-107"><a href="#cb32-107" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(AKI_g3_value,    <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-108"><a href="#cb32-108" aria-hidden="true" tabindex="-1"></a>  <span class="fu">merge</span>(AKI_kdigo_value, <span class="at">by =</span> <span class="st">"EMPI"</span>, <span class="at">all.x =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <hr>
@@ -1684,39 +1737,42 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Throm_g2_90days  =</span> <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(post_Throm_2_cutpoint_90days),  <span class="dv">1</span>, <span class="dv">0</span>),</span>
 <span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">Throm_g3_90days  =</span> <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(post_Throm_3_cutpoint_90days),  <span class="dv">1</span>, <span class="dv">0</span>),</span>
 <span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">AKI_g2_90days    =</span> <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(post_AKI_2_cutpoint_90days),    <span class="dv">1</span>, <span class="dv">0</span>),</span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">AKI_g3_90days    =</span> <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(post_AKI_3_cutpoint_90days),    <span class="dv">1</span>, <span class="dv">0</span>)</span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Time-to-AE in days; NA (no event) replaced with 90 (censored)</span></span>
-<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_anemia_2 =</span> post_Anemia_2_cutpoint_90days_date <span class="sc">-</span> baseline_sample_date,</span>
-<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_anemia_3 =</span> post_Anemia_3_cutpoint_90days_date <span class="sc">-</span> baseline_sample_date,</span>
-<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_throm_2  =</span> post_Throm_2_cutpoint_90days_date  <span class="sc">-</span> baseline_sample_date,</span>
-<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_throm_3  =</span> post_Throm_3_cutpoint_90days_date  <span class="sc">-</span> baseline_sample_date,</span>
-<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_aki_2    =</span> post_AKI_2_cutpoint_90days_date    <span class="sc">-</span> baseline_sample_date,</span>
-<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_aki_3    =</span> post_AKI_3_cutpoint_90days_date    <span class="sc">-</span> baseline_sample_date</span>
-<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(</span>
-<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(time_to_anemia_2, time_to_anemia_3,</span>
-<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>      time_to_throm_2,  time_to_throm_3,</span>
-<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>      time_to_aki_2,    time_to_aki_3),</span>
-<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(.), <span class="dv">90</span>, <span class="fu">as.numeric</span>(.))   <span class="co"># no-event patients censored at 90 days</span></span>
-<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>  ))</span>
-<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a><span class="co"># grade_2_aes: composite — any of anemia / throm / AKI grade 2</span></span>
-<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a><span class="co"># grade_3_aes: composite — any of anemia / throm / AKI grade 3</span></span>
-<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">grade_2_aes =</span> <span class="fu">case_when</span>(</span>
-<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a>      Anemia_g2_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> Throm_g2_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> AKI_g2_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span></span>
-<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">grade_3_aes =</span> <span class="fu">case_when</span>(</span>
-<span id="cb35-40"><a href="#cb35-40" aria-hidden="true" tabindex="-1"></a>      Anemia_g3_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> Throm_g3_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> AKI_g3_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb35-41"><a href="#cb35-41" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span></span>
-<span id="cb35-42"><a href="#cb35-42" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb35-43"><a href="#cb35-43" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">AKI_g3_90days    =</span> <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(post_AKI_3_cutpoint_90days),    <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">AKI_kdigo_90days =</span> <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(post_AKI_kdigo_cutpoint_90days), <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Time-to-AE in days; NA (no event) replaced with 90 (censored)</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_anemia_2 =</span> post_Anemia_2_cutpoint_90days_date <span class="sc">-</span> baseline_sample_date,</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_anemia_3 =</span> post_Anemia_3_cutpoint_90days_date <span class="sc">-</span> baseline_sample_date,</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_throm_2  =</span> post_Throm_2_cutpoint_90days_date  <span class="sc">-</span> baseline_sample_date,</span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_throm_3  =</span> post_Throm_3_cutpoint_90days_date  <span class="sc">-</span> baseline_sample_date,</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_aki_2    =</span> post_AKI_2_cutpoint_90days_date    <span class="sc">-</span> baseline_sample_date,</span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_aki_3    =</span> post_AKI_3_cutpoint_90days_date    <span class="sc">-</span> baseline_sample_date,</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_aki_kdigo =</span> post_AKI_kdigo_cutpoint_90days_date <span class="sc">-</span> baseline_sample_date</span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(</span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(time_to_anemia_2, time_to_anemia_3,</span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>      time_to_throm_2,  time_to_throm_3,</span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>      time_to_aki_2,    time_to_aki_3,</span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>      time_to_aki_kdigo),</span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a>    <span class="sc">~</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(.), <span class="dv">90</span>, <span class="fu">as.numeric</span>(.))   <span class="co"># no-event patients censored at 90 days</span></span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a><span class="co"># grade_2_aes: composite — any of anemia / throm / AKI grade 2</span></span>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a><span class="co"># grade_3_aes: composite — any of anemia / throm / AKI grade 3</span></span>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">grade_2_aes =</span> <span class="fu">case_when</span>(</span>
+<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a>      Anemia_g2_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> Throm_g2_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> AKI_g2_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb35-40"><a href="#cb35-40" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span></span>
+<span id="cb35-41"><a href="#cb35-41" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb35-42"><a href="#cb35-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">grade_3_aes =</span> <span class="fu">case_when</span>(</span>
+<span id="cb35-43"><a href="#cb35-43" aria-hidden="true" tabindex="-1"></a>      Anemia_g3_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> Throm_g3_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> AKI_g3_90days <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb35-44"><a href="#cb35-44" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span></span>
+<span id="cb35-45"><a href="#cb35-45" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb35-46"><a href="#cb35-46" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -1829,7 +1885,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply human-readable labels to REDCap numeric-coded variables (per data dictionary)</span></span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">sex        =</span> <span class="fu">factor</span>(sex, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Male"</span>, <span class="st">"Female"</span>)),</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">sex        =</span> <span class="fu">factor</span>(sex, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Female"</span>, <span class="st">"Male"</span>)),</span>
 <span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">race       =</span> <span class="fu">factor</span>(race, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"White"</span>, <span class="st">"Black"</span>, <span class="st">"Asian"</span>, <span class="st">"Other"</span>, <span class="st">"Unknown"</span>)),</span>
 <span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">ethnicity  =</span> <span class="fu">factor</span>(ethnicity, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Non-Hispanic"</span>, <span class="st">"Hispanic"</span>, <span class="st">"Unknown"</span>)),</span>
 <span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">tumor_stage =</span> <span class="fu">factor</span>(tumor_stage, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Local/Early"</span>, <span class="st">"Advanced/Metastatic"</span>)),</span>
@@ -1960,7 +2016,7 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">dose_diff_pct      =</span> (carbo_dose_redcap <span class="sc">-</span> carbo_dose_cre_cys) <span class="sc">/</span> carbo_dose_cre_cys <span class="sc">*</span> <span class="dv">100</span>,</span>
 <span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">dd_gt25            =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(dose_discrepancy) <span class="sc">&amp;</span> dose_discrepancy <span class="sc">&gt;</span> <span class="dv">25</span>, <span class="dv">1</span>, <span class="dv">0</span>)),</span>
 <span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">dd_gt50            =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(dose_discrepancy) <span class="sc">&amp;</span> dose_discrepancy <span class="sc">&gt;</span> <span class="dv">50</span>, <span class="dv">1</span>, <span class="dv">0</span>)),</span>
-<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">ecog_score_cat2    =</span> <span class="fu">ifelse</span>(ecog_score <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"0"</span>, <span class="st">"&gt;=1"</span>),</span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">ecog_score_cat2    =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(ecog_score <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"0"</span>, <span class="st">"&gt;=1"</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"0"</span>, <span class="st">"&gt;=1"</span>)),</span>
 <span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">bmi_30 =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(bmi <span class="sc">&lt;</span> <span class="dv">30</span>, <span class="st">"&lt;30"</span>, <span class="st">"&gt;=30"</span>)),</span>
 <span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_70 =</span> <span class="fu">factor</span>(<span class="fu">ifelse</span>(age <span class="sc">&lt;</span> <span class="dv">70</span>, <span class="st">"&lt;70"</span>, <span class="st">"&gt;=70"</span>))</span>
 <span id="cb49-22"><a href="#cb49-22" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2250,50 +2306,51 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_throm_3,  <span class="at">event_status =</span> Throm_g3_90days,  <span class="at">name =</span> <span class="st">"throm_3"</span>)</span>
 <span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_aki_2,    <span class="at">event_status =</span> AKI_g2_90days,    <span class="at">name =</span> <span class="st">"aki_2"</span>)</span>
 <span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_aki_3,    <span class="at">event_status =</span> AKI_g3_90days,    <span class="at">name =</span> <span class="st">"aki_3"</span>)</span>
-<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Composite AE: use the earliest event time across anemia/throm/AKI</span></span>
-<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_grade_2_aes =</span> <span class="fu">pmin</span>(time_to_anemia_2, time_to_throm_2, time_to_aki_2, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_grade_3_aes =</span> <span class="fu">pmin</span>(time_to_anemia_3, time_to_throm_3, time_to_aki_3, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_grade_2_aes, <span class="at">event_status =</span> grade_2_aes, <span class="at">name =</span> <span class="st">"grade_2_aes"</span>)</span>
-<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_grade_3_aes, <span class="at">event_status =</span> grade_3_aes, <span class="at">name =</span> <span class="st">"grade_3_aes"</span>)</span>
-<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Platinum-related hospitalization (side effects: hosp reasons 1–7)</span></span>
-<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master,</span>
-<span id="cb57-23"><a href="#cb57-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_time =</span> time_to_side_effect, <span class="at">event_status =</span> side_effect, <span class="at">name =</span> <span class="st">"side_effect"</span>)</span>
-<span id="cb57-24"><a href="#cb57-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-25"><a href="#cb57-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Hospitalization by reason 1–11</span></span>
-<span id="cb57-26"><a href="#cb57-26" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_1,  <span class="at">event_status =</span> event_hosp_1,  <span class="at">name =</span> <span class="st">"hosp_1"</span>)</span>
-<span id="cb57-27"><a href="#cb57-27" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_2,  <span class="at">event_status =</span> event_hosp_2,  <span class="at">name =</span> <span class="st">"hosp_2"</span>)</span>
-<span id="cb57-28"><a href="#cb57-28" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_3,  <span class="at">event_status =</span> event_hosp_3,  <span class="at">name =</span> <span class="st">"hosp_3"</span>)</span>
-<span id="cb57-29"><a href="#cb57-29" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_4,  <span class="at">event_status =</span> event_hosp_4,  <span class="at">name =</span> <span class="st">"hosp_4"</span>)</span>
-<span id="cb57-30"><a href="#cb57-30" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_5,  <span class="at">event_status =</span> event_hosp_5,  <span class="at">name =</span> <span class="st">"hosp_5"</span>)</span>
-<span id="cb57-31"><a href="#cb57-31" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_6,  <span class="at">event_status =</span> event_hosp_6,  <span class="at">name =</span> <span class="st">"hosp_6"</span>)</span>
-<span id="cb57-32"><a href="#cb57-32" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_7,  <span class="at">event_status =</span> event_hosp_7,  <span class="at">name =</span> <span class="st">"hosp_7"</span>)</span>
-<span id="cb57-33"><a href="#cb57-33" aria-hidden="true" tabindex="-1"></a><span class="co"># hosp_8–11 use their own event_status</span></span>
-<span id="cb57-34"><a href="#cb57-34" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_8,  <span class="at">event_status =</span> event_hosp_8,  <span class="at">name =</span> <span class="st">"hosp_8"</span>)</span>
-<span id="cb57-35"><a href="#cb57-35" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_9,  <span class="at">event_status =</span> event_hosp_9,  <span class="at">name =</span> <span class="st">"hosp_9"</span>)</span>
-<span id="cb57-36"><a href="#cb57-36" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_10, <span class="at">event_status =</span> event_hosp_10, <span class="at">name =</span> <span class="st">"hosp_10"</span>)</span>
-<span id="cb57-37"><a href="#cb57-37" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_11, <span class="at">event_status =</span> event_hosp_11, <span class="at">name =</span> <span class="st">"hosp_11"</span>)</span>
-<span id="cb57-38"><a href="#cb57-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-39"><a href="#cb57-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Overall hospitalization (any reason 1–11)</span></span>
-<span id="cb57-40"><a href="#cb57-40" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master,</span>
-<span id="cb57-41"><a href="#cb57-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_time =</span> time_to_any_hosp, <span class="at">event_status =</span> any_hosp, <span class="at">name =</span> <span class="st">"any_hosp"</span>)</span>
-<span id="cb57-42"><a href="#cb57-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-43"><a href="#cb57-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert all cmp_status_* columns to factor (required by tidycmprsk)</span></span>
-<span id="cb57-44"><a href="#cb57-44" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb57-45"><a href="#cb57-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"cmp_status_"</span>), as.factor))</span>
-<span id="cb57-46"><a href="#cb57-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-47"><a href="#cb57-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop record 911 — all RPDR pre-baseline labs are NA (see Section 6.1 note).</span></span>
-<span id="cb57-48"><a href="#cb57-48" aria-hidden="true" tabindex="-1"></a><span class="co"># This patient's nearest RPDR labs are ~189 days before baseline, well outside</span></span>
-<span id="cb57-49"><a href="#cb57-49" aria-hidden="true" tabindex="-1"></a><span class="co"># the 45-day pre_lab() window, so they are dropped from every Fine-Gray model</span></span>
-<span id="cb57-50"><a href="#cb57-50" aria-hidden="true" tabindex="-1"></a><span class="co"># via complete-case analysis anyway. Removing them up front keeps the cohort</span></span>
-<span id="cb57-51"><a href="#cb57-51" aria-hidden="true" tabindex="-1"></a><span class="co"># denominator consistent across tables and plots.</span></span>
-<span id="cb57-52"><a href="#cb57-52" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">filter</span>(record_id <span class="sc">!=</span> <span class="dv">911</span>)</span>
-<span id="cb57-53"><a href="#cb57-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-54"><a href="#cb57-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Save final_master for use by analysis.qmd</span></span>
-<span id="cb57-55"><a href="#cb57-55" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_master, <span class="st">"jiaxuan_final_master.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_aki_kdigo, <span class="at">event_status =</span> AKI_kdigo_90days, <span class="at">name =</span> <span class="st">"aki_kdigo"</span>)</span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Composite AE: use the earliest event time across anemia/throm/AKI</span></span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_grade_2_aes =</span> <span class="fu">pmin</span>(time_to_anemia_2, time_to_throm_2, time_to_aki_2, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_grade_3_aes =</span> <span class="fu">pmin</span>(time_to_anemia_3, time_to_throm_3, time_to_aki_3, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_grade_2_aes, <span class="at">event_status =</span> grade_2_aes, <span class="at">name =</span> <span class="st">"grade_2_aes"</span>)</span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_grade_3_aes, <span class="at">event_status =</span> grade_3_aes, <span class="at">name =</span> <span class="st">"grade_3_aes"</span>)</span>
+<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Platinum-related hospitalization (side effects: hosp reasons 1–7)</span></span>
+<span id="cb57-23"><a href="#cb57-23" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master,</span>
+<span id="cb57-24"><a href="#cb57-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_time =</span> time_to_side_effect, <span class="at">event_status =</span> side_effect, <span class="at">name =</span> <span class="st">"side_effect"</span>)</span>
+<span id="cb57-25"><a href="#cb57-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-26"><a href="#cb57-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Hospitalization by reason 1–11</span></span>
+<span id="cb57-27"><a href="#cb57-27" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_1,  <span class="at">event_status =</span> event_hosp_1,  <span class="at">name =</span> <span class="st">"hosp_1"</span>)</span>
+<span id="cb57-28"><a href="#cb57-28" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_2,  <span class="at">event_status =</span> event_hosp_2,  <span class="at">name =</span> <span class="st">"hosp_2"</span>)</span>
+<span id="cb57-29"><a href="#cb57-29" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_3,  <span class="at">event_status =</span> event_hosp_3,  <span class="at">name =</span> <span class="st">"hosp_3"</span>)</span>
+<span id="cb57-30"><a href="#cb57-30" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_4,  <span class="at">event_status =</span> event_hosp_4,  <span class="at">name =</span> <span class="st">"hosp_4"</span>)</span>
+<span id="cb57-31"><a href="#cb57-31" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_5,  <span class="at">event_status =</span> event_hosp_5,  <span class="at">name =</span> <span class="st">"hosp_5"</span>)</span>
+<span id="cb57-32"><a href="#cb57-32" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_6,  <span class="at">event_status =</span> event_hosp_6,  <span class="at">name =</span> <span class="st">"hosp_6"</span>)</span>
+<span id="cb57-33"><a href="#cb57-33" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_7,  <span class="at">event_status =</span> event_hosp_7,  <span class="at">name =</span> <span class="st">"hosp_7"</span>)</span>
+<span id="cb57-34"><a href="#cb57-34" aria-hidden="true" tabindex="-1"></a><span class="co"># hosp_8–11 use their own event_status</span></span>
+<span id="cb57-35"><a href="#cb57-35" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_8,  <span class="at">event_status =</span> event_hosp_8,  <span class="at">name =</span> <span class="st">"hosp_8"</span>)</span>
+<span id="cb57-36"><a href="#cb57-36" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_9,  <span class="at">event_status =</span> event_hosp_9,  <span class="at">name =</span> <span class="st">"hosp_9"</span>)</span>
+<span id="cb57-37"><a href="#cb57-37" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_10, <span class="at">event_status =</span> event_hosp_10, <span class="at">name =</span> <span class="st">"hosp_10"</span>)</span>
+<span id="cb57-38"><a href="#cb57-38" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_11, <span class="at">event_status =</span> event_hosp_11, <span class="at">name =</span> <span class="st">"hosp_11"</span>)</span>
+<span id="cb57-39"><a href="#cb57-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-40"><a href="#cb57-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Overall hospitalization (any reason 1–11)</span></span>
+<span id="cb57-41"><a href="#cb57-41" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master,</span>
+<span id="cb57-42"><a href="#cb57-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_time =</span> time_to_any_hosp, <span class="at">event_status =</span> any_hosp, <span class="at">name =</span> <span class="st">"any_hosp"</span>)</span>
+<span id="cb57-43"><a href="#cb57-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-44"><a href="#cb57-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert all cmp_status_* columns to factor (required by tidycmprsk)</span></span>
+<span id="cb57-45"><a href="#cb57-45" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb57-46"><a href="#cb57-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"cmp_status_"</span>), as.factor))</span>
+<span id="cb57-47"><a href="#cb57-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-48"><a href="#cb57-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop record 911 — all RPDR pre-baseline labs are NA (see Section 6.1 note).</span></span>
+<span id="cb57-49"><a href="#cb57-49" aria-hidden="true" tabindex="-1"></a><span class="co"># This patient's nearest RPDR labs are ~189 days before baseline, well outside</span></span>
+<span id="cb57-50"><a href="#cb57-50" aria-hidden="true" tabindex="-1"></a><span class="co"># the 45-day pre_lab() window, so they are dropped from every Fine-Gray model</span></span>
+<span id="cb57-51"><a href="#cb57-51" aria-hidden="true" tabindex="-1"></a><span class="co"># via complete-case analysis anyway. Removing them up front keeps the cohort</span></span>
+<span id="cb57-52"><a href="#cb57-52" aria-hidden="true" tabindex="-1"></a><span class="co"># denominator consistent across tables and plots.</span></span>
+<span id="cb57-53"><a href="#cb57-53" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">filter</span>(record_id <span class="sc">!=</span> <span class="dv">911</span>)</span>
+<span id="cb57-54"><a href="#cb57-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-55"><a href="#cb57-55" aria-hidden="true" tabindex="-1"></a><span class="co"># Save final_master for use by analysis.qmd</span></span>
+<span id="cb57-56"><a href="#cb57-56" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_master, <span class="st">"jiaxuan_final_master.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
