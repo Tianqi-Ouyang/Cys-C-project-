@@ -2138,57 +2138,57 @@
     "objectID": "qmd/jiaxuan_whole.html#events-per-variable-epv",
     "href": "qmd/jiaxuan_whole.html#events-per-variable-epv",
     "title": "Jiaxuan Project — Whole Cohort",
-    "section": "13.1 Events per Variable (EPV)",
-    "text": "13.1 Events per Variable (EPV)\n\n\nCode\noutcomes &lt;- c(\"anemia_2\", \"anemia_3\", \"throm_2\", \"throm_3\",\n              \"aki_2\", \"aki_kdigo\", \"grade_2_aes\", \"grade_3_aes\",\n              \"any_hosp\", \"side_effect\", \"death_90\")\n\nepv_table &lt;- purrr::map_dfr(outcomes, function(out) {\n  status_col &lt;- paste0(\"cmp_status_\", out)\n  n_pred &lt;- case_when(\n    grepl(\"anemia\", out) ~ 17L,\n    grepl(\"throm\", out)  ~ 17L,\n    TRUE                 ~ 16L\n  )\n  tibble(\n    outcome      = out,\n    N            = sum(!is.na(dat[[status_col]])),\n    events       = sum(dat[[status_col]] == 1, na.rm = TRUE),\n    deaths       = sum(dat[[status_col]] == 2, na.rm = TRUE),\n    n_predictors = n_pred,\n    EPV          = round(events / n_pred, 1)\n  )\n})\n\nepv_table %&gt;%\n  knitr::kable(caption = \"Events per variable — Whole Cohort\")\n\n\n\nEvents per variable — Whole Cohort\n\n\noutcome\nN\nevents\ndeaths\nn_predictors\nEPV\n\n\n\n\nanemia_2\n943\n432\n17\n17\n25.4\n\n\nanemia_3\n943\n133\n28\n17\n7.8\n\n\nthrom_2\n943\n131\n27\n17\n7.7\n\n\nthrom_3\n943\n44\n32\n17\n2.6\n\n\naki_2\n943\n89\n33\n16\n5.6\n\n\naki_kdigo\n943\n109\n31\n16\n6.8\n\n\ngrade_2_aes\n943\n484\n12\n16\n30.2\n\n\ngrade_3_aes\n943\n155\n24\n16\n9.7\n\n\nany_hosp\n943\n264\n13\n16\n16.5\n\n\nside_effect\n943\n162\n18\n16\n10.1\n\n\ndeath_90\n0\n0\n0\n16\n0.0"
+    "section": "9.1 Events per Variable (EPV)",
+    "text": "9.1 Events per Variable (EPV)\n\n\nCode\noutcomes &lt;- c(\"anemia_2\", \"anemia_3\", \"throm_2\", \"throm_3\",\n              \"aki_2\", \"aki_kdigo\", \"grade_2_aes\", \"grade_3_aes\",\n              \"any_hosp\", \"side_effect\", \"death_90\")\n\nepv_table &lt;- purrr::map_dfr(outcomes, function(out) {\n  n_pred &lt;- case_when(\n    grepl(\"anemia\", out) ~ 17L,\n    grepl(\"throm\", out)  ~ 17L,\n    TRUE                 ~ 16L\n  )\n  if (out == \"death_90\") {\n    tibble(\n      outcome      = out,\n      N            = sum(!is.na(dat[[\"death_90\"]])),\n      events       = sum(dat[[\"death_90\"]] == 1, na.rm = TRUE),\n      deaths       = NA_integer_,\n      n_predictors = n_pred,\n      EPV          = round(events / n_pred, 1)\n    )\n  } else {\n    status_col &lt;- paste0(\"cmp_status_\", out)\n    tibble(\n      outcome      = out,\n      N            = sum(!is.na(dat[[status_col]])),\n      events       = sum(dat[[status_col]] == 1, na.rm = TRUE),\n      deaths       = sum(dat[[status_col]] == 2, na.rm = TRUE),\n      n_predictors = n_pred,\n      EPV          = round(events / n_pred, 1)\n    )\n  }\n})\n\nepv_table %&gt;%\n  knitr::kable(caption = \"Events per variable — Whole Cohort\")\n\n\n\nEvents per variable — Whole Cohort\n\n\noutcome\nN\nevents\ndeaths\nn_predictors\nEPV\n\n\n\n\nanemia_2\n943\n432\n17\n17\n25.4\n\n\nanemia_3\n943\n133\n28\n17\n7.8\n\n\nthrom_2\n943\n131\n27\n17\n7.7\n\n\nthrom_3\n943\n44\n32\n17\n2.6\n\n\naki_2\n943\n89\n33\n16\n5.6\n\n\naki_kdigo\n943\n109\n31\n16\n6.8\n\n\ngrade_2_aes\n943\n484\n12\n16\n30.2\n\n\ngrade_3_aes\n943\n155\n24\n16\n9.7\n\n\nany_hosp\n943\n264\n13\n16\n16.5\n\n\nside_effect\n943\n162\n18\n16\n10.1\n\n\ndeath_90\n943\n41\nNA\n16\n2.6"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#collinearity-vif-egfr-ratio-model",
     "href": "qmd/jiaxuan_whole.html#collinearity-vif-egfr-ratio-model",
     "title": "Jiaxuan Project — Whole Cohort",
-    "section": "13.2 Collinearity — VIF (eGFR Ratio Model)",
-    "text": "13.2 Collinearity — VIF (eGFR Ratio Model)\n\n\nCode\nlibrary(car)\n\nvif_dat &lt;- dat %&gt;%\n  select(grade_2_aes, egfr_ratio_per10, age, sex, score, ecog_score_cat2, cockcroft,\n         cancer_type_cat_7, tumor_stage, platin_group, high_dose,\n         Paclitaxel, Pemetrexed, Gemcitabine,\n         bmi, smoking, steroids, thyroid) %&gt;%\n  drop_na()\n\nvif_mod &lt;- glm(grade_2_aes ~ egfr_ratio_per10 + age + sex + score + ecog_score_cat2 +\n                 cockcroft + cancer_type_cat_7 + tumor_stage + platin_group +\n                 high_dose + Paclitaxel + Pemetrexed + Gemcitabine +\n                 bmi + smoking + steroids + thyroid,\n               data = vif_dat, family = binomial)\n\nvif_res &lt;- vif(vif_mod)\nif (is.matrix(vif_res)) {\n  vif_res %&gt;% as.data.frame() %&gt;% rownames_to_column(\"term\") %&gt;%\n    arrange(desc(`GVIF^(1/(2*Df))`)) %&gt;% knitr::kable(digits = 2, caption = \"VIF — eGFR CR-CYS / CG ratio model (whole cohort)\")\n} else {\n  tibble(term = names(vif_res), VIF = vif_res) %&gt;%\n    arrange(desc(VIF)) %&gt;% knitr::kable(digits = 2, caption = \"VIF — eGFR CR-CYS / CG ratio model (whole cohort)\")\n}\n\n\n\nVIF — eGFR CR-CYS / CG ratio model (whole cohort)\n\n\nterm\nGVIF\nDf\nGVIF^(1/(2*Df))\n\n\n\n\nPaclitaxel\n2.88\n1\n1.70\n\n\nplatin_group\n2.69\n1\n1.64\n\n\nPemetrexed\n2.66\n1\n1.63\n\n\ncockcroft\n2.58\n1\n1.61\n\n\nage\n2.44\n1\n1.56\n\n\negfr_ratio_per10\n2.27\n1\n1.51\n\n\nbmi\n2.10\n1\n1.45\n\n\nhigh_dose\n2.01\n1\n1.42\n\n\nGemcitabine\n2.00\n1\n1.41\n\n\nsex\n1.84\n1\n1.35\n\n\ncancer_type_cat_7\n22.13\n6\n1.29\n\n\nscore\n1.68\n1\n1.29\n\n\necog_score_cat2\n1.36\n1\n1.16\n\n\nsmoking\n1.30\n1\n1.14\n\n\ntumor_stage\n1.19\n1\n1.09\n\n\nthyroid\n1.09\n1\n1.04\n\n\nsteroids\n1.07\n1\n1.03"
+    "section": "9.2 Collinearity — VIF (eGFR Ratio Model)",
+    "text": "9.2 Collinearity — VIF (eGFR Ratio Model)\n\n\nCode\nlibrary(car)\n\nvif_dat &lt;- dat %&gt;%\n  select(grade_2_aes, egfr_ratio_per10, age, sex, score, ecog_score_cat2, cockcroft,\n         cancer_type_cat_7, tumor_stage, platin_group, high_dose,\n         Paclitaxel, Pemetrexed, Gemcitabine,\n         bmi, smoking, steroids, thyroid) %&gt;%\n  drop_na()\n\nvif_mod &lt;- glm(grade_2_aes ~ egfr_ratio_per10 + age + sex + score + ecog_score_cat2 +\n                 cockcroft + cancer_type_cat_7 + tumor_stage + platin_group +\n                 high_dose + Paclitaxel + Pemetrexed + Gemcitabine +\n                 bmi + smoking + steroids + thyroid,\n               data = vif_dat, family = binomial)\n\nvif_res &lt;- vif(vif_mod)\nif (is.matrix(vif_res)) {\n  vif_res %&gt;% as.data.frame() %&gt;% rownames_to_column(\"term\") %&gt;%\n    arrange(desc(`GVIF^(1/(2*Df))`)) %&gt;% knitr::kable(digits = 2, caption = \"VIF — eGFR CR-CYS / CG ratio model (whole cohort)\")\n} else {\n  tibble(term = names(vif_res), VIF = vif_res) %&gt;%\n    arrange(desc(VIF)) %&gt;% knitr::kable(digits = 2, caption = \"VIF — eGFR CR-CYS / CG ratio model (whole cohort)\")\n}\n\n\n\nVIF — eGFR CR-CYS / CG ratio model (whole cohort)\n\n\nterm\nGVIF\nDf\nGVIF^(1/(2*Df))\n\n\n\n\nPaclitaxel\n2.88\n1\n1.70\n\n\nplatin_group\n2.69\n1\n1.64\n\n\nPemetrexed\n2.66\n1\n1.63\n\n\ncockcroft\n2.58\n1\n1.61\n\n\nage\n2.44\n1\n1.56\n\n\negfr_ratio_per10\n2.27\n1\n1.51\n\n\nbmi\n2.10\n1\n1.45\n\n\nhigh_dose\n2.01\n1\n1.42\n\n\nGemcitabine\n2.00\n1\n1.41\n\n\nsex\n1.84\n1\n1.35\n\n\ncancer_type_cat_7\n22.13\n6\n1.29\n\n\nscore\n1.68\n1\n1.29\n\n\necog_score_cat2\n1.36\n1\n1.16\n\n\nsmoking\n1.30\n1\n1.14\n\n\ntumor_stage\n1.19\n1\n1.09\n\n\nthyroid\n1.09\n1\n1.04\n\n\nsteroids\n1.07\n1\n1.03"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#correlation-matrix-continuous-predictors",
     "href": "qmd/jiaxuan_whole.html#correlation-matrix-continuous-predictors",
     "title": "Jiaxuan Project — Whole Cohort",
-    "section": "13.3 Correlation Matrix — Continuous Predictors",
-    "text": "13.3 Correlation Matrix — Continuous Predictors\n\n\nCode\ncor_vars &lt;- dat %&gt;%\n  select(egfr_ratio, cockcroft, ckd_epi_gfr_cre_cys_unindex, age, bmi, score,\n         pre_HGB_45days, pre_PLT_45days) %&gt;%\n  drop_na()\n\ncor(cor_vars) %&gt;%\n  round(3) %&gt;%\n  knitr::kable(caption = \"Pearson correlation — continuous predictors\")\n\n\n\nPearson correlation — continuous predictors\n\n\n\n\n\n\n\n\n\n\n\n\n\n\negfr_ratio\ncockcroft\nckd_epi_gfr_cre_cys_unindex\nage\nbmi\nscore\npre_HGB_45days\npre_PLT_45days\n\n\n\n\negfr_ratio\n1.000\n-0.452\n0.252\n0.256\n-0.575\n-0.042\n0.082\n-0.079\n\n\ncockcroft\n-0.452\n1.000\n0.709\n-0.566\n0.485\n-0.287\n0.112\n0.017\n\n\nckd_epi_gfr_cre_cys_unindex\n0.252\n0.709\n1.000\n-0.457\n0.080\n-0.373\n0.210\n-0.059\n\n\nage\n0.256\n-0.566\n-0.457\n1.000\n-0.045\n0.504\n-0.080\n-0.099\n\n\nbmi\n-0.575\n0.485\n0.080\n-0.045\n1.000\n0.025\n0.188\n-0.089\n\n\nscore\n-0.042\n-0.287\n-0.373\n0.504\n0.025\n1.000\n-0.222\n-0.030\n\n\npre_HGB_45days\n0.082\n0.112\n0.210\n-0.080\n0.188\n-0.222\n1.000\n-0.281\n\n\npre_PLT_45days\n-0.079\n0.017\n-0.059\n-0.099\n-0.089\n-0.030\n-0.281\n1.000"
+    "section": "9.3 Correlation Matrix — Continuous Predictors",
+    "text": "9.3 Correlation Matrix — Continuous Predictors\n\n\nCode\ncor_vars &lt;- dat %&gt;%\n  select(egfr_ratio, cockcroft, ckd_epi_gfr_cre_cys_unindex, age, bmi, score,\n         pre_HGB_45days, pre_PLT_45days) %&gt;%\n  drop_na()\n\ncor(cor_vars) %&gt;%\n  round(3) %&gt;%\n  knitr::kable(caption = \"Pearson correlation — continuous predictors\")\n\n\n\nPearson correlation — continuous predictors\n\n\n\n\n\n\n\n\n\n\n\n\n\n\negfr_ratio\ncockcroft\nckd_epi_gfr_cre_cys_unindex\nage\nbmi\nscore\npre_HGB_45days\npre_PLT_45days\n\n\n\n\negfr_ratio\n1.000\n-0.452\n0.252\n0.256\n-0.575\n-0.042\n0.082\n-0.079\n\n\ncockcroft\n-0.452\n1.000\n0.709\n-0.566\n0.485\n-0.287\n0.112\n0.017\n\n\nckd_epi_gfr_cre_cys_unindex\n0.252\n0.709\n1.000\n-0.457\n0.080\n-0.373\n0.210\n-0.059\n\n\nage\n0.256\n-0.566\n-0.457\n1.000\n-0.045\n0.504\n-0.080\n-0.099\n\n\nbmi\n-0.575\n0.485\n0.080\n-0.045\n1.000\n0.025\n0.188\n-0.089\n\n\nscore\n-0.042\n-0.287\n-0.373\n0.504\n0.025\n1.000\n-0.222\n-0.030\n\n\npre_HGB_45days\n0.082\n0.112\n0.210\n-0.080\n0.188\n-0.222\n1.000\n-0.281\n\n\npre_PLT_45days\n-0.079\n0.017\n-0.059\n-0.099\n-0.089\n-0.030\n-0.281\n1.000"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#anemia-grade-2-3",
     "href": "qmd/jiaxuan_whole.html#anemia-grade-2-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.1 Anemia Grade 2",
-    "text": "6.1 Anemia Grade 2\n\n\nCode\nplot_subhr(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n           \"pre_HGB_45days\", \"Anemia Grade 2\")"
+    "text": "6.1 Anemia Grade 2\n\n\nCode\nplot_subhr_ratio(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n                 \"pre_HGB_45days\", \"Anemia Grade 2\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#anemia-grade-3-3",
     "href": "qmd/jiaxuan_whole.html#anemia-grade-3-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.2 Anemia Grade 3",
-    "text": "6.2 Anemia Grade 3\n\n\nCode\nplot_subhr(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n           \"pre_HGB_45days\", \"Anemia Grade 3\")"
+    "text": "6.2 Anemia Grade 3\n\n\nCode\nplot_subhr_ratio(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n                 \"pre_HGB_45days\", \"Anemia Grade 3\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-2-3",
     "href": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-2-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.3 Thrombocytopenia Grade 2",
-    "text": "6.3 Thrombocytopenia Grade 2\n\n\nCode\nplot_subhr(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n           \"pre_PLT_45days\", \"Thrombocytopenia Grade 2\")"
+    "text": "6.3 Thrombocytopenia Grade 2\n\n\nCode\nplot_subhr_ratio(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n                 \"pre_PLT_45days\", \"Thrombocytopenia Grade 2\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-3-3",
     "href": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-3-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.4 Thrombocytopenia Grade 3",
-    "text": "6.4 Thrombocytopenia Grade 3\n\n\nCode\nplot_subhr(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n           \"pre_PLT_45days\", \"Thrombocytopenia Grade 3\")"
+    "text": "6.4 Thrombocytopenia Grade 3\n\n\nCode\nplot_subhr_ratio(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n                 \"pre_PLT_45days\", \"Thrombocytopenia Grade 3\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#aki-grade-2-3",
     "href": "qmd/jiaxuan_whole.html#aki-grade-2-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.5 AKI Grade 2",
-    "text": "6.5 AKI Grade 2\n\n\nCode\nplot_subhr(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n           NULL, \"AKI Grade 2\")"
+    "text": "6.5 AKI Grade 2\n\n\nCode\nplot_subhr_ratio(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n                 NULL, \"AKI Grade 2\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#aki-grade-3-3",
@@ -2202,14 +2202,14 @@
     "href": "qmd/jiaxuan_whole.html#composite-grade-2-aes-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.7 Composite Grade 2 AEs",
-    "text": "6.7 Composite Grade 2 AEs\n\n\nCode\nplot_subhr(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n           NULL, \"Composite Grade 2 AEs\")"
+    "text": "6.7 Composite Grade 2 AEs\n\n\nCode\nplot_subhr_ratio(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n                 NULL, \"Composite Grade 2 AEs\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#composite-grade-3-aes-3",
     "href": "qmd/jiaxuan_whole.html#composite-grade-3-aes-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.8 Composite Grade 3 AEs",
-    "text": "6.8 Composite Grade 3 AEs\n\n\nCode\nplot_subhr(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n           NULL, \"Composite Grade 3 AEs\")"
+    "text": "6.8 Composite Grade 3 AEs\n\n\nCode\nplot_subhr_ratio(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n                 NULL, \"Composite Grade 3 AEs\")"
   },
   {
     "objectID": "qmd/jiaxuan_carbo.html#anemia-grade-2-3",
@@ -2272,35 +2272,35 @@
     "href": "qmd/jiaxuan_whole.html#anemia-grade-2-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.1 Anemia Grade 2",
-    "text": "7.1 Anemia Grade 2\n\n\nCode\nplot_subhr_ratio(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n                 \"pre_HGB_45days\", \"Anemia Grade 2\")"
+    "text": "7.1 Anemia Grade 2\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n                        \"pre_HGB_45days\", \"Anemia Grade 2\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#anemia-grade-3-4",
     "href": "qmd/jiaxuan_whole.html#anemia-grade-3-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.2 Anemia Grade 3",
-    "text": "7.2 Anemia Grade 3\n\n\nCode\nplot_subhr_ratio(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n                 \"pre_HGB_45days\", \"Anemia Grade 3\")"
+    "text": "7.2 Anemia Grade 3\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n                        \"pre_HGB_45days\", \"Anemia Grade 3\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-2-4",
     "href": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-2-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.3 Thrombocytopenia Grade 2",
-    "text": "7.3 Thrombocytopenia Grade 2\n\n\nCode\nplot_subhr_ratio(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n                 \"pre_PLT_45days\", \"Thrombocytopenia Grade 2\")"
+    "text": "7.3 Thrombocytopenia Grade 2\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n                        \"pre_PLT_45days\", \"Thrombocytopenia Grade 2\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-3-4",
     "href": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-3-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.4 Thrombocytopenia Grade 3",
-    "text": "7.4 Thrombocytopenia Grade 3\n\n\nCode\nplot_subhr_ratio(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n                 \"pre_PLT_45days\", \"Thrombocytopenia Grade 3\")"
+    "text": "7.4 Thrombocytopenia Grade 3\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n                        \"pre_PLT_45days\", \"Thrombocytopenia Grade 3\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#aki-grade-2-4",
     "href": "qmd/jiaxuan_whole.html#aki-grade-2-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.5 AKI Grade 2",
-    "text": "7.5 AKI Grade 2\n\n\nCode\nplot_subhr_ratio(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n                 NULL, \"AKI Grade 2\")"
+    "text": "7.5 AKI Grade 2\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n                        NULL, \"AKI Grade 2\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#aki-grade-3-4",
@@ -2314,49 +2314,49 @@
     "href": "qmd/jiaxuan_whole.html#composite-grade-2-aes-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.7 Composite Grade 2 AEs",
-    "text": "7.7 Composite Grade 2 AEs\n\n\nCode\nplot_subhr_ratio(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n                 NULL, \"Composite Grade 2 AEs\")"
+    "text": "7.7 Composite Grade 2 AEs\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n                        NULL, \"Composite Grade 2 AEs\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#composite-grade-3-aes-4",
     "href": "qmd/jiaxuan_whole.html#composite-grade-3-aes-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.8 Composite Grade 3 AEs",
-    "text": "7.8 Composite Grade 3 AEs\n\n\nCode\nplot_subhr_ratio(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n                 NULL, \"Composite Grade 3 AEs\")"
+    "text": "7.8 Composite Grade 3 AEs\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n                        NULL, \"Composite Grade 3 AEs\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#anemia-grade-2-5",
     "href": "qmd/jiaxuan_whole.html#anemia-grade-2-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.1 Anemia Grade 2",
-    "text": "8.1 Anemia Grade 2\n\n\nCode\nplot_subhr_linear(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n                  \"pre_HGB_45days\", \"Anemia Grade 2\", \"discrepancy\")"
+    "text": "8.1 Anemia Grade 2\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n                        \"pre_HGB_45days\", \"Anemia Grade 2\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#anemia-grade-3-5",
     "href": "qmd/jiaxuan_whole.html#anemia-grade-3-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.2 Anemia Grade 3",
-    "text": "8.2 Anemia Grade 3\n\n\nCode\nplot_subhr_linear(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n                  \"pre_HGB_45days\", \"Anemia Grade 3\", \"discrepancy\")"
+    "text": "8.2 Anemia Grade 3\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n                        \"pre_HGB_45days\", \"Anemia Grade 3\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-2-5",
     "href": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-2-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.3 Thrombocytopenia Grade 2",
-    "text": "8.3 Thrombocytopenia Grade 2\n\n\nCode\nplot_subhr_linear(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n                  \"pre_PLT_45days\", \"Thrombocytopenia Grade 2\", \"discrepancy\")"
+    "text": "8.3 Thrombocytopenia Grade 2\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n                        \"pre_PLT_45days\", \"Thrombocytopenia Grade 2\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-3-5",
     "href": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-3-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.4 Thrombocytopenia Grade 3",
-    "text": "8.4 Thrombocytopenia Grade 3\n\n\nCode\nplot_subhr_linear(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n                  \"pre_PLT_45days\", \"Thrombocytopenia Grade 3\", \"discrepancy\")"
+    "text": "8.4 Thrombocytopenia Grade 3\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n                        \"pre_PLT_45days\", \"Thrombocytopenia Grade 3\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#aki-grade-2-5",
     "href": "qmd/jiaxuan_whole.html#aki-grade-2-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.5 AKI Grade 2",
-    "text": "8.5 AKI Grade 2\n\n\nCode\nplot_subhr_linear(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n                  NULL, \"AKI Grade 2\", \"discrepancy\")"
+    "text": "8.5 AKI Grade 2\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n                        NULL, \"AKI Grade 2\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#aki-grade-3-5",
@@ -2370,14 +2370,14 @@
     "href": "qmd/jiaxuan_whole.html#composite-grade-2-aes-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.7 Composite Grade 2 AEs",
-    "text": "8.7 Composite Grade 2 AEs\n\n\nCode\nplot_subhr_linear(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n                  NULL, \"Composite Grade 2 AEs\", \"discrepancy\")"
+    "text": "8.7 Composite Grade 2 AEs\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n                        NULL, \"Composite Grade 2 AEs\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#composite-grade-3-aes-5",
     "href": "qmd/jiaxuan_whole.html#composite-grade-3-aes-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.8 Composite Grade 3 AEs",
-    "text": "8.8 Composite Grade 3 AEs\n\n\nCode\nplot_subhr_linear(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n                  NULL, \"Composite Grade 3 AEs\", \"discrepancy\")"
+    "text": "8.8 Composite Grade 3 AEs\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n                        NULL, \"Composite Grade 3 AEs\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_carbo.html#anemia-grade-2-4",
@@ -2566,14 +2566,14 @@
     "href": "qmd/jiaxuan_whole.html#overall-hospitalization-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.9 Overall Hospitalization",
-    "text": "6.9 Overall Hospitalization\n\n\nCode\nplot_subhr(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n           NULL, \"Overall Hospitalization\")"
+    "text": "6.9 Overall Hospitalization\n\n\nCode\nplot_subhr_ratio(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n                 NULL, \"Overall Hospitalization\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#platinum-related-hospitalization-3",
     "href": "qmd/jiaxuan_whole.html#platinum-related-hospitalization-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.10 Platinum-Related Hospitalization",
-    "text": "6.10 Platinum-Related Hospitalization\n\n\nCode\nplot_subhr(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n           NULL, \"Platinum-Related Hospitalization\")"
+    "text": "6.10 Platinum-Related Hospitalization\n\n\nCode\nplot_subhr_ratio(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n                 NULL, \"Platinum-Related Hospitalization\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#day-death-3",
@@ -2587,14 +2587,14 @@
     "href": "qmd/jiaxuan_whole.html#overall-hospitalization-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.9 Overall Hospitalization",
-    "text": "7.9 Overall Hospitalization\n\n\nCode\nplot_subhr_ratio(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n                 NULL, \"Overall Hospitalization\")"
+    "text": "7.9 Overall Hospitalization\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n                        NULL, \"Overall Hospitalization\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#platinum-related-hospitalization-4",
     "href": "qmd/jiaxuan_whole.html#platinum-related-hospitalization-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.10 Platinum-Related Hospitalization",
-    "text": "7.10 Platinum-Related Hospitalization\n\n\nCode\nplot_subhr_ratio(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n                 NULL, \"Platinum-Related Hospitalization\")"
+    "text": "7.10 Platinum-Related Hospitalization\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n                        NULL, \"Platinum-Related Hospitalization\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#day-death-4",
@@ -2608,14 +2608,14 @@
     "href": "qmd/jiaxuan_whole.html#overall-hospitalization-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.9 Overall Hospitalization",
-    "text": "8.9 Overall Hospitalization\n\n\nCode\nplot_subhr_linear(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n                  NULL, \"Overall Hospitalization\", \"discrepancy\")"
+    "text": "8.9 Overall Hospitalization\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n                        NULL, \"Overall Hospitalization\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#platinum-related-hospitalization-5",
     "href": "qmd/jiaxuan_whole.html#platinum-related-hospitalization-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.10 Platinum-Related Hospitalization",
-    "text": "8.10 Platinum-Related Hospitalization\n\n\nCode\nplot_subhr_linear(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n                  NULL, \"Platinum-Related Hospitalization\", \"discrepancy\")"
+    "text": "8.10 Platinum-Related Hospitalization\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n                        NULL, \"Platinum-Related Hospitalization\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#day-death-5",
@@ -2776,21 +2776,21 @@
     "href": "qmd/jiaxuan_whole.html#aki-kdigo-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.6 AKI (KDIGO)",
-    "text": "6.6 AKI (KDIGO)\n\n\nCode\nplot_subhr(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n           NULL, \"AKI (KDIGO)\")"
+    "text": "6.6 AKI (KDIGO)\n\n\nCode\nplot_subhr_ratio(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n                 NULL, \"AKI (KDIGO)\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#aki-kdigo-4",
     "href": "qmd/jiaxuan_whole.html#aki-kdigo-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.6 AKI (KDIGO)",
-    "text": "7.6 AKI (KDIGO)\n\n\nCode\nplot_subhr_ratio(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n                 NULL, \"AKI (KDIGO)\")"
+    "text": "7.6 AKI (KDIGO)\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n                        NULL, \"AKI (KDIGO)\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#aki-kdigo-5",
     "href": "qmd/jiaxuan_whole.html#aki-kdigo-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.6 AKI (KDIGO)",
-    "text": "8.6 AKI (KDIGO)\n\n\nCode\nplot_subhr_linear(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n                  NULL, \"AKI (KDIGO)\", \"discrepancy\")"
+    "text": "8.6 AKI (KDIGO)\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n                        NULL, \"AKI (KDIGO)\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_carbo.html#aki-kdigo",
@@ -2860,21 +2860,21 @@
     "href": "qmd/jiaxuan_whole.html#day-death-cox-ph-3",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "6.11 90-Day Death (Cox PH)",
-    "text": "6.11 90-Day Death (Cox PH)\n\n\nCode\nplot_cox_spline(\"time_to_death_90\", \"death_90\",\n                NULL, \"90-Day Death (Cox PH)\")"
+    "text": "6.11 90-Day Death (Cox PH)\n\n\nCode\nplot_cox_spline_ratio(\"time_to_death_90\", \"death_90\",\n                      NULL, \"90-Day Death (Cox PH)\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#day-death-cox-ph-4",
     "href": "qmd/jiaxuan_whole.html#day-death-cox-ph-4",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "7.11 90-Day Death (Cox PH)",
-    "text": "7.11 90-Day Death (Cox PH)\n\n\nCode\nplot_cox_spline_ratio(\"time_to_death_90\", \"death_90\",\n                      NULL, \"90-Day Death (Cox PH)\")"
+    "text": "7.11 90-Day Death (Cox PH)\n\n\nCode\nplot_cox_linear_ratio(\"time_to_death_90\", \"death_90\",\n                      NULL, \"90-Day Death (Cox PH)\", \"ratio\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#day-death-cox-ph-5",
     "href": "qmd/jiaxuan_whole.html#day-death-cox-ph-5",
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "8.11 90-Day Death (Cox PH)",
-    "text": "8.11 90-Day Death (Cox PH)\n\n\nCode\nplot_cox_linear(\"time_to_death_90\", \"death_90\",\n                NULL, \"90-Day Death (Cox PH)\", \"discrepancy\")"
+    "text": "8.11 90-Day Death (Cox PH)\n\n\nCode\nplot_cox_linear_ratio(\"time_to_death_90\", \"death_90\",\n                      NULL, \"90-Day Death (Cox PH)\", \"percentile\")"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#anemia-grade-2-6",
