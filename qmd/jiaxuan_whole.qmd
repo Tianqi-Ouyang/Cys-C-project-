@@ -33,6 +33,7 @@ dat <- dat %>%
   mutate(
     egfr_ratio    = ckd_epi_gfr_cre_cys_unindex / cockcroft,
     egfr_ratio_per10 = -egfr_ratio * 10,  # per 0.1-unit *decrease* reporting scale
+    egfr_discrepancy = ckd_epi_gfr_cre_cys_unindex - cockcroft,
     cockcroft_per10 = cockcroft / 10,
     ckd_epi_per10   = ckd_epi_gfr_cre_cys_unindex / 10
   )
@@ -922,9 +923,45 @@ plot_cox_linear_ratio("time_to_death_90", "death_90",
                       NULL, "90-Day Death (Cox PH)", "percentile")
 ```
 
-# 9 Model Diagnostics
+# 9 Scatter Plots — eGFR Discrepancy
 
-## 9.1 Events per Variable (EPV)
+## 9.1 eGFR Discrepancy vs CKD-EPI Cr-Cys (unindexed)
+
+```{r}
+#| label: jx-scatter-egfr-epi
+#| fig-width: 6
+#| fig-height: 4
+ggplot(dat %>% filter(!is.na(egfr_discrepancy)),
+       aes(x = ckd_epi_gfr_cre_cys_unindex, y = egfr_discrepancy)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  labs(x = "CKD-EPI Cr-Cys eGFR (unindexed, mL/min)",
+       y = "eGFR Discrepancy (mL/min)",
+       title = "eGFR Discrepancy vs CKD-EPI Cr-Cys eGFR") +
+  theme_minimal(base_size = 11)
+```
+
+## 9.2 eGFR Discrepancy vs Cockcroft-Gault
+
+```{r}
+#| label: jx-scatter-egfr-cg
+#| fig-width: 6
+#| fig-height: 4
+ggplot(dat %>% filter(!is.na(egfr_discrepancy)),
+       aes(x = cockcroft, y = egfr_discrepancy)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  labs(x = "Cockcroft-Gault eGFR (mL/min)",
+       y = "eGFR Discrepancy (mL/min)",
+       title = "eGFR Discrepancy vs Cockcroft-Gault eGFR") +
+  theme_minimal(base_size = 11)
+```
+
+# 10 Model Diagnostics
+
+## 10.1 Events per Variable (EPV)
 
 ```{r}
 #| label: jx-epv-whole
@@ -964,7 +1001,7 @@ epv_table %>%
   knitr::kable(caption = "Events per variable — Whole Cohort")
 ```
 
-## 9.2 Collinearity — VIF (eGFR Ratio Model)
+## 10.2 Collinearity — VIF (eGFR Ratio Model)
 
 ```{r}
 #| label: jx-vif-ratio-whole
@@ -993,7 +1030,7 @@ if (is.matrix(vif_res)) {
 }
 ```
 
-## 9.3 Correlation Matrix — Continuous Predictors
+## 10.3 Correlation Matrix — Continuous Predictors
 
 ```{r}
 #| label: jx-cormat-whole
