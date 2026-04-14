@@ -140,42 +140,42 @@ fg_model("cmp_time_throm_3", "cmp_status_throm_3", "egfr_ratio_per10", "pre_PLT_
 fg_model("cmp_time_aki_2", "cmp_status_aki_2", "egfr_ratio_per10")
 ```
 
-## 3.5b AKI (KDIGO)
+## 3.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-fg-ratio-akikdigo
 fg_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "egfr_ratio_per10")
 ```
 
-## 3.6 Composite Grade 2 AEs
+## 3.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-fg-ratio-grade2
 fg_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "egfr_ratio_per10")
 ```
 
-## 3.7 Composite Grade 3 AEs
+## 3.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-fg-ratio-grade3
 fg_model("cmp_time_grade_3_aes", "cmp_status_grade_3_aes", "egfr_ratio_per10")
 ```
 
-## 3.8 Overall Hospitalization
+## 3.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-fg-ratio-anyhosp
 fg_model("cmp_time_any_hosp", "cmp_status_any_hosp", "egfr_ratio_per10")
 ```
 
-## 3.9 Platinum-Related Hospitalization
+## 3.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-fg-ratio-sideeffect
 fg_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_ratio_per10")
 ```
 
-## 3.10 90-Day Death
+## 3.11 90-Day Death
 
 ```{r}
 #| label: jx-cox-ratio-death
@@ -219,42 +219,42 @@ fg_model("cmp_time_throm_3", "cmp_status_throm_3", "cockcroft_per10", "pre_PLT_4
 fg_model("cmp_time_aki_2", "cmp_status_aki_2", "cockcroft_per10")
 ```
 
-## 4.5b AKI (KDIGO)
+## 4.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-fg-cg-akikdigo
 fg_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "cockcroft_per10")
 ```
 
-## 4.6 Composite Grade 2 AEs
+## 4.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-fg-cg-grade2
 fg_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "cockcroft_per10")
 ```
 
-## 4.7 Composite Grade 3 AEs
+## 4.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-fg-cg-grade3
 fg_model("cmp_time_grade_3_aes", "cmp_status_grade_3_aes", "cockcroft_per10")
 ```
 
-## 4.8 Overall Hospitalization
+## 4.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-fg-cg-anyhosp
 fg_model("cmp_time_any_hosp", "cmp_status_any_hosp", "cockcroft_per10")
 ```
 
-## 4.9 Platinum-Related Hospitalization
+## 4.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-fg-cg-sideeffect
 fg_model("cmp_time_side_effect", "cmp_status_side_effect", "cockcroft_per10")
 ```
 
-## 4.10 90-Day Death
+## 4.11 90-Day Death
 
 ```{r}
 #| label: jx-cox-cg-death
@@ -298,42 +298,42 @@ fg_model("cmp_time_throm_3", "cmp_status_throm_3", "ckd_epi_per10", "pre_PLT_45d
 fg_model("cmp_time_aki_2", "cmp_status_aki_2", "ckd_epi_per10")
 ```
 
-## 5.5b AKI (KDIGO)
+## 5.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-fg-epi-akikdigo
 fg_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "ckd_epi_per10")
 ```
 
-## 5.6 Composite Grade 2 AEs
+## 5.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-fg-epi-grade2
 fg_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "ckd_epi_per10")
 ```
 
-## 5.7 Composite Grade 3 AEs
+## 5.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-fg-epi-grade3
 fg_model("cmp_time_grade_3_aes", "cmp_status_grade_3_aes", "ckd_epi_per10")
 ```
 
-## 5.8 Overall Hospitalization
+## 5.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-fg-epi-anyhosp
 fg_model("cmp_time_any_hosp", "cmp_status_any_hosp", "ckd_epi_per10")
 ```
 
-## 5.9 Platinum-Related Hospitalization
+## 5.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-fg-epi-sideeffect
 fg_model("cmp_time_side_effect", "cmp_status_side_effect", "ckd_epi_per10")
 ```
 
-## 5.10 90-Day Death
+## 5.11 90-Day Death
 
 ```{r}
 #| label: jx-cox-epi-death
@@ -508,7 +508,7 @@ plot_subhr("cmp_time_aki_2", "cmp_status_aki_2",
            NULL, "AKI Grade 2")
 ```
 
-## 6.5b AKI (KDIGO)
+## 6.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-subhr-akikdigo
@@ -518,7 +518,7 @@ plot_subhr("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
            NULL, "AKI (KDIGO)")
 ```
 
-## 6.6 Composite Grade 2 AEs
+## 6.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-subhr-grade2
@@ -528,7 +528,7 @@ plot_subhr("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
            NULL, "Composite Grade 2 AEs")
 ```
 
-## 6.7 Composite Grade 3 AEs
+## 6.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-subhr-grade3
@@ -538,7 +538,7 @@ plot_subhr("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
            NULL, "Composite Grade 3 AEs")
 ```
 
-## 6.8 Overall Hospitalization
+## 6.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-subhr-anyhosp
@@ -548,7 +548,7 @@ plot_subhr("cmp_time_any_hosp", "cmp_status_any_hosp",
            NULL, "Overall Hospitalization")
 ```
 
-## 6.9 Platinum-Related Hospitalization
+## 6.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-subhr-sideeffect
@@ -558,7 +558,7 @@ plot_subhr("cmp_time_side_effect", "cmp_status_side_effect",
            NULL, "Platinum-Related Hospitalization")
 ```
 
-## 6.10 90-Day Death
+## 6.11 90-Day Death
 
 ```{r}
 #| label: jx-cox-spline-death
@@ -743,7 +743,7 @@ plot_subhr_linear("cmp_time_aki_2", "cmp_status_aki_2",
                   NULL, "AKI Grade 2", "ratio")
 ```
 
-## 7.5b AKI (KDIGO)
+## 7.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-linsubhr-akikdigo
@@ -753,7 +753,7 @@ plot_subhr_linear("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                   NULL, "AKI (KDIGO)", "ratio")
 ```
 
-## 7.6 Composite Grade 2 AEs
+## 7.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-linsubhr-grade2
@@ -763,7 +763,7 @@ plot_subhr_linear("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                   NULL, "Composite Grade 2 AEs", "ratio")
 ```
 
-## 7.7 Composite Grade 3 AEs
+## 7.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-linsubhr-grade3
@@ -773,7 +773,7 @@ plot_subhr_linear("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                   NULL, "Composite Grade 3 AEs", "ratio")
 ```
 
-## 7.8 Overall Hospitalization
+## 7.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-anyhosp
@@ -783,7 +783,7 @@ plot_subhr_linear("cmp_time_any_hosp", "cmp_status_any_hosp",
                   NULL, "Overall Hospitalization", "ratio")
 ```
 
-## 7.9 Platinum-Related Hospitalization
+## 7.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-sideeffect
@@ -793,7 +793,7 @@ plot_subhr_linear("cmp_time_side_effect", "cmp_status_side_effect",
                   NULL, "Platinum-Related Hospitalization", "ratio")
 ```
 
-## 7.10 90-Day Death
+## 7.11 90-Day Death
 
 ```{r}
 #| label: jx-cox-linear-death
@@ -855,7 +855,7 @@ plot_subhr_linear("cmp_time_aki_2", "cmp_status_aki_2",
                   NULL, "AKI Grade 2", "percentile")
 ```
 
-## 8.5b AKI (KDIGO)
+## 8.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-linsubhr-pct-akikdigo
@@ -865,7 +865,7 @@ plot_subhr_linear("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                   NULL, "AKI (KDIGO)", "percentile")
 ```
 
-## 8.6 Composite Grade 2 AEs
+## 8.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-linsubhr-pct-grade2
@@ -875,7 +875,7 @@ plot_subhr_linear("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                   NULL, "Composite Grade 2 AEs", "percentile")
 ```
 
-## 8.7 Composite Grade 3 AEs
+## 8.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-linsubhr-pct-grade3
@@ -885,7 +885,7 @@ plot_subhr_linear("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                   NULL, "Composite Grade 3 AEs", "percentile")
 ```
 
-## 8.8 Overall Hospitalization
+## 8.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-pct-anyhosp
@@ -895,7 +895,7 @@ plot_subhr_linear("cmp_time_any_hosp", "cmp_status_any_hosp",
                   NULL, "Overall Hospitalization", "percentile")
 ```
 
-## 8.9 Platinum-Related Hospitalization
+## 8.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-pct-sideeffect
@@ -905,7 +905,7 @@ plot_subhr_linear("cmp_time_side_effect", "cmp_status_side_effect",
                   NULL, "Platinum-Related Hospitalization", "percentile")
 ```
 
-## 8.10 90-Day Death
+## 8.11 90-Day Death
 
 ```{r}
 #| label: jx-cox-linear-pct-death
