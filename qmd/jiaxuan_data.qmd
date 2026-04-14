@@ -1145,7 +1145,7 @@ final_master <- final_master %>%
 # Apply human-readable labels to REDCap numeric-coded variables (per data dictionary)
 final_master <- final_master %>%
   mutate(
-    sex        = factor(sex, levels = c(1, 2), labels = c("Male", "Female")),
+    sex        = factor(sex, levels = c(2, 1), labels = c("Female", "Male")),
     race       = factor(race, levels = 1:5, labels = c("White", "Black", "Asian", "Other", "Unknown")),
     ethnicity  = factor(ethnicity, levels = 1:3, labels = c("Non-Hispanic", "Hispanic", "Unknown")),
     tumor_stage = factor(tumor_stage, levels = c(1, 2), labels = c("Local/Early", "Advanced/Metastatic")),
@@ -1260,7 +1260,7 @@ final_master <- final_master %>%
     dose_diff_pct      = (carbo_dose_redcap - carbo_dose_cre_cys) / carbo_dose_cre_cys * 100,
     dd_gt25            = factor(ifelse(!is.na(dose_discrepancy) & dose_discrepancy > 25, 1, 0)),
     dd_gt50            = factor(ifelse(!is.na(dose_discrepancy) & dose_discrepancy > 50, 1, 0)),
-    ecog_score_cat2    = ifelse(ecog_score == 0, "0", ">=1"),
+    ecog_score_cat2    = factor(ifelse(ecog_score == 0, "0", ">=1"), levels = c("0", ">=1")),
     bmi_30 = factor(ifelse(bmi < 30, "<30", ">=30")),
     age_70 = factor(ifelse(age < 70, "<70", ">=70"))
   )
