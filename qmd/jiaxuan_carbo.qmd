@@ -34,7 +34,6 @@ dat <- dat %>%
   mutate(
     # Cap both eGFR measures at 125 mL/min to remove physiologically
     # implausible outliers from extreme BSA unindexing
-    ckd_epi_gfr_cre_cys          = pmin(ckd_epi_gfr_cre_cys, 125),
     ckd_epi_gfr_cre_cys_unindex = pmin(ckd_epi_gfr_cre_cys_unindex, 125),
     cockcroft                   = pmin(cockcroft, 125),
     egfr_ratio    = ckd_epi_gfr_cre_cys_unindex / cockcroft,
