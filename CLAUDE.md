@@ -22,8 +22,17 @@ Or open in RStudio and use the **Knit** button. Output is an HTML document.
 
 - **`final code for ratio of cystatin and cre_platinum_ae_revised_0709 downloaded 1127.Rmd`** — Primary analysis file (~3,700 lines). This is the authoritative version.
 - **`Copy 709.Rmd`** — Earlier draft; may differ from the primary file.
-- **`CystatinCInPatientsO_DATA_2025-07-24_1327.csv`** — REDCap export (880 patients, ~150 variables).
+- **`Data/CystatinCInPatientsO_DATA_2026-04-16_1143.csv`** — Current REDCap export.
 - **`Cystatin C in Patients on Cisplatin and Carboplatin _ REDCap.pdf`** — REDCap data dictionary for variable reference.
+
+### Jiaxuan Project Files (in `qmd/`)
+
+- **`jiaxuan_data.qmd`** — Data management pipeline. Produces `jiaxuan_final_master.rds`. Must be rendered first.
+- **`jiaxuan_whole.qmd`** — Whole cohort analysis (all platinum patients).
+- **`jiaxuan_carbo.qmd`** — Carboplatin cohort analysis.
+- **`jiaxuan_carbo_auc3.qmd`** — Carboplatin AUC ≥ 3 subgroup (N=463).
+
+All three analysis files read from `jiaxuan_final_master.rds`. The Quarto website nav has a "Jiaxuan Project" dropdown with all four files.
 
 The primary `.Rmd` also loads external data files (RPDR exports: diagnoses, labs, medications, demographics as `.txt`/`.xlsx` files) that are expected to exist in paths hardcoded in the script.
 
@@ -64,4 +73,41 @@ The analysis follows a linear pipeline within the `.Rmd` file:
 - **Platinum dosing**: Cisplatin ≥ 70 mg/m² and carboplatin AUC ≥ 5 are categorized as "high dose."
 - **CKD staging**: Based on Cockcroft-Gault eGFR from pre-baseline creatinine values from RPDR labs.
 - **eGFR capping rules**: Only `ckd_epi_gfr_cre_cys_unindex` is capped at 125 mL/min (unindexing by BSA can produce implausible values). The indexed `ckd_epi_gfr_cre_cys` and `cockcroft` are NOT capped. Use **uncapped** versions for eGFR ratio; use **capped** versions (`ckd_epi_gfr_cre_cys_unindex_cap125`, `cockcroft_cap125`) for dose discrepancy calculations.
-- **dose_discrep_per25increase**: Dose discrepancy (actual − predicted carboplatin dose in mg) divided by 25, so HRs represent per 25 mg increase. Used as an alternative predictor alongside `egfr_ratio_per10`.
+- **dose_discrep_per25increase**: Dose discrepancy (actual − predicted carboplatin dose in mg) divided by 25, so HRs represent per 25 mg increase. Used as an alternative predictor alongside `egfr_ratio_per10`. Only in carbo/AUC3 files.
+
+## Jiaxuan Project — Analysis Structure
+
+### Reference categories
+- **sex**: Female is reference
+- **ecog_score_cat2**: "0" is reference (explicit factor)
+
+### Key variables
+- **egfr_ratio_per10**: Negated (`-egfr_ratio * 10`), so HRs represent per 0.1-unit **decrease** in CKD-EPI Cr-Cys / CG ratio
+- **egfr_discrepancy**: `ckd_epi_gfr_cre_cys_unindex - cockcroft` (mL/min)
+- **dose_discrep_per25increase**: `dose_discrepancy / 25` (carbo/AUC3 only)
+- **abs_dose_discrep_cat**: Absolute dose discrepancy binned: <25, 25–49.99, 50–74.99, 75–99.99, ≥100 mg (carbo/AUC3 only)
+
+### Section structure (whole cohort: `jiaxuan_whole.qmd`)
+1. Setup
+2. Table 1
+3. Fine-Gray Models — eGFR Ratio (adjusted for Cockcroft-Gault)
+4. Cause-Specific Hazard Models — eGFR Ratio (adjusted for CG)
+5. Linear subHR Curves — eGFR Ratio (raw scale, xlim 0.65–1.45)
+6. Linear subHR Curves — eGFR Discrepancy (auto-scale x)
+7. Linear subHR Curves — Hospitalization by Reason (1–8)
+8. Scatter Plots — eGFR Discrepancy
+
+### Section structure (carbo/AUC3 cohorts add):
+- Section 2: Dose Discrepancy Distribution histogram
+- Sections 6–7: Fine-Gray + CSH models with `dose_discrep_per25increase`
+- Section 10: Linear subHR — Dose Discrepancy (auto-scale x)
+- Section 12: Scatter Plots — Dose Discrepancy vs eGFR
+
+### Model adjusters (Cockcroft-adjusted)
+Base: age, sex, score, ecog_score_cat2, cancer_type_cat_7, tumor_stage, high_dose, Paclitaxel, Pemetrexed, Gemcitabine, bmi, smoking, steroids, thyroid + cockcroft. Whole cohort adds platin_group (auto-dropped for dose discrepancy models). Anemia models add pre_HGB_45days; thrombocytopenia adds pre_PLT_45days.
+
+### 90-Day Death
+Modeled with Cox PH (not competing risks). Section headers labeled "(Cox PH)".
+
+### Plot trimming
+Linear subHR plots trim at 2.5/97.5 percentile. eGFR ratio plots use xlim = (0.65, 1.45). Discrepancy/dose plots auto-scale x-axis.
