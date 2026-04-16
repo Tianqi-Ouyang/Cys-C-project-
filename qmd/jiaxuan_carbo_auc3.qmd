@@ -41,6 +41,11 @@ dat <- dat %>%
     egfr_discrepancy = ckd_epi_gfr_cre_cys_unindex - cockcroft,
     # Dose discrepancy uses CAPPED eGFR (already computed in jiaxuan_data.qmd)
     dose_discrep_per25increase = dose_discrepancy / 25,
+    abs_dose_discrep = abs(dose_discrepancy),
+    abs_dose_discrep_cat = cut(abs_dose_discrep,
+      breaks = c(0, 25, 50, 75, 100, Inf),
+      labels = c("<25", "25–49.99", "50–74.99", "75–99.99", "≥100"),
+      right = FALSE, include.lowest = TRUE),
     cockcroft_per10 = cockcroft / 10,
     ckd_epi_per10   = ckd_epi_gfr_cre_cys_unindex / 10
   )
@@ -48,7 +53,24 @@ dat <- dat %>%
 cat("Carboplatin AUC >= 3 cohort N =", nrow(dat), "\n")
 ```
 
-# 2 Table 1: Baseline Characteristics (Carboplatin AUC ≥ 3)
+# 2 Dose Discrepancy Distribution (Carboplatin AUC ≥ 3)
+
+```{r}
+#| label: jx-auc3-dose-discrep-hist
+#| fig-width: 8
+#| fig-height: 5
+dose_hist <- dat %>% filter(!is.na(abs_dose_discrep_cat))
+
+ggplot(dose_hist, aes(x = abs_dose_discrep_cat)) +
+  geom_bar(fill = "steelblue", color = "black", alpha = 0.7) +
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 4) +
+  labs(title = "Distribution of Absolute Dose Discrepancy (Carboplatin AUC ≥ 3)",
+       x = "Absolute Dose Discrepancy (mg)",
+       y = "Number of Patients") +
+  theme_minimal(base_size = 14)
+```
+
+# 3 Table 1: Baseline Characteristics (Carboplatin AUC ≥ 3)
 
 ```{r}
 #| label: jx-table1-carbo
@@ -71,7 +93,7 @@ dat %>%
   )
 ```
 
-# 3 Fine-Gray Models — eGFR Ratio (adjusted for Cockcroft-Gault) (Carboplatin AUC ≥ 3)
+# 4 Fine-Gray Models — eGFR Ratio (adjusted for Cockcroft-Gault) (Carboplatin AUC ≥ 3)
 
 ```{r}
 #| label: jx-auc3-fg-helper
@@ -193,7 +215,7 @@ fg_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_ratio_per10", e
 cox_model("time_to_death_90", "death_90", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
-# 4 Cause-Specific Hazard Models — eGFR Ratio (adjusted for Cockcroft-Gault) (Carboplatin AUC ≥ 3)
+# 5 Cause-Specific Hazard Models — eGFR Ratio (adjusted for Cockcroft-Gault) (Carboplatin AUC ≥ 3)
 
 ```{r}
 #| label: jx-auc3-csh-helper
@@ -293,7 +315,7 @@ csh_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_ratio_per10")
 cox_model("time_to_death_90", "death_90", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
-# 5 Fine-Gray Models — Dose Discrepancy per 25 mg (adjusted for Cockcroft-Gault) (Carboplatin AUC ≥ 3)
+# 6 Fine-Gray Models — Dose Discrepancy per 25 mg (adjusted for Cockcroft-Gault) (Carboplatin AUC ≥ 3)
 
 ## 5.1 Anemia Grade 2
 
@@ -372,7 +394,7 @@ fg_model("cmp_time_side_effect", "cmp_status_side_effect", "dose_discrep_per25in
 cox_model("time_to_death_90", "death_90", "dose_discrep_per25increase", egfr_adj = "cockcroft")
 ```
 
-# 6 Cause-Specific Hazard Models — Dose Discrepancy per 25 mg (adjusted for Cockcroft-Gault) (Carboplatin AUC ≥ 3)
+# 7 Cause-Specific Hazard Models — Dose Discrepancy per 25 mg (adjusted for Cockcroft-Gault) (Carboplatin AUC ≥ 3)
 
 ## 6.1 Anemia Grade 2
 
@@ -451,7 +473,7 @@ csh_model("cmp_time_side_effect", "cmp_status_side_effect", "dose_discrep_per25i
 cox_model("time_to_death_90", "death_90", "dose_discrep_per25increase", egfr_adj = "cockcroft")
 ```
 
-# 7 Linear subHR Curves — eGFR Ratio (raw scale) (Carboplatin AUC ≥ 3)
+# 8 Linear subHR Curves — eGFR Ratio (raw scale) (Carboplatin AUC ≥ 3)
 
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-helper
@@ -660,7 +682,7 @@ plot_cox_linear_ratio("time_to_death_90", "death_90",
                       NULL, "90-Day Death (Cox PH) (Carboplatin AUC ≥ 3)")
 ```
 
-# 8 Linear subHR Curves — eGFR Discrepancy (raw scale) (Carboplatin AUC ≥ 3)
+# 9 Linear subHR Curves — eGFR Discrepancy (raw scale) (Carboplatin AUC ≥ 3)
 
 ```{r}
 #| label: jx-auc3-linsubhr-disc-egfr-helper
@@ -869,7 +891,7 @@ plot_cox_linear_egfrdisc("time_to_death_90", "death_90",
                          NULL, "90-Day Death (Cox PH) (Carboplatin AUC ≥ 3)")
 ```
 
-# 9 Linear subHR Curves — Dose Discrepancy (raw scale) (Carboplatin AUC ≥ 3)
+# 10 Linear subHR Curves — Dose Discrepancy (raw scale) (Carboplatin AUC ≥ 3)
 
 ```{r}
 #| label: jx-auc3-linsubhr-dosedisc-helper
@@ -1078,7 +1100,7 @@ plot_cox_linear("time_to_death_90", "death_90",
                 NULL, "90-Day Death (Cox PH) (Carboplatin AUC ≥ 3)")
 ```
 
-# 10 Scatter Plots — Dose Discrepancy vs eGFR (Carboplatin AUC ≥ 3)
+# 11 Scatter Plots — Dose Discrepancy vs eGFR (Carboplatin AUC ≥ 3)
 
 ## 10.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)
 
