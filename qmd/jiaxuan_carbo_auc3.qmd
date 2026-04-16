@@ -53,20 +53,30 @@ dat <- dat %>%
 cat("Carboplatin AUC >= 3 cohort N =", nrow(dat), "\n")
 ```
 
-# 2 Dose Discrepancy Distribution (Carboplatin AUC ≥ 3)
+# 2 Actual vs Predicted Dose (Carboplatin AUC ≥ 3)
 
 ```{r}
-#| label: jx-auc3-dose-discrep-hist
+#| label: jx-auc3-dose-overlay
 #| fig-width: 8
 #| fig-height: 5
-dose_hist <- dat %>% filter(!is.na(abs_dose_discrep_cat))
+dose_long <- dat %>%
+  select(record_id, carbo_dose_redcap, carbo_dose_cre_cys) %>%
+  pivot_longer(
+    cols = c(carbo_dose_redcap, carbo_dose_cre_cys),
+    names_to = "dose_type", values_to = "dose_mg"
+  ) %>%
+  filter(!is.na(dose_mg)) %>%
+  mutate(dose_type = case_match(dose_type,
+    "carbo_dose_redcap"  ~ "Actual (REDCap)",
+    "carbo_dose_cre_cys" ~ "Predicted (CKD-EPI Cr-Cys)"
+  ))
 
-ggplot(dose_hist, aes(x = abs_dose_discrep_cat)) +
-  geom_bar(fill = "steelblue", color = "black", alpha = 0.7) +
-  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 4) +
-  labs(title = "Distribution of Absolute Dose Discrepancy (Carboplatin AUC ≥ 3)",
-       x = "Absolute Dose Discrepancy (mg)",
-       y = "Number of Patients") +
+ggplot(dose_long, aes(x = dose_mg, fill = dose_type)) +
+  geom_histogram(alpha = 0.5, bins = 40, position = "identity", color = "black") +
+  scale_fill_manual(values = c("Actual (REDCap)" = "#E31A1C",
+                                "Predicted (CKD-EPI Cr-Cys)" = "#1F78B4")) +
+  labs(title = "Carboplatin Dose Distribution (AUC ≥ 3)",
+       x = "Dose (mg)", y = "Number of Patients", fill = "Dose Type") +
   theme_minimal(base_size = 14)
 ```
 
