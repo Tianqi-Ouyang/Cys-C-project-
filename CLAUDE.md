@@ -1,44 +1,8 @@
 # CLAUDE.md
 
+@~/.claude/hospital-privacy.md
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-### Data safty
-
-Data Privacy & Compliance Protocol (HIPAA/GDPR)
-This project involves sensitive hospital research data. Compliance with HIPAA (US) and GDPR (EU) is mandatory. All interactions with Claude must adhere to the following safety guardrails.
-
-1. The "Zero-PHI" Principle
-Never upload, paste, or pipe files containing Protected Health Information (PHI) or Personally Identifiable Information (PII) into the AI.
-
-Prohibited Data: Names, social security numbers, exact dates (birth/discharge), medical record numbers, or specific geographic identifiers.
-
-Allowed Data: synthetic data, or structural metadata (column names and types only). Ask user to confirm
-
-2. Safe Coding Workflow
-To maintain data integrity while using AI for statistical analysis:
-
-Structural Prompting: Provide Claude with the structure of your Excel or text files (e.g., str(df) or the first 2 empty rows) rather than the data itself.
-
-Synthetic Development: Request Claude users to run on themselves.
-
-Local Execution: Once Claude provides the logic or script, run it on your local machine or secure hospital server where the real data resides. Do not return the output of the real data analysis to the AI if it contains individual-level records.
-
-3. Handling Files (.xlsx, .csv, .txt)
-Excel Files: can only read first line variable names, and ask user to confirm.
-
-Text Files: ask for variable names.
-
-4. Claude Configuration Requirements
-Ensure the following settings are active in your Claude environment:
-
-Data Training: Verify that "Product Improvement" (training on your chats) is Disabled in the account settings.
-
-Session Context: If Claude starts "hallucinating" or requesting more data than necessary to solve a coding problem, reset the session to clear the context.
-
-
-
-
-Do not read or upload any file to server. Do not access any personal inforamtion, like EMPI.
-Do not change .Rmd files 
 
 ## Project Overview
 
@@ -99,3 +63,4 @@ The analysis follows a linear pipeline within the `.Rmd` file:
 - **Competing risks framework**: Death is treated as a competing event for non-fatal outcomes; `tidycmprsk::crr()` is used instead of standard Cox regression.
 - **Platinum dosing**: Cisplatin ≥ 70 mg/m² and carboplatin AUC ≥ 5 are categorized as "high dose."
 - **CKD staging**: Based on Cockcroft-Gault eGFR from pre-baseline creatinine values from RPDR labs.
+- **eGFR cap at 125**: Both `ckd_epi_gfr_cre_cys_unindex` and `cockcroft` are capped at 125 mL/min in the Jiaxuan analysis files (`jiaxuan_whole.qmd`, `jiaxuan_carbo.qmd`). Unindexing by BSA can produce physiologically implausible values (e.g., >400 mL/min) in patients with extreme body habitus. Always use the capped versions for eGFR ratio, eGFR discrepancy, and all downstream models/plots.
