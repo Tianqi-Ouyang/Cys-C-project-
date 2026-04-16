@@ -3398,29 +3398,29 @@
     "objectID": "qmd/jiaxuan_carbo.html#dose-discrepancy-vs-ckd-epi-cr-cys-unindexed",
     "href": "qmd/jiaxuan_carbo.html#dose-discrepancy-vs-ckd-epi-cr-cys-unindexed",
     "title": "Jiaxuan Project — Carboplatin Cohort",
-    "section": "10.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)",
-    "text": "10.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(dose_discrepancy)),\n       aes(x = ckd_epi_gfr_cre_cys_unindex, y = dose_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"CKD-EPI Cr-Cys eGFR (unindexed, mL/min)\",\n       y = \"Dose Discrepancy (mg)\",\n       title = \"Dose Discrepancy vs CKD-EPI Cr-Cys eGFR (Carboplatin)\") +\n  theme_minimal(base_size = 11)"
+    "section": "12.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)",
+    "text": "12.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(dose_discrepancy)),\n       aes(x = ckd_epi_gfr_cre_cys_unindex, y = dose_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"CKD-EPI Cr-Cys eGFR (unindexed, mL/min)\",\n       y = \"Dose Discrepancy (mg)\",\n       title = \"Dose Discrepancy vs CKD-EPI Cr-Cys eGFR (Carboplatin)\") +\n  theme_minimal(base_size = 11)"
   },
   {
     "objectID": "qmd/jiaxuan_carbo.html#dose-discrepancy-vs-cockcroft-gault",
     "href": "qmd/jiaxuan_carbo.html#dose-discrepancy-vs-cockcroft-gault",
     "title": "Jiaxuan Project — Carboplatin Cohort",
-    "section": "10.2 Dose Discrepancy vs Cockcroft-Gault",
-    "text": "10.2 Dose Discrepancy vs Cockcroft-Gault\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(dose_discrepancy)),\n       aes(x = cockcroft, y = dose_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"Cockcroft-Gault eGFR (mL/min)\",\n       y = \"Dose Discrepancy (mg)\",\n       title = \"Dose Discrepancy vs Cockcroft-Gault eGFR (Carboplatin)\") +\n  theme_minimal(base_size = 11)"
+    "section": "12.2 Dose Discrepancy vs Cockcroft-Gault",
+    "text": "12.2 Dose Discrepancy vs Cockcroft-Gault\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(dose_discrepancy)),\n       aes(x = cockcroft, y = dose_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"Cockcroft-Gault eGFR (mL/min)\",\n       y = \"Dose Discrepancy (mg)\",\n       title = \"Dose Discrepancy vs Cockcroft-Gault eGFR (Carboplatin)\") +\n  theme_minimal(base_size = 11)"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#egfr-discrepancy-vs-ckd-epi-cr-cys-unindexed",
     "href": "qmd/jiaxuan_whole.html#egfr-discrepancy-vs-ckd-epi-cr-cys-unindexed",
     "title": "Jiaxuan Project — Whole Cohort",
-    "section": "7.1 eGFR Discrepancy vs CKD-EPI Cr-Cys (unindexed)",
-    "text": "7.1 eGFR Discrepancy vs CKD-EPI Cr-Cys (unindexed)\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(egfr_discrepancy)),\n       aes(x = ckd_epi_gfr_cre_cys_unindex, y = egfr_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  geom_hline(yintercept = 0, linetype = \"dashed\", color = \"grey50\") +\n  labs(x = \"CKD-EPI Cr-Cys eGFR (unindexed, mL/min)\",\n       y = \"eGFR Discrepancy (mL/min)\",\n       title = \"eGFR Discrepancy vs CKD-EPI Cr-Cys eGFR\") +\n  theme_minimal(base_size = 11)"
+    "section": "8.1 eGFR Discrepancy vs CKD-EPI Cr-Cys (unindexed)",
+    "text": "8.1 eGFR Discrepancy vs CKD-EPI Cr-Cys (unindexed)\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(egfr_discrepancy)),\n       aes(x = ckd_epi_gfr_cre_cys_unindex, y = egfr_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  geom_hline(yintercept = 0, linetype = \"dashed\", color = \"grey50\") +\n  labs(x = \"CKD-EPI Cr-Cys eGFR (unindexed, mL/min)\",\n       y = \"eGFR Discrepancy (mL/min)\",\n       title = \"eGFR Discrepancy vs CKD-EPI Cr-Cys eGFR\") +\n  theme_minimal(base_size = 11)"
   },
   {
     "objectID": "qmd/jiaxuan_whole.html#egfr-discrepancy-vs-cockcroft-gault",
     "href": "qmd/jiaxuan_whole.html#egfr-discrepancy-vs-cockcroft-gault",
     "title": "Jiaxuan Project — Whole Cohort",
-    "section": "7.2 eGFR Discrepancy vs Cockcroft-Gault",
-    "text": "7.2 eGFR Discrepancy vs Cockcroft-Gault\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(egfr_discrepancy)),\n       aes(x = cockcroft, y = egfr_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  geom_hline(yintercept = 0, linetype = \"dashed\", color = \"grey50\") +\n  labs(x = \"Cockcroft-Gault eGFR (mL/min)\",\n       y = \"eGFR Discrepancy (mL/min)\",\n       title = \"eGFR Discrepancy vs Cockcroft-Gault eGFR\") +\n  theme_minimal(base_size = 11)"
+    "section": "8.2 eGFR Discrepancy vs Cockcroft-Gault",
+    "text": "8.2 eGFR Discrepancy vs Cockcroft-Gault\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(egfr_discrepancy)),\n       aes(x = cockcroft, y = egfr_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  geom_hline(yintercept = 0, linetype = \"dashed\", color = \"grey50\") +\n  labs(x = \"Cockcroft-Gault eGFR (mL/min)\",\n       y = \"eGFR Discrepancy (mL/min)\",\n       title = \"eGFR Discrepancy vs Cockcroft-Gault eGFR\") +\n  theme_minimal(base_size = 11)"
   },
   {
     "objectID": "qmd/jiaxuan_carbo_auc3.html",
@@ -3972,15 +3972,15 @@
     "objectID": "qmd/jiaxuan_carbo_auc3.html#dose-discrepancy-vs-ckd-epi-cr-cys-unindexed",
     "href": "qmd/jiaxuan_carbo_auc3.html#dose-discrepancy-vs-ckd-epi-cr-cys-unindexed",
     "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
-    "section": "10.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)",
-    "text": "10.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(dose_discrepancy)),\n       aes(x = ckd_epi_gfr_cre_cys_unindex, y = dose_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"CKD-EPI Cr-Cys eGFR (unindexed, mL/min)\",\n       y = \"Dose Discrepancy (mg)\",\n       title = \"Dose Discrepancy vs CKD-EPI Cr-Cys eGFR (Carboplatin AUC ≥ 3)\") +\n  theme_minimal(base_size = 11)"
+    "section": "12.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)",
+    "text": "12.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(dose_discrepancy)),\n       aes(x = ckd_epi_gfr_cre_cys_unindex, y = dose_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"CKD-EPI Cr-Cys eGFR (unindexed, mL/min)\",\n       y = \"Dose Discrepancy (mg)\",\n       title = \"Dose Discrepancy vs CKD-EPI Cr-Cys eGFR (Carboplatin AUC ≥ 3)\") +\n  theme_minimal(base_size = 11)"
   },
   {
     "objectID": "qmd/jiaxuan_carbo_auc3.html#dose-discrepancy-vs-cockcroft-gault",
     "href": "qmd/jiaxuan_carbo_auc3.html#dose-discrepancy-vs-cockcroft-gault",
     "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
-    "section": "10.2 Dose Discrepancy vs Cockcroft-Gault",
-    "text": "10.2 Dose Discrepancy vs Cockcroft-Gault\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(dose_discrepancy)),\n       aes(x = cockcroft, y = dose_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"Cockcroft-Gault eGFR (mL/min)\",\n       y = \"Dose Discrepancy (mg)\",\n       title = \"Dose Discrepancy vs Cockcroft-Gault eGFR (Carboplatin AUC ≥ 3)\") +\n  theme_minimal(base_size = 11)"
+    "section": "12.2 Dose Discrepancy vs Cockcroft-Gault",
+    "text": "12.2 Dose Discrepancy vs Cockcroft-Gault\n\n\nCode\nggplot(dat %&gt;% filter(!is.na(dose_discrepancy)),\n       aes(x = cockcroft, y = dose_discrepancy)) +\n  geom_point(alpha = 0.3) +\n  geom_smooth(method = \"lm\", se = TRUE, color = \"steelblue\") +\n  labs(x = \"Cockcroft-Gault eGFR (mL/min)\",\n       y = \"Dose Discrepancy (mg)\",\n       title = \"Dose Discrepancy vs Cockcroft-Gault eGFR (Carboplatin AUC ≥ 3)\") +\n  theme_minimal(base_size = 11)"
   },
   {
     "objectID": "qmd/jiaxuan_carbo_auc3.html#events-per-variable-epv",
@@ -4002,5 +4002,173 @@
     "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
     "section": "11.3 Correlation Matrix — Continuous Predictors",
     "text": "11.3 Correlation Matrix — Continuous Predictors\n\n\nCode\ncor_vars &lt;- dat %&gt;%\n  select(egfr_ratio, cockcroft, ckd_epi_gfr_cre_cys_unindex, age, bmi, score,\n         pre_HGB_45days, pre_PLT_45days) %&gt;%\n  drop_na()\n\ncor(cor_vars) %&gt;%\n  round(3) %&gt;%\n  knitr::kable(caption = \"Pearson correlation — continuous predictors (carboplatin)\")\n\n\n\nPearson correlation — continuous predictors (carboplatin)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\negfr_ratio\ncockcroft\nckd_epi_gfr_cre_cys_unindex\nage\nbmi\nscore\npre_HGB_45days\npre_PLT_45days\n\n\n\n\negfr_ratio\n1.000\n-0.566\n-0.045\n0.301\n-0.662\n0.042\n0.054\n-0.084\n\n\ncockcroft\n-0.566\n1.000\n0.796\n-0.574\n0.539\n-0.313\n0.073\n0.049\n\n\nckd_epi_gfr_cre_cys_unindex\n-0.045\n0.796\n1.000\n-0.556\n0.166\n-0.411\n0.154\n-0.023\n\n\nage\n0.301\n-0.574\n-0.556\n1.000\n-0.088\n0.571\n-0.039\n-0.055\n\n\nbmi\n-0.662\n0.539\n0.166\n-0.088\n1.000\n-0.003\n0.154\n-0.026\n\n\nscore\n0.042\n-0.313\n-0.411\n0.571\n-0.003\n1.000\n-0.135\n-0.055\n\n\npre_HGB_45days\n0.054\n0.073\n0.154\n-0.039\n0.154\n-0.135\n1.000\n-0.358\n\n\npre_PLT_45days\n-0.084\n0.049\n-0.023\n-0.055\n-0.026\n-0.055\n-0.358\n1.000"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#nauseavomitinggi",
+    "href": "qmd/jiaxuan_whole.html#nauseavomitinggi",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "7.1 Nausea/Vomiting/GI",
+    "text": "7.1 Nausea/Vomiting/GI\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_1\", \"cmp_status_hosp_1\",\n                        NULL, \"Nausea/Vomiting/GI\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#failure-to-thrivefatiguedehydration",
+    "href": "qmd/jiaxuan_whole.html#failure-to-thrivefatiguedehydration",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "7.2 Failure to Thrive/Fatigue/Dehydration",
+    "text": "7.2 Failure to Thrive/Fatigue/Dehydration\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_2\", \"cmp_status_hosp_2\",\n                        NULL, \"Failure to Thrive/Fatigue/Dehydration\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#aki",
+    "href": "qmd/jiaxuan_whole.html#aki",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "7.3 AKI",
+    "text": "7.3 AKI\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_3\", \"cmp_status_hosp_3\",\n                        NULL, \"AKI\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#electrolyte-abnormalities",
+    "href": "qmd/jiaxuan_whole.html#electrolyte-abnormalities",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "7.4 Electrolyte Abnormalities",
+    "text": "7.4 Electrolyte Abnormalities\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_4\", \"cmp_status_hosp_4\",\n                        NULL, \"Electrolyte Abnormalities\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#cytopenia",
+    "href": "qmd/jiaxuan_whole.html#cytopenia",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "7.5 Cytopenia",
+    "text": "7.5 Cytopenia\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_5\", \"cmp_status_hosp_5\",\n                        NULL, \"Cytopenia\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#febrile-neutropenia",
+    "href": "qmd/jiaxuan_whole.html#febrile-neutropenia",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "7.6 Febrile Neutropenia",
+    "text": "7.6 Febrile Neutropenia\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_6\", \"cmp_status_hosp_6\",\n                        NULL, \"Febrile Neutropenia\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#infectionsepsis",
+    "href": "qmd/jiaxuan_whole.html#infectionsepsis",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "7.7 Infection/Sepsis",
+    "text": "7.7 Infection/Sepsis\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_7\", \"cmp_status_hosp_7\",\n                        NULL, \"Infection/Sepsis\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#cancer-progression",
+    "href": "qmd/jiaxuan_whole.html#cancer-progression",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "7.8 Cancer Progression",
+    "text": "7.8 Cancer Progression\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_8\", \"cmp_status_hosp_8\",\n                        NULL, \"Cancer Progression\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#nauseavomitinggi",
+    "href": "qmd/jiaxuan_carbo.html#nauseavomitinggi",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "11.1 Nausea/Vomiting/GI",
+    "text": "11.1 Nausea/Vomiting/GI\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_1\", \"cmp_status_hosp_1\",\n                        NULL, \"Nausea/Vomiting/GI (Carboplatin)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#failure-to-thrivefatiguedehydration",
+    "href": "qmd/jiaxuan_carbo.html#failure-to-thrivefatiguedehydration",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "11.2 Failure to Thrive/Fatigue/Dehydration",
+    "text": "11.2 Failure to Thrive/Fatigue/Dehydration\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_2\", \"cmp_status_hosp_2\",\n                        NULL, \"Failure to Thrive/Fatigue/Dehydration (Carboplatin)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#aki",
+    "href": "qmd/jiaxuan_carbo.html#aki",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "11.3 AKI",
+    "text": "11.3 AKI\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_3\", \"cmp_status_hosp_3\",\n                        NULL, \"AKI (Carboplatin)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#electrolyte-abnormalities",
+    "href": "qmd/jiaxuan_carbo.html#electrolyte-abnormalities",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "11.4 Electrolyte Abnormalities",
+    "text": "11.4 Electrolyte Abnormalities\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_4\", \"cmp_status_hosp_4\",\n                        NULL, \"Electrolyte Abnormalities (Carboplatin)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#cytopenia",
+    "href": "qmd/jiaxuan_carbo.html#cytopenia",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "11.5 Cytopenia",
+    "text": "11.5 Cytopenia\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_5\", \"cmp_status_hosp_5\",\n                        NULL, \"Cytopenia (Carboplatin)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#febrile-neutropenia",
+    "href": "qmd/jiaxuan_carbo.html#febrile-neutropenia",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "11.6 Febrile Neutropenia",
+    "text": "11.6 Febrile Neutropenia\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_6\", \"cmp_status_hosp_6\",\n                        NULL, \"Febrile Neutropenia (Carboplatin)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#infectionsepsis",
+    "href": "qmd/jiaxuan_carbo.html#infectionsepsis",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "11.7 Infection/Sepsis",
+    "text": "11.7 Infection/Sepsis\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_7\", \"cmp_status_hosp_7\",\n                        NULL, \"Infection/Sepsis (Carboplatin)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#cancer-progression",
+    "href": "qmd/jiaxuan_carbo.html#cancer-progression",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "11.8 Cancer Progression",
+    "text": "11.8 Cancer Progression\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_8\", \"cmp_status_hosp_8\",\n                        NULL, \"Cancer Progression (Carboplatin)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#nauseavomitinggi",
+    "href": "qmd/jiaxuan_carbo_auc3.html#nauseavomitinggi",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "11.1 Nausea/Vomiting/GI",
+    "text": "11.1 Nausea/Vomiting/GI\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_1\", \"cmp_status_hosp_1\",\n                        NULL, \"Nausea/Vomiting/GI (Carboplatin AUC ≥ 3)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#failure-to-thrivefatiguedehydration",
+    "href": "qmd/jiaxuan_carbo_auc3.html#failure-to-thrivefatiguedehydration",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "11.2 Failure to Thrive/Fatigue/Dehydration",
+    "text": "11.2 Failure to Thrive/Fatigue/Dehydration\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_2\", \"cmp_status_hosp_2\",\n                        NULL, \"Failure to Thrive/Fatigue/Dehydration (Carboplatin AUC ≥ 3)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#aki",
+    "href": "qmd/jiaxuan_carbo_auc3.html#aki",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "11.3 AKI",
+    "text": "11.3 AKI\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_3\", \"cmp_status_hosp_3\",\n                        NULL, \"AKI (Carboplatin AUC ≥ 3)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#electrolyte-abnormalities",
+    "href": "qmd/jiaxuan_carbo_auc3.html#electrolyte-abnormalities",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "11.4 Electrolyte Abnormalities",
+    "text": "11.4 Electrolyte Abnormalities\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_4\", \"cmp_status_hosp_4\",\n                        NULL, \"Electrolyte Abnormalities (Carboplatin AUC ≥ 3)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#cytopenia",
+    "href": "qmd/jiaxuan_carbo_auc3.html#cytopenia",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "11.5 Cytopenia",
+    "text": "11.5 Cytopenia\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_5\", \"cmp_status_hosp_5\",\n                        NULL, \"Cytopenia (Carboplatin AUC ≥ 3)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#febrile-neutropenia",
+    "href": "qmd/jiaxuan_carbo_auc3.html#febrile-neutropenia",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "11.6 Febrile Neutropenia",
+    "text": "11.6 Febrile Neutropenia\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_6\", \"cmp_status_hosp_6\",\n                        NULL, \"Febrile Neutropenia (Carboplatin AUC ≥ 3)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#infectionsepsis",
+    "href": "qmd/jiaxuan_carbo_auc3.html#infectionsepsis",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "11.7 Infection/Sepsis",
+    "text": "11.7 Infection/Sepsis\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_7\", \"cmp_status_hosp_7\",\n                        NULL, \"Infection/Sepsis (Carboplatin AUC ≥ 3)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#cancer-progression",
+    "href": "qmd/jiaxuan_carbo_auc3.html#cancer-progression",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "11.8 Cancer Progression",
+    "text": "11.8 Cancer Progression\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_8\", \"cmp_status_hosp_8\",\n                        NULL, \"Cancer Progression (Carboplatin AUC ≥ 3)\")"
   }
 ]

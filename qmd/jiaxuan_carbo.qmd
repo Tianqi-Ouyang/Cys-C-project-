@@ -1100,9 +1100,91 @@ plot_cox_linear("time_to_death_90", "death_90",
                 NULL, "90-Day Death (Cox PH) (Carboplatin)")
 ```
 
-# 11 Scatter Plots — Dose Discrepancy vs eGFR (Carboplatin)
+# 11 Linear subHR Curves — Hospitalization by Reason (Carboplatin)
 
-## 10.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)
+## 11.1 Nausea/Vomiting/GI
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp1
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_1", "cmp_status_hosp_1",
+                        NULL, "Nausea/Vomiting/GI (Carboplatin)")
+```
+
+## 11.2 Failure to Thrive/Fatigue/Dehydration
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp2
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_2", "cmp_status_hosp_2",
+                        NULL, "Failure to Thrive/Fatigue/Dehydration (Carboplatin)")
+```
+
+## 11.3 AKI
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp3
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_3", "cmp_status_hosp_3",
+                        NULL, "AKI (Carboplatin)")
+```
+
+## 11.4 Electrolyte Abnormalities
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp4
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_4", "cmp_status_hosp_4",
+                        NULL, "Electrolyte Abnormalities (Carboplatin)")
+```
+
+## 11.5 Cytopenia
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp5
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_5", "cmp_status_hosp_5",
+                        NULL, "Cytopenia (Carboplatin)")
+```
+
+## 11.6 Febrile Neutropenia
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp6
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_6", "cmp_status_hosp_6",
+                        NULL, "Febrile Neutropenia (Carboplatin)")
+```
+
+## 11.7 Infection/Sepsis
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp7
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_7", "cmp_status_hosp_7",
+                        NULL, "Infection/Sepsis (Carboplatin)")
+```
+
+## 11.8 Cancer Progression
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp8
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_8", "cmp_status_hosp_8",
+                        NULL, "Cancer Progression (Carboplatin)")
+```
+
+# 12 Scatter Plots — Dose Discrepancy vs eGFR (Carboplatin)
+
+## 12.1 Dose Discrepancy vs CKD-EPI Cr-Cys (unindexed)
 
 ```{r}
 #| label: jx-carbo-scatter-epi
@@ -1118,7 +1200,7 @@ ggplot(dat %>% filter(!is.na(dose_discrepancy)),
   theme_minimal(base_size = 11)
 ```
 
-## 10.2 Dose Discrepancy vs Cockcroft-Gault
+## 12.2 Dose Discrepancy vs Cockcroft-Gault
 
 ```{r}
 #| label: jx-carbo-scatter-cg
