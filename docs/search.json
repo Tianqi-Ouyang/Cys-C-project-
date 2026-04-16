@@ -4170,5 +4170,12 @@
     "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
     "section": "11.8 Cancer Progression",
     "text": "11.8 Cancer Progression\n\n\nCode\nplot_subhr_linear_ratio(\"cmp_time_hosp_8\", \"cmp_status_hosp_8\",\n                        NULL, \"Cancer Progression (Carboplatin AUC ≥ 3)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#absolute-dose-discrepancy-distribution",
+    "href": "qmd/jiaxuan_carbo_auc3.html#absolute-dose-discrepancy-distribution",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "2.2 Absolute Dose Discrepancy Distribution",
+    "text": "2.2 Absolute Dose Discrepancy Distribution\n\n\nCode\ndose_hist &lt;- dat %&gt;% filter(!is.na(abs_dose_discrep_cat))\n\nggplot(dose_hist, aes(x = abs_dose_discrep_cat)) +\n  geom_bar(fill = \"steelblue\", color = \"black\", alpha = 0.7) +\n  geom_text(stat = \"count\", aes(label = after_stat(count)), vjust = -0.5, size = 4) +\n  labs(title = \"Distribution of Absolute Dose Discrepancy (Carboplatin AUC ≥ 3)\",\n       x = \"Absolute Dose Discrepancy (mg)\",\n       y = \"Number of Patients\") +\n  theme_minimal(base_size = 14)"
   }
 ]

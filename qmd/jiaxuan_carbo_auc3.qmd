@@ -80,6 +80,23 @@ ggplot(dose_long, aes(x = dose_mg, fill = dose_type)) +
   theme_minimal(base_size = 14)
 ```
 
+## 2.2 Absolute Dose Discrepancy Distribution
+
+```{r}
+#| label: jx-auc3-dose-discrep-hist
+#| fig-width: 8
+#| fig-height: 5
+dose_hist <- dat %>% filter(!is.na(abs_dose_discrep_cat))
+
+ggplot(dose_hist, aes(x = abs_dose_discrep_cat)) +
+  geom_bar(fill = "steelblue", color = "black", alpha = 0.7) +
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 4) +
+  labs(title = "Distribution of Absolute Dose Discrepancy (Carboplatin AUC ≥ 3)",
+       x = "Absolute Dose Discrepancy (mg)",
+       y = "Number of Patients") +
+  theme_minimal(base_size = 14)
+```
+
 # 3 Table 1: Baseline Characteristics (Carboplatin AUC ≥ 3)
 
 ```{r}
