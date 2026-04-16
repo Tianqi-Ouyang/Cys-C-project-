@@ -8,6 +8,7 @@ project:
     - qmd/jiaxuan_data.qmd
     - qmd/jiaxuan_whole.qmd
     - qmd/jiaxuan_carbo.qmd
+    - qmd/jiaxuan_carbo_auc3.qmd
 
 website:
   title: "Cystatin C / Creatinine Ratio – Platinum AE"
@@ -27,6 +28,8 @@ website:
             text: Whole Cohort
           - href: qmd/jiaxuan_carbo.qmd
             text: Carboplatin Cohort
+          - href: qmd/jiaxuan_carbo_auc3.qmd
+            text: Carboplatin AUC ≥ 3
 
 format:
   html:
