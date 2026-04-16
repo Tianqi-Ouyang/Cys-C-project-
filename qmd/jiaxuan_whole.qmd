@@ -352,9 +352,9 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     theme_minimal(base_size = 11)
 
   if (x_axis == "ratio") {
-    p <- p + coord_cartesian(ylim = c(0, 4))
+    p <- p + coord_cartesian(xlim = c(0.6, 1.45), ylim = c(0, 4))
   } else {
-    p <- p + coord_cartesian(ylim = c(0, 4))
+    p <- p + coord_cartesian(xlim = c(0.6, 1.45), ylim = c(0, 4))
   }
   p
 }
@@ -413,9 +413,9 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     theme_minimal(base_size = 11)
 
   if (x_axis == "ratio") {
-    p <- p + coord_cartesian(ylim = c(0, 4))
+    p <- p + coord_cartesian(xlim = c(0.6, 1.45), ylim = c(0, 4))
   } else {
-    p <- p + coord_cartesian(ylim = c(0, 4))
+    p <- p + coord_cartesian(xlim = c(0.6, 1.45), ylim = c(0, 4))
   }
   p
 }
