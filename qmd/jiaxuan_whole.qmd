@@ -79,6 +79,8 @@ fg_model <- function(time_var, status_var, pred_var, pre_labs = NULL,
            "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
            "Paclitaxel","Pemetrexed","Gemcitabine",
            "bmi","smoking","steroids","thyroid")
+  # Drop platin_group when predictor requires dose data (carbo-only after drop_na)
+  if (grepl("dose_discrep", pred_var)) adj <- setdiff(adj, "platin_group")
   if (egfr_adj == "cockcroft") adj <- c(adj, "cockcroft")
   if (egfr_adj == "ckd_epi")   adj <- c(adj, "ckd_epi_gfr_cre_cys_unindex")
   if (!is.null(pre_labs)) adj <- c(adj, pre_labs)
@@ -99,6 +101,7 @@ cox_model <- function(time_var, status_var, pred_var, pre_labs = NULL,
            "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
            "Paclitaxel","Pemetrexed","Gemcitabine",
            "bmi","smoking","steroids","thyroid")
+  if (grepl("dose_discrep", pred_var)) adj <- setdiff(adj, "platin_group")
   if (egfr_adj == "cockcroft") adj <- c(adj, "cockcroft")
   if (egfr_adj == "ckd_epi")   adj <- c(adj, "ckd_epi_gfr_cre_cys_unindex")
   if (!is.null(pre_labs)) adj <- c(adj, pre_labs)
@@ -199,6 +202,7 @@ csh_model <- function(time_var, status_var, pred_var, pre_labs = NULL) {
            "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
            "Paclitaxel","Pemetrexed","Gemcitabine",
            "bmi","smoking","steroids","thyroid","cockcroft")
+  if (grepl("dose_discrep", pred_var)) adj <- setdiff(adj, "platin_group")
   if (!is.null(pre_labs)) adj <- c(adj, pre_labs)
   # Cause-specific: treat death (status == 2) as censored
   d <- dat
