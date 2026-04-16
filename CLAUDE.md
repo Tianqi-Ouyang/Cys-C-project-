@@ -63,4 +63,4 @@ The analysis follows a linear pipeline within the `.Rmd` file:
 - **Competing risks framework**: Death is treated as a competing event for non-fatal outcomes; `tidycmprsk::crr()` is used instead of standard Cox regression.
 - **Platinum dosing**: Cisplatin ≥ 70 mg/m² and carboplatin AUC ≥ 5 are categorized as "high dose."
 - **CKD staging**: Based on Cockcroft-Gault eGFR from pre-baseline creatinine values from RPDR labs.
-- **eGFR cap at 125**: Both `ckd_epi_gfr_cre_cys_unindex` and `cockcroft` are capped at 125 mL/min in the Jiaxuan analysis files (`jiaxuan_whole.qmd`, `jiaxuan_carbo.qmd`). Unindexing by BSA can produce physiologically implausible values (e.g., >400 mL/min) in patients with extreme body habitus. Always use the capped versions for eGFR ratio, eGFR discrepancy, and all downstream models/plots.
+- **eGFR cap at 125**: Only `ckd_epi_gfr_cre_cys_unindex` is capped at 125 mL/min in the Jiaxuan analysis files (`jiaxuan_whole.qmd`, `jiaxuan_carbo.qmd`). Unindexing by BSA can produce physiologically implausible values (e.g., >400 mL/min) in patients with extreme body habitus. The indexed `ckd_epi_gfr_cre_cys` and `cockcroft` are NOT capped.
