@@ -44,7 +44,7 @@ dat <- dat %>%
     abs_dose_discrep = abs(dose_discrepancy),
     abs_dose_discrep_cat = cut(abs_dose_discrep,
       breaks = c(0, 25, 50, 75, 100, Inf),
-      labels = c("<25", "25–49.99", "50–74.99", "75–99.99", "≥100"),
+      labels = c("<25", "25-49.99", "50-74.99", "75-99.99", ">=100"),
       right = FALSE, include.lowest = TRUE),
     cockcroft_per10 = cockcroft / 10,
     ckd_epi_per10   = ckd_epi_gfr_cre_cys_unindex / 10
