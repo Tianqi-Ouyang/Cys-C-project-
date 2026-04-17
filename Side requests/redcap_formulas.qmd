@@ -218,7 +218,7 @@ kable(formulas, caption = "eGFR and Predicted Dosing Formulas")
 library(openxlsx)
 
 # Load full REDCap export (whole cohort, N=974)
-redcap <- read.csv("Data/CystatinCInPatientsO_DATA_2026-04-16_1143.csv",
+redcap <- read.csv("../Data/CystatinCInPatientsO_DATA_2026-04-16_1143.csv",
                     stringsAsFactors = FALSE)
 
 # --- eGFR functions (same as data_management.qmd) ---
@@ -410,7 +410,7 @@ writeData(wb, "Variable Dictionary", dict_df)
 addStyle(wb, "Variable Dictionary", hs, rows = 1, cols = 1:ncol(dict_df))
 setColWidths(wb, "Variable Dictionary", cols = 1:4, widths = c(38, 10, 85, 100))
 
-saveWorkbook(wb, "Side requests/redcap_formulas.xlsx", overwrite = TRUE)
+saveWorkbook(wb, "redcap_formulas.xlsx", overwrite = TRUE)
 cat("Saved: redcap_formulas.xlsx with", nrow(export_df), "rows\n")
 ```
 
