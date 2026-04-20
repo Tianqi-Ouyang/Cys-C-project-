@@ -129,7 +129,7 @@ fg_model <- function(time_var, status_var, pred_var, pre_labs = NULL,
   egfr_adj <- match.arg(egfr_adj)
   adj <- c("age","sex","score","ecog_score_cat2",
            "cancer_type_cat_7","tumor_stage","high_dose",
-           "Paclitaxel","Pemetrexed","Gemcitabine",
+           "Paclitaxel","Pemetrexed","Gemcitabine","ici",
            "bmi","smoking","steroids","thyroid")
   if (egfr_adj == "cockcroft") adj <- c(adj, "cockcroft")
   if (egfr_adj == "ckd_epi")   adj <- c(adj, "ckd_epi_gfr_cre_cys_unindex")
@@ -149,7 +149,7 @@ cox_model <- function(time_var, status_var, pred_var, pre_labs = NULL,
   egfr_adj <- match.arg(egfr_adj)
   adj <- c("age","sex","score","ecog_score_cat2",
            "cancer_type_cat_7","tumor_stage","high_dose",
-           "Paclitaxel","Pemetrexed","Gemcitabine",
+           "Paclitaxel","Pemetrexed","Gemcitabine","ici",
            "bmi","smoking","steroids","thyroid")
   if (egfr_adj == "cockcroft") adj <- c(adj, "cockcroft")
   if (egfr_adj == "ckd_epi")   adj <- c(adj, "ckd_epi_gfr_cre_cys_unindex")
@@ -249,7 +249,7 @@ cox_model("time_to_death_90", "death_90", "egfr_ratio_per10", egfr_adj = "cockcr
 csh_model <- function(time_var, status_var, pred_var, pre_labs = NULL) {
   adj <- c("age","sex","score","ecog_score_cat2",
            "cancer_type_cat_7","tumor_stage","high_dose",
-           "Paclitaxel","Pemetrexed","Gemcitabine",
+           "Paclitaxel","Pemetrexed","Gemcitabine","ici",
            "bmi","smoking","steroids","thyroid","cockcroft")
   if (!is.null(pre_labs)) adj <- c(adj, pre_labs)
   d <- dat
@@ -508,7 +508,7 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
                                     outcome_label) {
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
                 "cancer_type_cat_7","tumor_stage","high_dose",
-                "Paclitaxel","Pemetrexed","Gemcitabine",
+                "Paclitaxel","Pemetrexed","Gemcitabine","ici",
                 "bmi","smoking","steroids","thyroid")
   keep <- c("egfr_ratio", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
@@ -557,7 +557,7 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
                                   outcome_label) {
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
                 "cancer_type_cat_7","tumor_stage","high_dose",
-                "Paclitaxel","Pemetrexed","Gemcitabine",
+                "Paclitaxel","Pemetrexed","Gemcitabine","ici",
                 "bmi","smoking","steroids","thyroid")
   keep <- c("egfr_ratio", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
@@ -717,7 +717,7 @@ plot_subhr_linear_egfrdisc <- function(time_var, status_var, extra_adj = NULL,
                                        outcome_label) {
   base_adj <- c("age","sex","score","ecog_score_cat2",
                 "cancer_type_cat_7","tumor_stage","high_dose",
-                "Paclitaxel","Pemetrexed","Gemcitabine",
+                "Paclitaxel","Pemetrexed","Gemcitabine","ici",
                 "bmi","smoking","steroids","thyroid")
   keep <- c("egfr_discrepancy", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
@@ -766,7 +766,7 @@ plot_cox_linear_egfrdisc <- function(time_var, status_var, extra_adj = NULL,
                                      outcome_label) {
   base_adj <- c("age","sex","score","ecog_score_cat2",
                 "cancer_type_cat_7","tumor_stage","high_dose",
-                "Paclitaxel","Pemetrexed","Gemcitabine",
+                "Paclitaxel","Pemetrexed","Gemcitabine","ici",
                 "bmi","smoking","steroids","thyroid")
   keep <- c("egfr_discrepancy", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
@@ -926,7 +926,7 @@ plot_subhr_linear <- function(time_var, status_var, extra_adj = NULL,
                               outcome_label) {
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
                 "cancer_type_cat_7","tumor_stage","high_dose",
-                "Paclitaxel","Pemetrexed","Gemcitabine",
+                "Paclitaxel","Pemetrexed","Gemcitabine","ici",
                 "bmi","smoking","steroids","thyroid")
   keep <- c("dose_discrepancy", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
@@ -975,7 +975,7 @@ plot_cox_linear <- function(time_var, status_var, extra_adj = NULL,
                             outcome_label) {
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
                 "cancer_type_cat_7","tumor_stage","high_dose",
-                "Paclitaxel","Pemetrexed","Gemcitabine",
+                "Paclitaxel","Pemetrexed","Gemcitabine","ici",
                 "bmi","smoking","steroids","thyroid")
   keep <- c("dose_discrepancy", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
