@@ -106,7 +106,7 @@ ggplot(ratio_hist, aes(x = egfr_ratio)) +
                  fill = "steelblue", color = "black", alpha = 0.7) +
   geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
   labs(title = "Distribution of eGFR Ratio (Carboplatin)",
-       x = "eGFR Ratio (0.1 bins)",
+       x = "eGFR Ratio",
        y = "Number of Patients") +
   scale_x_continuous(breaks = seq(0, 3, 0.2)) +
   theme_minimal(base_size = 14)
@@ -1199,6 +1199,36 @@ plot_subhr_linear_ratio("cmp_time_hosp_7", "cmp_status_hosp_7",
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_8", "cmp_status_hosp_8",
                         NULL, "Cancer Progression (Carboplatin)")
+```
+
+## 13.9 Immune-related AE
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp9
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_9", "cmp_status_hosp_9",
+                        NULL, "Immune-related AE (Carboplatin)")
+```
+
+## 13.10 Planned Surgery/Port
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp10
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_10", "cmp_status_hosp_10",
+                        NULL, "Planned Surgery/Port (Carboplatin)")
+```
+
+## 13.11 Other
+
+```{r}
+#| label: jx-carbo-linsubhr-ratio-hosp11
+#| fig-width: 6
+#| fig-height: 4
+plot_subhr_linear_ratio("cmp_time_hosp_11", "cmp_status_hosp_11",
+                        NULL, "Other (Carboplatin)")
 ```
 
 # 13 Scatter Plots — Dose Discrepancy vs eGFR (Carboplatin)
