@@ -63,7 +63,26 @@ dat %>%
   )
 ```
 
-# 3 Fine-Gray Models — eGFR Ratio (adjusted for Cockcroft-Gault)
+# 3 eGFR Ratio Distribution (Overall)
+
+```{r}
+#| label: jx-egfr-ratio-hist
+#| fig-width: 8
+#| fig-height: 5
+ratio_hist <- dat %>% filter(!is.na(egfr_ratio))
+
+ggplot(ratio_hist, aes(x = egfr_ratio)) +
+  geom_histogram(binwidth = 0.1, boundary = 0,
+                 fill = "steelblue", color = "black", alpha = 0.7) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
+  labs(title = "Distribution of eGFR Ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault)",
+       x = "eGFR Ratio (0.1 bins)",
+       y = "Number of Patients") +
+  scale_x_continuous(breaks = seq(0, 3, 0.2)) +
+  theme_minimal(base_size = 14)
+```
+
+# 4 Fine-Gray Models — eGFR Ratio (adjusted for Cockcroft-Gault)
 
 ```{r}
 #| label: jx-fg-helper
@@ -111,84 +130,84 @@ cox_model <- function(time_var, status_var, pred_var, pre_labs = NULL,
 }
 ```
 
-## 3.1 Anemia Grade 2
+## 4.1 Anemia Grade 2
 
 ```{r}
 #| label: jx-fg-cg-anemia2
 fg_model("cmp_time_anemia_2", "cmp_status_anemia_2", "egfr_ratio_per10", "pre_HGB_45days", "cockcroft")
 ```
 
-## 3.2 Anemia Grade 3
+## 4.2 Anemia Grade 3
 
 ```{r}
 #| label: jx-fg-cg-anemia3
 fg_model("cmp_time_anemia_3", "cmp_status_anemia_3", "egfr_ratio_per10", "pre_HGB_45days", "cockcroft")
 ```
 
-## 3.3 Thrombocytopenia Grade 2
+## 4.3 Thrombocytopenia Grade 2
 
 ```{r}
 #| label: jx-fg-cg-throm2
 fg_model("cmp_time_throm_2", "cmp_status_throm_2", "egfr_ratio_per10", "pre_PLT_45days", "cockcroft")
 ```
 
-## 3.4 Thrombocytopenia Grade 3
+## 4.4 Thrombocytopenia Grade 3
 
 ```{r}
 #| label: jx-fg-cg-throm3
 fg_model("cmp_time_throm_3", "cmp_status_throm_3", "egfr_ratio_per10", "pre_PLT_45days", "cockcroft")
 ```
 
-## 3.5 AKI Grade 2
+## 4.5 AKI Grade 2
 
 ```{r}
 #| label: jx-fg-cg-aki2
 fg_model("cmp_time_aki_2", "cmp_status_aki_2", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
-## 3.6 AKI (KDIGO)
+## 4.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-fg-cg-akikdigo
 fg_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
-## 3.7 Composite Grade 2 AEs
+## 4.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-fg-cg-grade2
 fg_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
-## 3.8 Composite Grade 3 AEs
+## 4.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-fg-cg-grade3
 fg_model("cmp_time_grade_3_aes", "cmp_status_grade_3_aes", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
-## 3.9 Overall Hospitalization
+## 4.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-fg-cg-anyhosp
 fg_model("cmp_time_any_hosp", "cmp_status_any_hosp", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
-## 3.10 Platinum-Related Hospitalization
+## 4.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-fg-cg-sideeffect
 fg_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
-## 3.11 90-Day Death (Cox PH)
+## 4.11 90-Day Death (Cox PH)
 
 ```{r}
 #| label: jx-cox-cg-death
 cox_model("time_to_death_90", "death_90", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
-# 4 Cause-Specific Hazard Models — eGFR Ratio (adjusted for Cockcroft-Gault)
+# 5 Cause-Specific Hazard Models — eGFR Ratio (adjusted for Cockcroft-Gault)
 
 ```{r}
 #| label: jx-csh-helper
@@ -213,84 +232,84 @@ csh_model <- function(time_var, status_var, pred_var, pre_labs = NULL) {
 }
 ```
 
-## 4.1 Anemia Grade 2
+## 5.1 Anemia Grade 2
 
 ```{r}
 #| label: jx-csh-anemia2
 csh_model("cmp_time_anemia_2", "cmp_status_anemia_2", "egfr_ratio_per10", "pre_HGB_45days")
 ```
 
-## 4.2 Anemia Grade 3
+## 5.2 Anemia Grade 3
 
 ```{r}
 #| label: jx-csh-anemia3
 csh_model("cmp_time_anemia_3", "cmp_status_anemia_3", "egfr_ratio_per10", "pre_HGB_45days")
 ```
 
-## 4.3 Thrombocytopenia Grade 2
+## 5.3 Thrombocytopenia Grade 2
 
 ```{r}
 #| label: jx-csh-throm2
 csh_model("cmp_time_throm_2", "cmp_status_throm_2", "egfr_ratio_per10", "pre_PLT_45days")
 ```
 
-## 4.4 Thrombocytopenia Grade 3
+## 5.4 Thrombocytopenia Grade 3
 
 ```{r}
 #| label: jx-csh-throm3
 csh_model("cmp_time_throm_3", "cmp_status_throm_3", "egfr_ratio_per10", "pre_PLT_45days")
 ```
 
-## 4.5 AKI Grade 2
+## 5.5 AKI Grade 2
 
 ```{r}
 #| label: jx-csh-aki2
 csh_model("cmp_time_aki_2", "cmp_status_aki_2", "egfr_ratio_per10")
 ```
 
-## 4.6 AKI (KDIGO)
+## 5.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-csh-akikdigo
 csh_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "egfr_ratio_per10")
 ```
 
-## 4.7 Composite Grade 2 AEs
+## 5.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-csh-grade2
 csh_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "egfr_ratio_per10")
 ```
 
-## 4.8 Composite Grade 3 AEs
+## 5.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-csh-grade3
 csh_model("cmp_time_grade_3_aes", "cmp_status_grade_3_aes", "egfr_ratio_per10")
 ```
 
-## 4.9 Overall Hospitalization
+## 5.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-csh-anyhosp
 csh_model("cmp_time_any_hosp", "cmp_status_any_hosp", "egfr_ratio_per10")
 ```
 
-## 4.10 Platinum-Related Hospitalization
+## 5.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-csh-sideeffect
 csh_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_ratio_per10")
 ```
 
-## 4.11 90-Day Death (Cox PH)
+## 5.11 90-Day Death (Cox PH)
 
 ```{r}
 #| label: jx-csh-death
 cox_model("time_to_death_90", "death_90", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
-# 5 Linear subHR Curves — eGFR Ratio (raw scale)
+# 6 Linear subHR Curves — eGFR Ratio (raw scale)
 
 ```{r}
 #| label: jx-linsubhr-helper
@@ -421,7 +440,7 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
 }
 ```
 
-## 5.1 Anemia Grade 2
+## 6.1 Anemia Grade 2
 
 ```{r}
 #| label: jx-linsubhr-ratio-anemia2
@@ -431,7 +450,7 @@ plot_subhr_linear_ratio("cmp_time_anemia_2", "cmp_status_anemia_2",
                         "pre_HGB_45days", "Anemia Grade 2", "ratio")
 ```
 
-## 5.2 Anemia Grade 3
+## 6.2 Anemia Grade 3
 
 ```{r}
 #| label: jx-linsubhr-ratio-anemia3
@@ -441,7 +460,7 @@ plot_subhr_linear_ratio("cmp_time_anemia_3", "cmp_status_anemia_3",
                         "pre_HGB_45days", "Anemia Grade 3", "ratio")
 ```
 
-## 5.3 Thrombocytopenia Grade 2
+## 6.3 Thrombocytopenia Grade 2
 
 ```{r}
 #| label: jx-linsubhr-ratio-throm2
@@ -451,7 +470,7 @@ plot_subhr_linear_ratio("cmp_time_throm_2", "cmp_status_throm_2",
                         "pre_PLT_45days", "Thrombocytopenia Grade 2", "ratio")
 ```
 
-## 5.4 Thrombocytopenia Grade 3
+## 6.4 Thrombocytopenia Grade 3
 
 ```{r}
 #| label: jx-linsubhr-ratio-throm3
@@ -461,7 +480,7 @@ plot_subhr_linear_ratio("cmp_time_throm_3", "cmp_status_throm_3",
                         "pre_PLT_45days", "Thrombocytopenia Grade 3", "ratio")
 ```
 
-## 5.5 AKI Grade 2
+## 6.5 AKI Grade 2
 
 ```{r}
 #| label: jx-linsubhr-ratio-aki2
@@ -471,7 +490,7 @@ plot_subhr_linear_ratio("cmp_time_aki_2", "cmp_status_aki_2",
                         NULL, "AKI Grade 2", "ratio")
 ```
 
-## 5.6 AKI (KDIGO)
+## 6.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-linsubhr-ratio-akikdigo
@@ -481,7 +500,7 @@ plot_subhr_linear_ratio("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                         NULL, "AKI (KDIGO)", "ratio")
 ```
 
-## 5.7 Composite Grade 2 AEs
+## 6.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-linsubhr-ratio-grade2
@@ -491,7 +510,7 @@ plot_subhr_linear_ratio("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                         NULL, "Composite Grade 2 AEs", "ratio")
 ```
 
-## 5.8 Composite Grade 3 AEs
+## 6.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-linsubhr-ratio-grade3
@@ -501,7 +520,7 @@ plot_subhr_linear_ratio("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                         NULL, "Composite Grade 3 AEs", "ratio")
 ```
 
-## 5.9 Overall Hospitalization
+## 6.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-ratio-anyhosp
@@ -511,7 +530,7 @@ plot_subhr_linear_ratio("cmp_time_any_hosp", "cmp_status_any_hosp",
                         NULL, "Overall Hospitalization", "ratio")
 ```
 
-## 5.10 Platinum-Related Hospitalization
+## 6.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-ratio-sideeffect
@@ -521,7 +540,7 @@ plot_subhr_linear_ratio("cmp_time_side_effect", "cmp_status_side_effect",
                         NULL, "Platinum-Related Hospitalization", "ratio")
 ```
 
-## 5.11 90-Day Death (Cox PH)
+## 6.11 90-Day Death (Cox PH)
 
 ```{r}
 #| label: jx-cox-linear-ratio-death
@@ -531,7 +550,7 @@ plot_cox_linear_ratio("time_to_death_90", "death_90",
                       NULL, "90-Day Death (Cox PH)", "ratio")
 ```
 
-# 6 Linear subHR Curves — eGFR Discrepancy (raw scale)
+# 7 Linear subHR Curves — eGFR Discrepancy (raw scale)
 
 ```{r}
 #| label: jx-linsubhr-disc-helper
@@ -630,7 +649,7 @@ plot_cox_linear_disc <- function(time_var, status_var, extra_adj = NULL,
 }
 ```
 
-## 6.1 Anemia Grade 2
+## 7.1 Anemia Grade 2
 
 ```{r}
 #| label: jx-linsubhr-disc-anemia2
@@ -640,7 +659,7 @@ plot_subhr_linear_disc("cmp_time_anemia_2", "cmp_status_anemia_2",
                        "pre_HGB_45days", "Anemia Grade 2")
 ```
 
-## 6.2 Anemia Grade 3
+## 7.2 Anemia Grade 3
 
 ```{r}
 #| label: jx-linsubhr-disc-anemia3
@@ -650,7 +669,7 @@ plot_subhr_linear_disc("cmp_time_anemia_3", "cmp_status_anemia_3",
                        "pre_HGB_45days", "Anemia Grade 3")
 ```
 
-## 6.3 Thrombocytopenia Grade 2
+## 7.3 Thrombocytopenia Grade 2
 
 ```{r}
 #| label: jx-linsubhr-disc-throm2
@@ -660,7 +679,7 @@ plot_subhr_linear_disc("cmp_time_throm_2", "cmp_status_throm_2",
                        "pre_PLT_45days", "Thrombocytopenia Grade 2")
 ```
 
-## 6.4 Thrombocytopenia Grade 3
+## 7.4 Thrombocytopenia Grade 3
 
 ```{r}
 #| label: jx-linsubhr-disc-throm3
@@ -670,7 +689,7 @@ plot_subhr_linear_disc("cmp_time_throm_3", "cmp_status_throm_3",
                        "pre_PLT_45days", "Thrombocytopenia Grade 3")
 ```
 
-## 6.5 AKI Grade 2
+## 7.5 AKI Grade 2
 
 ```{r}
 #| label: jx-linsubhr-disc-aki2
@@ -680,7 +699,7 @@ plot_subhr_linear_disc("cmp_time_aki_2", "cmp_status_aki_2",
                        NULL, "AKI Grade 2")
 ```
 
-## 6.6 AKI (KDIGO)
+## 7.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-linsubhr-disc-akikdigo
@@ -690,7 +709,7 @@ plot_subhr_linear_disc("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                        NULL, "AKI (KDIGO)")
 ```
 
-## 6.7 Composite Grade 2 AEs
+## 7.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-linsubhr-disc-grade2
@@ -700,7 +719,7 @@ plot_subhr_linear_disc("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                        NULL, "Composite Grade 2 AEs")
 ```
 
-## 6.8 Composite Grade 3 AEs
+## 7.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-linsubhr-disc-grade3
@@ -710,7 +729,7 @@ plot_subhr_linear_disc("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                        NULL, "Composite Grade 3 AEs")
 ```
 
-## 6.9 Overall Hospitalization
+## 7.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-disc-anyhosp
@@ -720,7 +739,7 @@ plot_subhr_linear_disc("cmp_time_any_hosp", "cmp_status_any_hosp",
                        NULL, "Overall Hospitalization")
 ```
 
-## 6.10 Platinum-Related Hospitalization
+## 7.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-linsubhr-disc-sideeffect
@@ -730,7 +749,7 @@ plot_subhr_linear_disc("cmp_time_side_effect", "cmp_status_side_effect",
                        NULL, "Platinum-Related Hospitalization")
 ```
 
-## 6.11 90-Day Death (Cox PH)
+## 7.11 90-Day Death (Cox PH)
 
 ```{r}
 #| label: jx-linsubhr-disc-death
@@ -740,9 +759,9 @@ plot_cox_linear_disc("time_to_death_90", "death_90",
                      NULL, "90-Day Death (Cox PH)")
 ```
 
-# 7 Linear subHR Curves — Hospitalization by Reason
+# 8 Linear subHR Curves — Hospitalization by Reason
 
-## 7.1 Nausea/Vomiting/GI
+## 8.1 Nausea/Vomiting/GI
 
 ```{r}
 #| label: jx-linsubhr-ratio-hosp1
@@ -752,7 +771,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_1", "cmp_status_hosp_1",
                         NULL, "Nausea/Vomiting/GI")
 ```
 
-## 7.2 Failure to Thrive/Fatigue/Dehydration
+## 8.2 Failure to Thrive/Fatigue/Dehydration
 
 ```{r}
 #| label: jx-linsubhr-ratio-hosp2
@@ -762,7 +781,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_2", "cmp_status_hosp_2",
                         NULL, "Failure to Thrive/Fatigue/Dehydration")
 ```
 
-## 7.3 AKI
+## 8.3 AKI
 
 ```{r}
 #| label: jx-linsubhr-ratio-hosp3
@@ -772,7 +791,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_3", "cmp_status_hosp_3",
                         NULL, "AKI")
 ```
 
-## 7.4 Electrolyte Abnormalities
+## 8.4 Electrolyte Abnormalities
 
 ```{r}
 #| label: jx-linsubhr-ratio-hosp4
@@ -782,7 +801,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_4", "cmp_status_hosp_4",
                         NULL, "Electrolyte Abnormalities")
 ```
 
-## 7.5 Cytopenia
+## 8.5 Cytopenia
 
 ```{r}
 #| label: jx-linsubhr-ratio-hosp5
@@ -792,7 +811,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_5", "cmp_status_hosp_5",
                         NULL, "Cytopenia")
 ```
 
-## 7.6 Febrile Neutropenia
+## 8.6 Febrile Neutropenia
 
 ```{r}
 #| label: jx-linsubhr-ratio-hosp6
@@ -802,7 +821,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_6", "cmp_status_hosp_6",
                         NULL, "Febrile Neutropenia")
 ```
 
-## 7.7 Infection/Sepsis
+## 8.7 Infection/Sepsis
 
 ```{r}
 #| label: jx-linsubhr-ratio-hosp7
@@ -812,7 +831,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_7", "cmp_status_hosp_7",
                         NULL, "Infection/Sepsis")
 ```
 
-## 7.8 Cancer Progression
+## 8.8 Cancer Progression
 
 ```{r}
 #| label: jx-linsubhr-ratio-hosp8
@@ -822,9 +841,9 @@ plot_subhr_linear_ratio("cmp_time_hosp_8", "cmp_status_hosp_8",
                         NULL, "Cancer Progression")
 ```
 
-# 8 Scatter Plots — eGFR Discrepancy
+# 9 Scatter Plots — eGFR Discrepancy
 
-## 8.1 eGFR Discrepancy vs CKD-EPI Cr-Cys (unindexed)
+## 9.1 eGFR Discrepancy vs CKD-EPI Cr-Cys (unindexed)
 
 ```{r}
 #| label: jx-scatter-egfr-epi
@@ -841,7 +860,7 @@ ggplot(dat %>% filter(!is.na(egfr_discrepancy)),
   theme_minimal(base_size = 11)
 ```
 
-## 8.2 eGFR Discrepancy vs Cockcroft-Gault
+## 9.2 eGFR Discrepancy vs Cockcroft-Gault
 
 ```{r}
 #| label: jx-scatter-egfr-cg
