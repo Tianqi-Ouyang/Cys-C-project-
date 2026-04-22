@@ -309,6 +309,16 @@ csh_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_ratio_per10")
 cox_model("time_to_death_90", "death_90", "egfr_ratio_per10", egfr_adj = "cockcroft")
 ```
 
+::: {.callout-note}
+## Why anchor at the median (subHR = 1 at the reference)
+
+Three reasons to anchor at the **median**:
+
+1. **Interpretability**: "A patient with eGFR ratio of 0.8 has ~1.5× the subHR compared to a typical patient (at the median)."
+2. **Stability**: The median sits in the densest part of the data, so estimates near it have the tightest confidence intervals. The CIs fan out as you move away — you can see this in the plots.
+3. **No arbitrary choice**: If we picked 1.0 arbitrarily, the plot would look almost identical here (because median ≈ 1), but in cohorts where the median is 0.9 or 1.1, picking 1.0 would either shift or distort the curve without changing the actual model.
+:::
+
 # 6 Linear subHR Curves — eGFR Ratio (raw scale)
 
 ```{r}
