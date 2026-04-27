@@ -3477,5 +3477,40 @@
     "title": "Jiaxuan Project — Carboplatin Cohort",
     "section": "2.2 Signed Dose Discrepancy Distribution",
     "text": "2.2 Signed Dose Discrepancy Distribution\nSigned dose discrepancy = actual carboplatin dose - predicted dose (CKD-EPI Cr-Cys). Bars are coloured differently on either side of 0.\n\n\nCode\ndose_hist &lt;- dat %&gt;%\n  filter(!is.na(signed_dose_discrep_cat)) %&gt;%\n  mutate(side = ifelse(as.integer(signed_dose_discrep_cat) &lt;= 5, \"neg\", \"pos\"))\n\nggplot(dose_hist, aes(x = signed_dose_discrep_cat, fill = side)) +\n  geom_bar(color = \"black\", alpha = 0.8) +\n  geom_text(stat = \"count\", aes(label = after_stat(count)), vjust = -0.5, size = 3.8) +\n  geom_vline(xintercept = 5.5, linetype = \"dashed\", color = \"grey40\") +\n  scale_fill_manual(values = c(neg = \"#E31A1C\", pos = \"#1F78B4\"),\n                    guide = \"none\") +\n  labs(title = \"Distribution of Signed Dose Discrepancy (Carboplatin)\",\n       x = \"Dose Discrepancy (mg) = actual - predicted\",\n       y = \"Number of Patients\") +\n  theme_minimal(base_size = 13) +\n  theme(axis.text.x = element_text(angle = 30, hjust = 1))"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#age-70",
+    "href": "qmd/jiaxuan_whole.html#age-70",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "10.1 Age >= 70",
+    "text": "10.1 Age &gt;= 70\n\n\nCode\nplot_cg_vs_epi(\"age\", 70, \"Age &gt;= 70\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#age-75",
+    "href": "qmd/jiaxuan_whole.html#age-75",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "10.2 Age >= 75",
+    "text": "10.2 Age &gt;= 75\n\n\nCode\nplot_cg_vs_epi(\"age\", 75, \"Age &gt;= 75\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#age-80",
+    "href": "qmd/jiaxuan_whole.html#age-80",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "10.3 Age >= 80",
+    "text": "10.3 Age &gt;= 80\n\n\nCode\nplot_cg_vs_epi(\"age\", 80, \"Age &gt;= 80\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#bmi-25",
+    "href": "qmd/jiaxuan_whole.html#bmi-25",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "10.4 BMI >= 25",
+    "text": "10.4 BMI &gt;= 25\n\n\nCode\nplot_cg_vs_epi(\"bmi\", 25, \"BMI &gt;= 25\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#bmi-30",
+    "href": "qmd/jiaxuan_whole.html#bmi-30",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "10.5 BMI >= 30",
+    "text": "10.5 BMI &gt;= 30\n\n\nCode\nplot_cg_vs_epi(\"bmi\", 30, \"BMI &gt;= 30\")"
   }
 ]

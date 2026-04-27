@@ -917,3 +917,78 @@ ggplot(dat %>% filter(!is.na(egfr_discrepancy)),
   theme_minimal(base_size = 11)
 ```
 
+
+# 10 CG vs CKD-EPI Cr-Cys (highlighted by Age / BMI)
+
+For each plot below, the x-axis is Cockcroft-Gault eGFR (mL/min) and the y-axis is CKD-EPI Cr-Cys *unindexed* eGFR (mL/min). The dashed line is `y = x` (perfect agreement). Patients meeting the highlighted threshold are coloured red; all others are grey. `N` shown in each title is the count of patients with both eGFR values non-missing; `n_red` is the count meeting the red criterion.
+
+```{r}
+#| label: jx-scatter-cg-epi-helper
+plot_cg_vs_epi <- function(highlight_var, threshold, label) {
+  d <- dat %>%
+    filter(!is.na(cockcroft), !is.na(ckd_epi_gfr_cre_cys_unindex),
+           !is.na(.data[[highlight_var]])) %>%
+    mutate(highlight = .data[[highlight_var]] >= threshold)
+
+  n_total <- nrow(d)
+  n_red   <- sum(d$highlight)
+
+  ggplot(d, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex,
+                color = highlight)) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed",
+                color = "grey50") +
+    geom_point(alpha = 0.6, size = 1.6) +
+    scale_color_manual(values = c("FALSE" = "grey60", "TRUE" = "#E31A1C"),
+                       guide = "none") +
+    labs(x = "Cockcroft-Gault eGFR (mL/min)",
+         y = "CKD-EPI Cr-Cys eGFR, unindexed (mL/min)",
+         title = sprintf("%s   |   N = %d, n_red = %d",
+                         label, n_total, n_red)) +
+    theme_minimal(base_size = 11)
+}
+```
+
+## 10.1 Age >= 70
+
+```{r}
+#| label: jx-scatter-cg-epi-age70
+#| fig-width: 6
+#| fig-height: 5
+plot_cg_vs_epi("age", 70, "Age >= 70")
+```
+
+## 10.2 Age >= 75
+
+```{r}
+#| label: jx-scatter-cg-epi-age75
+#| fig-width: 6
+#| fig-height: 5
+plot_cg_vs_epi("age", 75, "Age >= 75")
+```
+
+## 10.3 Age >= 80
+
+```{r}
+#| label: jx-scatter-cg-epi-age80
+#| fig-width: 6
+#| fig-height: 5
+plot_cg_vs_epi("age", 80, "Age >= 80")
+```
+
+## 10.4 BMI >= 25
+
+```{r}
+#| label: jx-scatter-cg-epi-bmi25
+#| fig-width: 6
+#| fig-height: 5
+plot_cg_vs_epi("bmi", 25, "BMI >= 25")
+```
+
+## 10.5 BMI >= 30
+
+```{r}
+#| label: jx-scatter-cg-epi-bmi30
+#| fig-width: 6
+#| fig-height: 5
+plot_cg_vs_epi("bmi", 30, "BMI >= 30")
+```
