@@ -64,7 +64,7 @@ cat("Carboplatin cohort N =", nrow(dat), "\n")
 
 # 2 Dose Discrepancy Distribution (Carboplatin)
 
-Signed dose discrepancy = actual carboplatin dose - predicted dose (CKD-EPI Cr-Cys). Bars left of 0 are **under-dosed** patients (red); bars right of 0 are **over-dosed** patients (blue).
+Signed dose discrepancy = actual carboplatin dose - predicted dose (CKD-EPI Cr-Cys). Bars are coloured differently on either side of 0.
 
 ```{r}
 #| label: jx-carbo-dose-discrep-hist
@@ -72,22 +72,19 @@ Signed dose discrepancy = actual carboplatin dose - predicted dose (CKD-EPI Cr-C
 #| fig-height: 5
 dose_hist <- dat %>%
   filter(!is.na(signed_dose_discrep_cat)) %>%
-  mutate(sign = ifelse(as.integer(signed_dose_discrep_cat) <= 5,
-                       "Under-dosed", "Over-dosed"))
+  mutate(side = ifelse(as.integer(signed_dose_discrep_cat) <= 5, "neg", "pos"))
 
-ggplot(dose_hist, aes(x = signed_dose_discrep_cat, fill = sign)) +
+ggplot(dose_hist, aes(x = signed_dose_discrep_cat, fill = side)) +
   geom_bar(color = "black", alpha = 0.8) +
   geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 3.8) +
   geom_vline(xintercept = 5.5, linetype = "dashed", color = "grey40") +
-  scale_fill_manual(values = c("Under-dosed" = "#E31A1C",
-                               "Over-dosed"  = "#1F78B4")) +
+  scale_fill_manual(values = c(neg = "#E31A1C", pos = "#1F78B4"),
+                    guide = "none") +
   labs(title = "Distribution of Signed Dose Discrepancy (Carboplatin)",
        x = "Dose Discrepancy (mg) = actual - predicted",
-       y = "Number of Patients",
-       fill = NULL) +
+       y = "Number of Patients") +
   theme_minimal(base_size = 13) +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1),
-        legend.position = "top")
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
 ```
 
 # 3 Table 1: Baseline Characteristics (Carboplatin Only)
