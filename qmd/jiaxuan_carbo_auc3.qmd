@@ -46,8 +46,7 @@ dat <- dat %>%
       breaks = c(0, 25, 50, 75, 100, Inf),
       labels = c("<25", "25-49.99", "50-74.99", "75-99.99", ">=100"),
       right = FALSE, include.lowest = TRUE),
-    # Signed dose discrepancy: negative = under-dosed (actual < predicted),
-    # positive = over-dosed (actual > predicted). 10 bins symmetric around 0.
+    # Signed dose discrepancy = actual - predicted; 10 bins symmetric around 0.
     signed_dose_discrep_cat = cut(dose_discrepancy,
       breaks = c(-Inf, -100, -75, -50, -25, 0, 25, 50, 75, 100, Inf),
       labels = c("<=-100", "-99.99 to -75", "-74.99 to -50",
