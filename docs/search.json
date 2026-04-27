@@ -4,7 +4,7 @@
     "href": "qmd/jiaxuan_carbo_auc3.html",
     "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
     "section": "",
-    "text": "Code\n# Force UTF-8 locale so kable captions and other strings render real Unicode\n# (e.g. em-dash) instead of &lt;U+2014&gt; escape sequences.\ninvisible(Sys.setlocale(\"LC_ALL\", \"en_US.UTF-8\"))\nlibrary(tidyverse)\nlibrary(scales)\nlibrary(ggplot2)\nlibrary(tidycmprsk)\nlibrary(ggsurvfit)\nlibrary(gtsummary)\n\n# Load whole-cohort data, then keep only carboplatin patients\ndat &lt;- readRDS(\"jiaxuan_final_master.rds\") %&gt;%\n  filter(platin_group == \"Carboplatin\", carbo_AUC &gt;= 3)\n\n# Create eGFR ratio: CKD-EPI Cr-Cys (unindexed) / Cockcroft-Gault\n# Also create per-10 mL/min rescaled versions of cockcroft and CKD-EPI for\n# reporting (HRs per 1 mL/min are clinically uninterpretable; convention in\n# nephro-onc is per 10 mL/min — bio_agent confirmed). Adjusters keep raw scale.\ndat &lt;- dat %&gt;%\n  mutate(\n    # Capped versions (for dose discrepancy calculations)\n    cockcroft_cap125 = pmin(cockcroft, 125),\n    # ckd_epi_gfr_cre_cys_unindex_cap125 already exists in data\n    # Ratio uses UNCAPPED eGFR\n    egfr_ratio    = ckd_epi_gfr_cre_cys_unindex / cockcroft,\n    egfr_ratio_per10 = -egfr_ratio * 10,  # per 0.1-unit *decrease* reporting scale\n    egfr_discrepancy = ckd_epi_gfr_cre_cys_unindex - cockcroft,\n    # Dose discrepancy uses CAPPED eGFR (already computed in jiaxuan_data.qmd)\n    dose_discrep_per25increase = dose_discrepancy / 25,\n    abs_dose_discrep = abs(dose_discrepancy),\n    abs_dose_discrep_cat = cut(abs_dose_discrep,\n      breaks = c(0, 25, 50, 75, 100, Inf),\n      labels = c(\"&lt;25\", \"25-49.99\", \"50-74.99\", \"75-99.99\", \"&gt;=100\"),\n      right = FALSE, include.lowest = TRUE),\n    # Signed dose discrepancy = actual - predicted; 10 bins symmetric around 0.\n    signed_dose_discrep_cat = cut(dose_discrepancy,\n      breaks = c(-Inf, -100, -75, -50, -25, 0, 25, 50, 75, 100, Inf),\n      labels = c(\"&lt;=-100\", \"-99.99 to -75\", \"-74.99 to -50\",\n                 \"-49.99 to -25\", \"-24.99 to 0\",\n                 \"0 to 24.99\", \"25 to 49.99\", \"50 to 74.99\",\n                 \"75 to 99.99\", \"&gt;=100\"),\n      right = FALSE, include.lowest = TRUE),\n    cockcroft_per10 = cockcroft / 10,\n    ckd_epi_per10   = ckd_epi_gfr_cre_cys_unindex / 10\n  )\n\ncat(\"Carboplatin AUC &gt;= 3 cohort N =\", nrow(dat), \"\\n\")\n\n\nCarboplatin AUC &gt;= 3 cohort N = 463"
+    "text": "Code\n# Force UTF-8 locale so kable captions and other strings render real Unicode\n# (e.g. em-dash) instead of &lt;U+2014&gt; escape sequences.\ninvisible(Sys.setlocale(\"LC_ALL\", \"en_US.UTF-8\"))\nlibrary(tidyverse)\nlibrary(scales)\nlibrary(ggplot2)\nlibrary(tidycmprsk)\nlibrary(ggsurvfit)\nlibrary(gtsummary)\n\n# Load whole-cohort data, then keep only carboplatin patients\ndat &lt;- readRDS(\"jiaxuan_final_master.rds\") %&gt;%\n  filter(platin_group == \"Carboplatin\", carbo_AUC &gt;= 3)\n\n# Create eGFR ratio: CKD-EPI Cr-Cys (unindexed) / Cockcroft-Gault\n# Also create per-10 mL/min rescaled versions of cockcroft and CKD-EPI for\n# reporting (HRs per 1 mL/min are clinically uninterpretable; convention in\n# nephro-onc is per 10 mL/min — bio_agent confirmed). Adjusters keep raw scale.\ndat &lt;- dat %&gt;%\n  mutate(\n    # Capped versions (for dose discrepancy calculations)\n    cockcroft_cap125 = pmin(cockcroft, 125),\n    # ckd_epi_gfr_cre_cys_unindex_cap125 already exists in data\n    # Ratio uses UNCAPPED eGFR\n    egfr_ratio    = ckd_epi_gfr_cre_cys_unindex / cockcroft,\n    egfr_ratio_per10 = -egfr_ratio * 10,  # per 0.1-unit *decrease* reporting scale\n    egfr_discrepancy = ckd_epi_gfr_cre_cys_unindex - cockcroft,\n    # Dose discrepancy uses CAPPED eGFR (already computed in jiaxuan_data.qmd)\n    dose_discrep_per25increase = dose_discrepancy / 25,\n    abs_dose_discrep = abs(dose_discrepancy),\n    abs_dose_discrep_cat = cut(abs_dose_discrep,\n      breaks = c(0, 25, 50, 75, 100, Inf),\n      labels = c(\"&lt;25\", \"25-49.99\", \"50-74.99\", \"75-99.99\", \"&gt;=100\"),\n      right = FALSE, include.lowest = TRUE),\n    # Binary exposure for adjusted CIF curves (Section 14): 1 if patient was\n    # over-dosed by 25 mg or more (actual - predicted &gt;= 25), else 0.\n    dose_discrep_ge25 = as.integer(dose_discrepancy &gt;= 25),\n    # Signed dose discrepancy = actual - predicted; 10 bins symmetric around 0.\n    signed_dose_discrep_cat = cut(dose_discrepancy,\n      breaks = c(-Inf, -100, -75, -50, -25, 0, 25, 50, 75, 100, Inf),\n      labels = c(\"&lt;=-100\", \"-99.99 to -75\", \"-74.99 to -50\",\n                 \"-49.99 to -25\", \"-24.99 to 0\",\n                 \"0 to 24.99\", \"25 to 49.99\", \"50 to 74.99\",\n                 \"75 to 99.99\", \"&gt;=100\"),\n      right = FALSE, include.lowest = TRUE),\n    cockcroft_per10 = cockcroft / 10,\n    ckd_epi_per10   = ckd_epi_gfr_cre_cys_unindex / 10\n  )\n\ncat(\"Carboplatin AUC &gt;= 3 cohort N =\", nrow(dat), \"\\n\")\n\n\nCarboplatin AUC &gt;= 3 cohort N = 463"
   },
   {
     "objectID": "qmd/jiaxuan_carbo_auc3.html#absolute-dose-discrepancy-distribution",
@@ -2783,7 +2783,7 @@
     "href": "qmd/jiaxuan_carbo.html",
     "title": "Jiaxuan Project — Carboplatin Cohort",
     "section": "",
-    "text": "Code\n# Force UTF-8 locale so kable captions and other strings render real Unicode\n# (e.g. em-dash) instead of &lt;U+2014&gt; escape sequences.\ninvisible(Sys.setlocale(\"LC_ALL\", \"en_US.UTF-8\"))\nlibrary(tidyverse)\nlibrary(scales)\nlibrary(ggplot2)\nlibrary(tidycmprsk)\nlibrary(ggsurvfit)\nlibrary(gtsummary)\n\n# Load whole-cohort data, then keep only carboplatin patients\ndat &lt;- readRDS(\"jiaxuan_final_master.rds\") %&gt;%\n  filter(platin_group == \"Carboplatin\")\n\n# Create eGFR ratio: CKD-EPI Cr-Cys (unindexed) / Cockcroft-Gault\n# Also create per-10 mL/min rescaled versions of cockcroft and CKD-EPI for\n# reporting (HRs per 1 mL/min are clinically uninterpretable; convention in\n# nephro-onc is per 10 mL/min — bio_agent confirmed). Adjusters keep raw scale.\ndat &lt;- dat %&gt;%\n  mutate(\n    # Capped versions (for dose discrepancy calculations)\n    cockcroft_cap125 = pmin(cockcroft, 125),\n    # ckd_epi_gfr_cre_cys_unindex_cap125 already exists in data\n    # Ratio uses UNCAPPED eGFR\n    egfr_ratio    = ckd_epi_gfr_cre_cys_unindex / cockcroft,\n    egfr_ratio_per10 = -egfr_ratio * 10,  # per 0.1-unit *decrease* reporting scale\n    egfr_discrepancy = ckd_epi_gfr_cre_cys_unindex - cockcroft,\n    # Dose discrepancy uses CAPPED eGFR (already computed in jiaxuan_data.qmd)\n    dose_discrep_per25increase = dose_discrepancy / 25,\n    abs_dose_discrep = abs(dose_discrepancy),\n    abs_dose_discrep_cat = cut(abs_dose_discrep,\n      breaks = c(0, 25, 50, 75, 100, Inf),\n      labels = c(\"&lt;25\", \"25-49.99\", \"50-74.99\", \"75-99.99\", \"&gt;=100\"),\n      right = FALSE, include.lowest = TRUE),\n    # Signed dose discrepancy = actual - predicted; 10 bins symmetric around 0.\n    signed_dose_discrep_cat = cut(dose_discrepancy,\n      breaks = c(-Inf, -100, -75, -50, -25, 0, 25, 50, 75, 100, Inf),\n      labels = c(\"&lt;=-100\", \"-99.99 to -75\", \"-74.99 to -50\",\n                 \"-49.99 to -25\", \"-24.99 to 0\",\n                 \"0 to 24.99\", \"25 to 49.99\", \"50 to 74.99\",\n                 \"75 to 99.99\", \"&gt;=100\"),\n      right = FALSE, include.lowest = TRUE),\n    cockcroft_per10 = cockcroft / 10,\n    ckd_epi_per10   = ckd_epi_gfr_cre_cys_unindex / 10\n  )\n\ncat(\"Carboplatin cohort N =\", nrow(dat), \"\\n\")\n\n\nCarboplatin cohort N = 596"
+    "text": "Code\n# Force UTF-8 locale so kable captions and other strings render real Unicode\n# (e.g. em-dash) instead of &lt;U+2014&gt; escape sequences.\ninvisible(Sys.setlocale(\"LC_ALL\", \"en_US.UTF-8\"))\nlibrary(tidyverse)\nlibrary(scales)\nlibrary(ggplot2)\nlibrary(tidycmprsk)\nlibrary(ggsurvfit)\nlibrary(gtsummary)\n\n# Load whole-cohort data, then keep only carboplatin patients\ndat &lt;- readRDS(\"jiaxuan_final_master.rds\") %&gt;%\n  filter(platin_group == \"Carboplatin\")\n\n# Create eGFR ratio: CKD-EPI Cr-Cys (unindexed) / Cockcroft-Gault\n# Also create per-10 mL/min rescaled versions of cockcroft and CKD-EPI for\n# reporting (HRs per 1 mL/min are clinically uninterpretable; convention in\n# nephro-onc is per 10 mL/min — bio_agent confirmed). Adjusters keep raw scale.\ndat &lt;- dat %&gt;%\n  mutate(\n    # Capped versions (for dose discrepancy calculations)\n    cockcroft_cap125 = pmin(cockcroft, 125),\n    # ckd_epi_gfr_cre_cys_unindex_cap125 already exists in data\n    # Ratio uses UNCAPPED eGFR\n    egfr_ratio    = ckd_epi_gfr_cre_cys_unindex / cockcroft,\n    egfr_ratio_per10 = -egfr_ratio * 10,  # per 0.1-unit *decrease* reporting scale\n    egfr_discrepancy = ckd_epi_gfr_cre_cys_unindex - cockcroft,\n    # Dose discrepancy uses CAPPED eGFR (already computed in jiaxuan_data.qmd)\n    dose_discrep_per25increase = dose_discrepancy / 25,\n    abs_dose_discrep = abs(dose_discrepancy),\n    abs_dose_discrep_cat = cut(abs_dose_discrep,\n      breaks = c(0, 25, 50, 75, 100, Inf),\n      labels = c(\"&lt;25\", \"25-49.99\", \"50-74.99\", \"75-99.99\", \"&gt;=100\"),\n      right = FALSE, include.lowest = TRUE),\n    # Binary exposure for adjusted CIF curves (Section 14): 1 if patient was\n    # over-dosed by 25 mg or more (actual - predicted &gt;= 25), else 0.\n    dose_discrep_ge25 = as.integer(dose_discrepancy &gt;= 25),\n    # Signed dose discrepancy = actual - predicted; 10 bins symmetric around 0.\n    signed_dose_discrep_cat = cut(dose_discrepancy,\n      breaks = c(-Inf, -100, -75, -50, -25, 0, 25, 50, 75, 100, Inf),\n      labels = c(\"&lt;=-100\", \"-99.99 to -75\", \"-74.99 to -50\",\n                 \"-49.99 to -25\", \"-24.99 to 0\",\n                 \"0 to 24.99\", \"25 to 49.99\", \"50 to 74.99\",\n                 \"75 to 99.99\", \"&gt;=100\"),\n      right = FALSE, include.lowest = TRUE),\n    cockcroft_per10 = cockcroft / 10,\n    ckd_epi_per10   = ckd_epi_gfr_cre_cys_unindex / 10\n  )\n\ncat(\"Carboplatin cohort N =\", nrow(dat), \"\\n\")\n\n\nCarboplatin cohort N = 596"
   },
   {
     "objectID": "qmd/jiaxuan_carbo.html#anemia-grade-2",
@@ -3512,5 +3512,145 @@
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "10.5 BMI >= 30",
     "text": "10.5 BMI &gt;= 30\n\n\nCode\nplot_cg_vs_epi(\"bmi\", 30, \"BMI &gt;= 30\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#anemia-grade-2-7",
+    "href": "qmd/jiaxuan_carbo.html#anemia-grade-2-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.1 Anemia Grade 2",
+    "text": "14.1 Anemia Grade 2\n\n\nCode\nadj_cif(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n        \"pre_HGB_45days\", \"Anemia Grade 2\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#anemia-grade-3-7",
+    "href": "qmd/jiaxuan_carbo.html#anemia-grade-3-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.2 Anemia Grade 3",
+    "text": "14.2 Anemia Grade 3\n\n\nCode\nadj_cif(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n        \"pre_HGB_45days\", \"Anemia Grade 3\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#thrombocytopenia-grade-2-7",
+    "href": "qmd/jiaxuan_carbo.html#thrombocytopenia-grade-2-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.3 Thrombocytopenia Grade 2",
+    "text": "14.3 Thrombocytopenia Grade 2\n\n\nCode\nadj_cif(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n        \"pre_PLT_45days\", \"Thrombocytopenia Grade 2\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#thrombocytopenia-grade-3-7",
+    "href": "qmd/jiaxuan_carbo.html#thrombocytopenia-grade-3-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.4 Thrombocytopenia Grade 3",
+    "text": "14.4 Thrombocytopenia Grade 3\n\n\nCode\nadj_cif(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n        \"pre_PLT_45days\", \"Thrombocytopenia Grade 3\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#aki-grade-2-7",
+    "href": "qmd/jiaxuan_carbo.html#aki-grade-2-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.5 AKI Grade 2",
+    "text": "14.5 AKI Grade 2\n\n\nCode\nadj_cif(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n        NULL, \"AKI Grade 2\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#aki-kdigo-7",
+    "href": "qmd/jiaxuan_carbo.html#aki-kdigo-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.6 AKI (KDIGO)",
+    "text": "14.6 AKI (KDIGO)\n\n\nCode\nadj_cif(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n        NULL, \"AKI (KDIGO)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#composite-grade-2-aes-7",
+    "href": "qmd/jiaxuan_carbo.html#composite-grade-2-aes-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.7 Composite Grade 2 AEs",
+    "text": "14.7 Composite Grade 2 AEs\n\n\nCode\nadj_cif(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n        NULL, \"Composite Grade 2 AEs\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#composite-grade-3-aes-7",
+    "href": "qmd/jiaxuan_carbo.html#composite-grade-3-aes-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.8 Composite Grade 3 AEs",
+    "text": "14.8 Composite Grade 3 AEs\n\n\nCode\nadj_cif(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n        NULL, \"Composite Grade 3 AEs\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#overall-hospitalization-7",
+    "href": "qmd/jiaxuan_carbo.html#overall-hospitalization-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.9 Overall Hospitalization",
+    "text": "14.9 Overall Hospitalization\n\n\nCode\nadj_cif(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n        NULL, \"Overall Hospitalization\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#platinum-related-hospitalization-7",
+    "href": "qmd/jiaxuan_carbo.html#platinum-related-hospitalization-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.10 Platinum-Related Hospitalization",
+    "text": "14.10 Platinum-Related Hospitalization\n\n\nCode\nadj_cif(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n        NULL, \"Platinum-Related Hospitalization\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#anemia-grade-2-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#anemia-grade-2-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.1 Anemia Grade 2",
+    "text": "14.1 Anemia Grade 2\n\n\nCode\nadj_cif(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n        \"pre_HGB_45days\", \"Anemia Grade 2\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#anemia-grade-3-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#anemia-grade-3-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.2 Anemia Grade 3",
+    "text": "14.2 Anemia Grade 3\n\n\nCode\nadj_cif(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n        \"pre_HGB_45days\", \"Anemia Grade 3\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#thrombocytopenia-grade-2-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#thrombocytopenia-grade-2-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.3 Thrombocytopenia Grade 2",
+    "text": "14.3 Thrombocytopenia Grade 2\n\n\nCode\nadj_cif(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n        \"pre_PLT_45days\", \"Thrombocytopenia Grade 2\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#thrombocytopenia-grade-3-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#thrombocytopenia-grade-3-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.4 Thrombocytopenia Grade 3",
+    "text": "14.4 Thrombocytopenia Grade 3\n\n\nCode\nadj_cif(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n        \"pre_PLT_45days\", \"Thrombocytopenia Grade 3\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#aki-grade-2-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#aki-grade-2-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.5 AKI Grade 2",
+    "text": "14.5 AKI Grade 2\n\n\nCode\nadj_cif(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n        NULL, \"AKI Grade 2\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#aki-kdigo-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#aki-kdigo-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.6 AKI (KDIGO)",
+    "text": "14.6 AKI (KDIGO)\n\n\nCode\nadj_cif(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n        NULL, \"AKI (KDIGO)\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#composite-grade-2-aes-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#composite-grade-2-aes-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.7 Composite Grade 2 AEs",
+    "text": "14.7 Composite Grade 2 AEs\n\n\nCode\nadj_cif(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n        NULL, \"Composite Grade 2 AEs\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#composite-grade-3-aes-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#composite-grade-3-aes-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.8 Composite Grade 3 AEs",
+    "text": "14.8 Composite Grade 3 AEs\n\n\nCode\nadj_cif(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n        NULL, \"Composite Grade 3 AEs\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#overall-hospitalization-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#overall-hospitalization-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.9 Overall Hospitalization",
+    "text": "14.9 Overall Hospitalization\n\n\nCode\nadj_cif(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n        NULL, \"Overall Hospitalization\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#platinum-related-hospitalization-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#platinum-related-hospitalization-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.10 Platinum-Related Hospitalization",
+    "text": "14.10 Platinum-Related Hospitalization\n\n\nCode\nadj_cif(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n        NULL, \"Platinum-Related Hospitalization\")"
   }
 ]
