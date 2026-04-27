@@ -506,7 +506,7 @@ dia_list_name <- function(data, listed_names, index_date, excluded_names = NULL,
 
 ```{r}
 #| label: load-redcap
-master <- read_csv('Data/CystatinCInPatientsO_DATA_2026-04-09_1028.csv')
+master <- read_csv('Data/CystatinCInPatientsO_DATA_2026-04-27_0819.csv')
 
 whole_cohort <- read_csv('Data/Included Patients WHOLE cohort.csv')
 
