@@ -671,3 +671,49 @@ cor(cor_vars) %>%
   round(3) %>%
   knitr::kable(caption = "Pearson correlation — continuous predictors")
 ```
+
+# 10 Signed Dose Discrepancy Distribution
+
+`dose_discrepancy = carbo_dose_redcap − carbo_dose_cre_cys` (mg). Positive values indicate the patient received **more** carboplatin than the CKD-EPI Cr-Cys formula predicts; negative values indicate **less**. Defined only for carboplatin patients; cisplatin rows are NA and excluded from the plot.
+
+```{r}
+#| label: jx-whole-signed-dd-summary
+dd_summary <- dat %>%
+  filter(!is.na(dose_discrepancy)) %>%
+  summarise(
+    n        = dplyr::n(),
+    mean     = mean(dose_discrepancy),
+    sd       = sd(dose_discrepancy),
+    median   = median(dose_discrepancy),
+    q25      = quantile(dose_discrepancy, 0.25),
+    q75      = quantile(dose_discrepancy, 0.75),
+    min      = min(dose_discrepancy),
+    max      = max(dose_discrepancy),
+    pct_pos  = mean(dose_discrepancy > 0) * 100,
+    pct_gt25 = mean(dose_discrepancy > 25) * 100,
+    pct_gt50 = mean(dose_discrepancy > 50) * 100
+  )
+
+dd_summary %>%
+  knitr::kable(digits = 1,
+               caption = "Signed dose discrepancy (mg) — carboplatin patients in whole cohort")
+```
+
+```{r}
+#| label: jx-whole-signed-dd-hist
+#| fig-width: 7
+#| fig-height: 4.5
+ggplot(dat %>% filter(!is.na(dose_discrepancy)),
+       aes(x = dose_discrepancy)) +
+  geom_histogram(bins = 40, fill = "#1F78B4",
+                 color = "black", alpha = 0.7) +
+  geom_vline(xintercept = 0,  linetype = "dashed", color = "red", linewidth = 0.7) +
+  geom_vline(xintercept = c(-50, -25, 25, 50),
+             linetype = "dotted", color = "grey40") +
+  labs(title    = "Signed Dose Discrepancy Distribution",
+       subtitle = "Actual − Predicted carboplatin dose (mg); 0 = perfect agreement",
+       x = "Dose discrepancy (mg)",
+       y = "Number of patients") +
+  theme_minimal(base_size = 13)
+```
+
