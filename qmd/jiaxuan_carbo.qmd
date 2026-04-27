@@ -46,6 +46,15 @@ dat <- dat %>%
       breaks = c(0, 25, 50, 75, 100, Inf),
       labels = c("<25", "25-49.99", "50-74.99", "75-99.99", ">=100"),
       right = FALSE, include.lowest = TRUE),
+    # Signed dose discrepancy: negative = under-dosed (actual < predicted),
+    # positive = over-dosed (actual > predicted). 10 bins symmetric around 0.
+    signed_dose_discrep_cat = cut(dose_discrepancy,
+      breaks = c(-Inf, -100, -75, -50, -25, 0, 25, 50, 75, 100, Inf),
+      labels = c("<=-100", "-99.99 to -75", "-74.99 to -50",
+                 "-49.99 to -25", "-24.99 to 0",
+                 "0 to 24.99", "25 to 49.99", "50 to 74.99",
+                 "75 to 99.99", ">=100"),
+      right = FALSE, include.lowest = TRUE),
     cockcroft_per10 = cockcroft / 10,
     ckd_epi_per10   = ckd_epi_gfr_cre_cys_unindex / 10
   )
@@ -55,19 +64,30 @@ cat("Carboplatin cohort N =", nrow(dat), "\n")
 
 # 2 Dose Discrepancy Distribution (Carboplatin)
 
+Signed dose discrepancy = actual carboplatin dose - predicted dose (CKD-EPI Cr-Cys). Bars left of 0 are **under-dosed** patients (red); bars right of 0 are **over-dosed** patients (blue).
+
 ```{r}
 #| label: jx-carbo-dose-discrep-hist
-#| fig-width: 8
+#| fig-width: 9
 #| fig-height: 5
-dose_hist <- dat %>% filter(!is.na(abs_dose_discrep_cat))
+dose_hist <- dat %>%
+  filter(!is.na(signed_dose_discrep_cat)) %>%
+  mutate(sign = ifelse(as.integer(signed_dose_discrep_cat) <= 5,
+                       "Under-dosed", "Over-dosed"))
 
-ggplot(dose_hist, aes(x = abs_dose_discrep_cat)) +
-  geom_bar(fill = "steelblue", color = "black", alpha = 0.7) +
-  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 4) +
-  labs(title = "Distribution of Absolute Dose Discrepancy (Carboplatin)",
-       x = "Absolute Dose Discrepancy (mg)",
-       y = "Number of Patients") +
-  theme_minimal(base_size = 14)
+ggplot(dose_hist, aes(x = signed_dose_discrep_cat, fill = sign)) +
+  geom_bar(color = "black", alpha = 0.8) +
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 3.8) +
+  geom_vline(xintercept = 5.5, linetype = "dashed", color = "grey40") +
+  scale_fill_manual(values = c("Under-dosed" = "#E31A1C",
+                               "Over-dosed"  = "#1F78B4")) +
+  labs(title = "Distribution of Signed Dose Discrepancy (Carboplatin)",
+       x = "Dose Discrepancy (mg) = actual - predicted",
+       y = "Number of Patients",
+       fill = NULL) +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1),
+        legend.position = "top")
 ```
 
 # 3 Table 1: Baseline Characteristics (Carboplatin Only)
