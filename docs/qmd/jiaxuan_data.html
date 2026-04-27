@@ -727,6 +727,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Cisplatin dose category: 1=&lt;75 mg/m², 2=≥75 mg/m², 0=not cisplatin</td>
 </tr>
 <tr class="even">
+<td><code>cis_dose_high</code></td>
+<td>Cisplatin dose factor: “&lt;75” or “&gt;=75” (NA for non-cisplatin)</td>
+</tr>
+<tr class="odd">
 <td><code>cis_group</code></td>
 <td>Cisplatin dose tier: 1=&lt;40 mg/m², 2=40–60 mg/m², 3=≥60 mg/m²</td>
 </tr>
@@ -789,7 +793,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="derived-drug-indicators-competing-risk" class="level2">
 <h2 class="anchored" data-anchor-id="derived-drug-indicators-competing-risk">1.12 Derived — Drug Indicators &amp; Competing Risk</h2>
-<p>Drug indicators (binary 0/1) parsed from <code>regimen_dose</code> text by <code>create_drug_indicators()</code>: <code>Bevacizumab</code>, <code>Paclitaxel</code>, <code>Pemetrexed</code>, <code>Durvalumab</code>, <code>Doxorubicin</code>, <code>Pembrolizumab</code>, <code>Etoposide</code>, <code>Gemcitabine</code>, <code>Atezolizumab</code>, <code>Pertuzumab</code>, <code>Trastuzumab</code>, <code>Docetaxel</code>, <code>Fluorouracil</code>, <code>Methotrexate</code>, <code>Vinblastine</code>, <code>Administered_alone</code> (1 if no co-administered drugs detected)</p>
+<p>Drug indicators (binary 0/1) parsed from <code>regimen_dose</code> text by <code>create_drug_indicators()</code>: <code>Bevacizumab</code>, <code>Paclitaxel</code>, <code>Pemetrexed</code>, <code>Durvalumab</code>, <code>Doxorubicin</code>, <code>Pembrolizumab</code>, <code>Etoposide</code>, <code>Gemcitabine</code>, <code>Atezolizumab</code>, <code>Pertuzumab</code>, <code>Trastuzumab</code>, <code>Docetaxel</code>, <code>Fluorouracil</code>, <code>Methotrexate</code>, <code>Vinblastine</code>, <code>Administered_alone</code> (1 if no co-administered drugs detected), <code>other_chemo</code> (1 if any of <code>Fluorouracil</code>, <code>Methotrexate</code>, <code>Vinblastine</code>)</p>
 <p>Competing risk variables: <code>cmp_time_&lt;outcome&gt;</code> / <code>cmp_status_&lt;outcome&gt;</code> for each outcome. Status coding: 0=censored (alive, no event by 90 days), 1=event occurred, 2=death (competing event)</p>
 <hr>
 </section>
@@ -967,8 +971,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>  data<span class="sc">$</span>Administered_alone <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">rowSums</span>(data[, all_drugs]) <span class="sc">==</span> <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
 <span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(data)</span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Other chemotherapy: any of Fluorouracil / Methotrexate / Vinblastine, i.e.</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>  <span class="co"># the partner drugs not already broken out individually in Table 1.</span></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>  data<span class="sc">$</span>other_chemo <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    data<span class="sc">$</span>Fluorouracil <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> data<span class="sc">$</span>Methotrexate <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> data<span class="sc">$</span>Vinblastine <span class="sc">==</span> <span class="dv">1</span>,</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">0</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(data)</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -1985,10 +1996,17 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb47-30"><a href="#cb47-30" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
 <span id="cb47-31"><a href="#cb47-31" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="dv">2</span>,</span>
 <span id="cb47-32"><a href="#cb47-32" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="dv">0</span></span>
-<span id="cb47-33"><a href="#cb47-33" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb47-34"><a href="#cb47-34" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb47-35"><a href="#cb47-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-36"><a href="#cb47-36" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>high_dose)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb47-33"><a href="#cb47-33" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb47-34"><a href="#cb47-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Labeled cisplatin dose factor for Table 1 (NA for non-cisplatin patients,</span></span>
+<span id="cb47-35"><a href="#cb47-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># symmetric to carbo_AUC_cat which is NA for non-carboplatin patients)</span></span>
+<span id="cb47-36"><a href="#cb47-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">cis_dose_high =</span> <span class="fu">factor</span>(<span class="fu">case_when</span>(</span>
+<span id="cb47-37"><a href="#cb47-37" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&lt;</span>  <span class="dv">75</span> <span class="sc">~</span> <span class="st">"&lt;75"</span>,</span>
+<span id="cb47-38"><a href="#cb47-38" aria-hidden="true" tabindex="-1"></a>      cis_dose <span class="sc">&gt;=</span> <span class="dv">75</span> <span class="sc">~</span> <span class="st">"&gt;=75"</span>,</span>
+<span id="cb47-39"><a href="#cb47-39" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb47-40"><a href="#cb47-40" aria-hidden="true" tabindex="-1"></a>    ), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;75"</span>, <span class="st">"&gt;=75"</span>))</span>
+<span id="cb47-41"><a href="#cb47-41" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb47-42"><a href="#cb47-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-43"><a href="#cb47-43" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(final_master<span class="sc">$</span>high_dose)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>

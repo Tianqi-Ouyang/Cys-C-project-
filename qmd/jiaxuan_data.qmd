@@ -138,6 +138,7 @@ Hospitalization reasons 1–11 per REDCap codebook:
 | `high_dose` | Binary factor: 1=High-dose (carbo AUC ≥ 5 OR cisplatin ≥ 75 mg/m²), 0=Low-dose |
 | `carbo_AUC_cat` | Carboplatin AUC category: "<3" or ">=3" |
 | `cis_dose_cat` | Cisplatin dose category: 1=<75 mg/m², 2=≥75 mg/m², 0=not cisplatin |
+| `cis_dose_high` | Cisplatin dose factor: "<75" or ">=75" (NA for non-cisplatin) |
 | `cis_group` | Cisplatin dose tier: 1=<40 mg/m², 2=40–60 mg/m², 3=≥60 mg/m² |
 
 ## 1.11 Derived — Carboplatin Dose Discrepancy
@@ -164,7 +165,8 @@ Drug indicators (binary 0/1) parsed from `regimen_dose` text by `create_drug_ind
 `Bevacizumab`, `Paclitaxel`, `Pemetrexed`, `Durvalumab`, `Doxorubicin`,
 `Pembrolizumab`, `Etoposide`, `Gemcitabine`, `Atezolizumab`, `Pertuzumab`,
 `Trastuzumab`, `Docetaxel`, `Fluorouracil`, `Methotrexate`, `Vinblastine`,
-`Administered_alone` (1 if no co-administered drugs detected)
+`Administered_alone` (1 if no co-administered drugs detected),
+`other_chemo` (1 if any of `Fluorouracil`, `Methotrexate`, `Vinblastine`)
 
 Competing risk variables: `cmp_time_<outcome>` / `cmp_status_<outcome>` for each outcome.
 Status coding: 0=censored (alive, no event by 90 days), 1=event occurred, 2=death (competing event)
@@ -351,6 +353,13 @@ create_drug_indicators <- function(data) {
                  "Trastuzumab", "Docetaxel", "Fluorouracil", "Methotrexate", "Vinblastine")
 
   data$Administered_alone <- ifelse(rowSums(data[, all_drugs]) == 0, 1, 0)
+
+  # Other chemotherapy: any of Fluorouracil / Methotrexate / Vinblastine, i.e.
+  # the partner drugs not already broken out individually in Table 1.
+  data$other_chemo <- ifelse(
+    data$Fluorouracil == 1 | data$Methotrexate == 1 | data$Vinblastine == 1,
+    1, 0
+  )
 
   return(data)
 }
@@ -1232,7 +1241,14 @@ final_master <- final_master %>%
       cis_dose <  75 ~ 1,
       cis_dose >= 75 ~ 2,
       TRUE ~ 0
-    )
+    ),
+    # Labeled cisplatin dose factor for Table 1 (NA for non-cisplatin patients,
+    # symmetric to carbo_AUC_cat which is NA for non-carboplatin patients)
+    cis_dose_high = factor(case_when(
+      cis_dose <  75 ~ "<75",
+      cis_dose >= 75 ~ ">=75",
+      TRUE ~ NA_character_
+    ), levels = c("<75", ">=75"))
   )
 
 table(final_master$high_dose)
