@@ -3463,5 +3463,19 @@
     "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
     "section": "2.2 Signed Dose Discrepancy Distribution",
     "text": "2.2 Signed Dose Discrepancy Distribution\nSigned dose discrepancy = actual carboplatin dose - predicted dose (CKD-EPI Cr-Cys). Bars are coloured differently on either side of 0.\n\n\nCode\ndose_hist &lt;- dat %&gt;%\n  filter(!is.na(signed_dose_discrep_cat)) %&gt;%\n  mutate(side = ifelse(as.integer(signed_dose_discrep_cat) &lt;= 5, \"neg\", \"pos\"))\n\nggplot(dose_hist, aes(x = signed_dose_discrep_cat, fill = side)) +\n  geom_bar(color = \"black\", alpha = 0.8) +\n  geom_text(stat = \"count\", aes(label = after_stat(count)), vjust = -0.5, size = 3.8) +\n  geom_vline(xintercept = 5.5, linetype = \"dashed\", color = \"grey40\") +\n  scale_fill_manual(values = c(neg = \"#E31A1C\", pos = \"#1F78B4\"),\n                    guide = \"none\") +\n  labs(title = \"Distribution of Signed Dose Discrepancy (Carboplatin AUC ≥ 3)\",\n       x = \"Dose Discrepancy (mg) = actual - predicted\",\n       y = \"Number of Patients\") +\n  theme_minimal(base_size = 13) +\n  theme(axis.text.x = element_text(angle = 30, hjust = 1))"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#actual-vs-predicted-dose",
+    "href": "qmd/jiaxuan_carbo.html#actual-vs-predicted-dose",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "2.1 Actual vs Predicted Dose",
+    "text": "2.1 Actual vs Predicted Dose\n\n\nCode\ndose_long &lt;- dat %&gt;%\n  select(record_id, carbo_dose_redcap, carbo_dose_cre_cys) %&gt;%\n  pivot_longer(\n    cols = c(carbo_dose_redcap, carbo_dose_cre_cys),\n    names_to = \"dose_type\", values_to = \"dose_mg\"\n  ) %&gt;%\n  filter(!is.na(dose_mg)) %&gt;%\n  mutate(dose_type = case_match(dose_type,\n    \"carbo_dose_redcap\"  ~ \"Actual (REDCap)\",\n    \"carbo_dose_cre_cys\" ~ \"Predicted (CKD-EPI Cr-Cys)\"\n  ))\n\nggplot(dose_long, aes(x = dose_mg, fill = dose_type)) +\n  geom_histogram(alpha = 0.5, bins = 40, position = \"identity\", color = \"black\") +\n  scale_fill_manual(values = c(\"Actual (REDCap)\" = \"#E31A1C\",\n                                \"Predicted (CKD-EPI Cr-Cys)\" = \"#1F78B4\")) +\n  labs(title = \"Carboplatin Dose Distribution\",\n       x = \"Dose (mg)\", y = \"Number of Patients\", fill = \"Dose Type\") +\n  theme_minimal(base_size = 14)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#signed-dose-discrepancy-distribution",
+    "href": "qmd/jiaxuan_carbo.html#signed-dose-discrepancy-distribution",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "2.2 Signed Dose Discrepancy Distribution",
+    "text": "2.2 Signed Dose Discrepancy Distribution\nSigned dose discrepancy = actual carboplatin dose - predicted dose (CKD-EPI Cr-Cys). Bars are coloured differently on either side of 0.\n\n\nCode\ndose_hist &lt;- dat %&gt;%\n  filter(!is.na(signed_dose_discrep_cat)) %&gt;%\n  mutate(side = ifelse(as.integer(signed_dose_discrep_cat) &lt;= 5, \"neg\", \"pos\"))\n\nggplot(dose_hist, aes(x = signed_dose_discrep_cat, fill = side)) +\n  geom_bar(color = \"black\", alpha = 0.8) +\n  geom_text(stat = \"count\", aes(label = after_stat(count)), vjust = -0.5, size = 3.8) +\n  geom_vline(xintercept = 5.5, linetype = \"dashed\", color = \"grey40\") +\n  scale_fill_manual(values = c(neg = \"#E31A1C\", pos = \"#1F78B4\"),\n                    guide = \"none\") +\n  labs(title = \"Distribution of Signed Dose Discrepancy (Carboplatin)\",\n       x = \"Dose Discrepancy (mg) = actual - predicted\",\n       y = \"Number of Patients\") +\n  theme_minimal(base_size = 13) +\n  theme(axis.text.x = element_text(angle = 30, hjust = 1))"
   }
 ]
