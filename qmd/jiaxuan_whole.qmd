@@ -940,6 +940,7 @@ plot_cg_vs_epi <- function(highlight_var, threshold, label) {
     geom_point(alpha = 0.6, size = 1.6) +
     scale_color_manual(values = c("FALSE" = "grey60", "TRUE" = "#E31A1C"),
                        guide = "none") +
+    coord_cartesian(xlim = c(0, 200), ylim = c(0, 200)) +
     labs(x = "Cockcroft-Gault eGFR (mL/min)",
          y = "CKD-EPI Cr-Cys eGFR, unindexed (mL/min)",
          title = sprintf("%s   |   N = %d, n_red = %d",
