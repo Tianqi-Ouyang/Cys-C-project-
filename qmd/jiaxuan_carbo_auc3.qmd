@@ -1359,6 +1359,20 @@ adj_cif <- function(time_var, status_var, extra_pre = NULL, label) {
   fit <- cmprsk::crr(ftime = time_num, fstatus = stat_num,
                      cov1 = X_full, failcode = 1)
 
+  # subHR (95% CI) for the binary exposure, extracted from the same FG fit
+  # dose_discrep_ge25 is the first column of cov1 (entered first in the formula)
+  beta_e <- unname(fit$coef[1])
+  se_e   <- sqrt(fit$var[1, 1])
+  hr     <- exp(beta_e)
+  lcl    <- exp(beta_e - 1.96 * se_e)
+  ucl    <- exp(beta_e + 1.96 * se_e)
+  pval   <- 2 * (1 - pnorm(abs(beta_e / se_e)))
+  p_str  <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+  subtitle_str <- sprintf(
+    "Discrep >= +25 vs <+25: subHR = %.2f (95%% CI %.2f-%.2f), p = %s",
+    hr, lcl, ucl, p_str
+  )
+
   X0 <- X_full; X0[, "dose_discrep_ge25"] <- 0
   X1 <- X_full; X1[, "dose_discrep_ge25"] <- 1
 
@@ -1384,9 +1398,11 @@ adj_cif <- function(time_var, status_var, extra_pre = NULL, label) {
     labs(x = "Days from baseline",
          y = "Cumulative incidence",
          color = NULL,
-         title = label) +
+         title = label,
+         subtitle = subtitle_str) +
     theme_minimal(base_size = 11) +
-    theme(legend.position = "top")
+    theme(legend.position = "top",
+          plot.subtitle = element_text(size = 10, color = "grey25"))
 }
 ```
 
