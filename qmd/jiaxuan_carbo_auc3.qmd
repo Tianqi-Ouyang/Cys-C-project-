@@ -120,6 +120,7 @@ ggplot() +
   geom_vline(xintercept = 0, linetype = "dashed", color = "grey40") +
   scale_fill_manual(values = c(neg = "#E31A1C", pos = "#1F78B4"),
                     guide = "none") +
+  coord_cartesian(xlim = c(-250, 250)) +
   labs(title = "Distribution of Signed Dose Discrepancy (Carboplatin AUC ≥ 3)",
        x = "Dose Discrepancy (mg) = actual - predicted",
        y = "Density") +
