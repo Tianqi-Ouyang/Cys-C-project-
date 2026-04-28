@@ -72,12 +72,13 @@ dat %>%
 ratio_hist <- dat %>% filter(!is.na(egfr_ratio))
 
 ggplot(ratio_hist, aes(x = egfr_ratio)) +
-  geom_histogram(binwidth = 0.1, boundary = 0,
+  geom_histogram(aes(y = after_stat(count) / sum(after_stat(count)) * 100),
+                 binwidth = 0.1, boundary = 0,
                  fill = "steelblue", color = "black", alpha = 0.7) +
   geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
   labs(title = "Distribution of eGFR Ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault)",
        x = "eGFR Ratio",
-       y = "Number of Patients") +
+       y = "Percent of Patients (%)") +
   scale_x_continuous(breaks = seq(0, 3, 0.2)) +
   theme_minimal(base_size = 14)
 ```
@@ -992,4 +993,31 @@ plot_cg_vs_epi("bmi", 25, "BMI >= 25")
 #| fig-width: 6
 #| fig-height: 5
 plot_cg_vs_epi("bmi", 30, "BMI >= 30")
+```
+
+## 10.6 Sex
+
+```{r}
+#| label: jx-scatter-cg-epi-sex
+#| fig-width: 6
+#| fig-height: 5
+d_sex <- dat %>%
+  filter(!is.na(cockcroft), !is.na(ckd_epi_gfr_cre_cys_unindex), !is.na(sex))
+
+ggplot(d_sex, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex,
+                  color = sex)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed",
+              color = "grey50") +
+  geom_point(alpha = 0.6, size = 1.6) +
+  scale_color_manual(values = c("Female" = "#1F78B4", "Male" = "#E31A1C")) +
+  coord_cartesian(xlim = c(0, 200), ylim = c(0, 200)) +
+  labs(x = "Cockcroft-Gault eGFR (mL/min)",
+       y = "CKD-EPI Cr-Cys eGFR, unindexed (mL/min)",
+       color = NULL,
+       title = sprintf("Sex   |   N = %d (Female %d, Male %d)",
+                       nrow(d_sex),
+                       sum(d_sex$sex == "Female"),
+                       sum(d_sex$sex == "Male"))) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "top")
 ```

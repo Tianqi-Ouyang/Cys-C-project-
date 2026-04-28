@@ -93,27 +93,37 @@ ggplot(dose_long, aes(x = dose_mg, fill = dose_type)) +
 
 ## 2.2 Signed Dose Discrepancy Distribution
 
-Signed dose discrepancy = actual carboplatin dose - predicted dose (CKD-EPI Cr-Cys). Bars are coloured differently on either side of 0.
+Smooth kernel density estimate of the signed dose discrepancy (actual − predicted, CKD-EPI Cr-Cys). The area under the curve is shaded by sign — negative (under-dosed region) on one side, positive on the other.
 
 ```{r}
 #| label: jx-auc3-dose-discrep-hist
 #| fig-width: 9
 #| fig-height: 5
-dose_hist <- dat %>%
-  filter(!is.na(signed_dose_discrep_cat)) %>%
-  mutate(side = ifelse(as.integer(signed_dose_discrep_cat) <= 5, "neg", "pos"))
+dose_vals <- dat %>%
+  filter(!is.na(dose_discrepancy)) %>%
+  pull(dose_discrepancy)
 
-ggplot(dose_hist, aes(x = signed_dose_discrep_cat, fill = side)) +
-  geom_bar(color = "black", alpha = 0.8) +
-  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 3.8) +
-  geom_vline(xintercept = 5.5, linetype = "dashed", color = "grey40") +
+dens <- density(dose_vals, n = 512)
+y_at_zero <- approx(dens$x, dens$y, xout = 0)$y
+
+dens_df <- tibble(x = dens$x, y = dens$y) %>%
+  bind_rows(tibble(x = 0, y = y_at_zero)) %>%
+  arrange(x)
+
+neg_part <- dens_df %>% filter(x <= 0) %>% mutate(side = "neg")
+pos_part <- dens_df %>% filter(x >= 0) %>% mutate(side = "pos")
+plot_df  <- bind_rows(neg_part, pos_part)
+
+ggplot() +
+  geom_area(data = plot_df, aes(x = x, y = y, fill = side), alpha = 0.6) +
+  geom_line(data = dens_df, aes(x = x, y = y), linewidth = 0.6, color = "black") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey40") +
   scale_fill_manual(values = c(neg = "#E31A1C", pos = "#1F78B4"),
                     guide = "none") +
   labs(title = "Distribution of Signed Dose Discrepancy (Carboplatin AUC ≥ 3)",
        x = "Dose Discrepancy (mg) = actual - predicted",
-       y = "Number of Patients") +
-  theme_minimal(base_size = 13) +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+       y = "Density") +
+  theme_minimal(base_size = 13)
 ```
 
 # 3 Table 1: Baseline Characteristics (Carboplatin AUC ≥ 3)
@@ -148,12 +158,13 @@ dat %>%
 ratio_hist <- dat %>% filter(!is.na(egfr_ratio))
 
 ggplot(ratio_hist, aes(x = egfr_ratio)) +
-  geom_histogram(binwidth = 0.1, boundary = 0,
+  geom_histogram(aes(y = after_stat(count) / sum(after_stat(count)) * 100),
+                 binwidth = 0.1, boundary = 0,
                  fill = "steelblue", color = "black", alpha = 0.7) +
   geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
   labs(title = "Distribution of eGFR Ratio (Carboplatin AUC ≥ 3)",
        x = "eGFR Ratio",
-       y = "Number of Patients") +
+       y = "Percent of Patients (%)") +
   scale_x_continuous(breaks = seq(0, 3, 0.2)) +
   theme_minimal(base_size = 14)
 ```
