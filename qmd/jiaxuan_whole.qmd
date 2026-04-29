@@ -1008,7 +1008,7 @@ ggplot(d_sex, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex,
   geom_abline(slope = 1, intercept = 0, linetype = "dashed",
               color = "grey50") +
   geom_point(alpha = 0.6, size = 1.6) +
-  scale_color_manual(values = c("Female" = "#1F78B4", "Male" = "#E31A1C")) +
+  scale_color_manual(values = c("Female" = "#E31A1C", "Male" = "grey60")) +
   coord_cartesian(xlim = c(0, 200), ylim = c(0, 200)) +
   labs(x = "Cockcroft-Gault eGFR (mL/min)",
        y = "CKD-EPI Cr-Cys eGFR, unindexed (mL/min)",
