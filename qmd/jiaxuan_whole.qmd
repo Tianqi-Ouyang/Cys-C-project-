@@ -75,7 +75,6 @@ ggplot(ratio_hist, aes(x = egfr_ratio)) +
   geom_histogram(aes(y = after_stat(count) / sum(after_stat(count)) * 100),
                  binwidth = 0.1, boundary = 0,
                  fill = "steelblue", color = "black", alpha = 0.7) +
-  geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
   labs(title = "Distribution of eGFR Ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault)",
        x = "eGFR Ratio",
        y = "Percent of Patients (%)") +
