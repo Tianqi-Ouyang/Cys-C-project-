@@ -1336,12 +1336,9 @@ ggplot(dat %>% filter(!is.na(dose_discrepancy)),
 
 # 14 Adjusted CIF — Dose Discrepancy >= +25 mg (Carboplatin AUC ≥ 3)
 
-Standardized cumulative incidence functions for each competing-risk outcome, contrasting patients with `dose_discrepancy >= 25` (red) against those with `dose_discrepancy < 25` (blue). Two methods are overlaid in each panel:
+Standardized cumulative incidence functions for each competing-risk outcome, contrasting patients with `dose_discrepancy >= 25` (red) against those with `dose_discrepancy < 25` (blue). The Fine-Gray model is fit with the binary exposure plus the same adjuster set used in Section 7. Curves are *adjusted (standardized)* via g-computation: for every patient, predict CIF under exposure = 1 and under exposure = 0, then average the two CIF curves over the cohort. Y-axis is cumulative incidence, x-axis is days from baseline.
 
-- **Solid line — Fine-Gray (FG):** subdistribution hazard model fit with the binary exposure + the same adjusters as Section 7. CIFs predicted via `predict.crr()` under counterfactual exposure values for every patient, averaged across the cohort.
-- **Dashed line — Cause-specific Cox (CSH):** two Cox models (one for the event with death censored, one for death with the event censored) using the same exposure + adjuster set. Patient-level CIFs are reconstructed from the baseline cumulative hazards and linear predictors, then averaged across the cohort.
-
-The subtitle reports both binary-exposure hazard ratios with 95 % CIs and Wald p-values. Y-axis is cumulative incidence; x-axis is days from baseline.
+90-day death (Section 14.11) is modelled with Cox PH instead of Fine-Gray (no competing event), and the standardized cumulative-incidence-of-death curve is `1 − S(t|Xᵢ)` averaged across the cohort.
 
 ```{r}
 #| label: jx-auc3-adjcif-helper
@@ -1362,116 +1359,115 @@ adj_cif <- function(time_var, status_var, extra_pre = NULL, label) {
   stat_num <- suppressWarnings(as.integer(as.character(d[[status_var]])))
   time_num <- as.numeric(d[[time_var]])
 
+  fit <- cmprsk::crr(ftime = time_num, fstatus = stat_num,
+                     cov1 = X_full, failcode = 1)
+
+  # subHR (95% CI) for the binary exposure, extracted from the same FG fit
+  # dose_discrep_ge25 is the first column of cov1 (entered first in the formula)
+  beta_e <- unname(fit$coef[1])
+  se_e   <- sqrt(fit$var[1, 1])
+  hr     <- exp(beta_e)
+  lcl    <- exp(beta_e - 1.96 * se_e)
+  ucl    <- exp(beta_e + 1.96 * se_e)
+  pval   <- 2 * (1 - pnorm(abs(beta_e / se_e)))
+  p_str  <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+  subtitle_str <- sprintf(
+    "Discrep >= +25 vs <+25: subHR = %.2f (95%% CI %.2f-%.2f), p = %s",
+    hr, lcl, ucl, p_str
+  )
+
   X0 <- X_full; X0[, "dose_discrep_ge25"] <- 0
   X1 <- X_full; X1[, "dose_discrep_ge25"] <- 1
 
-  fmt_p <- function(p) ifelse(p < 0.001, "<0.001", sprintf("%.3f", p))
+  pred0 <- predict(fit, X0)
+  pred1 <- predict(fit, X1)
 
-  ## ---- Fine-Gray ----------------------------------------------------------
-  fit_fg <- cmprsk::crr(ftime = time_num, fstatus = stat_num,
-                        cov1 = X_full, failcode = 1)
-  beta_fg <- unname(fit_fg$coef[1])
-  se_fg   <- sqrt(fit_fg$var[1, 1])
-  hr_fg   <- exp(beta_fg)
-  lcl_fg  <- exp(beta_fg - 1.96 * se_fg)
-  ucl_fg  <- exp(beta_fg + 1.96 * se_fg)
-  p_fg    <- 2 * (1 - pnorm(abs(beta_fg / se_fg)))
+  times <- pred0[, 1]
+  cif0  <- rowMeans(pred0[, -1, drop = FALSE])
+  cif1  <- rowMeans(pred1[, -1, drop = FALSE])
 
-  pred0_fg <- predict(fit_fg, X0)
-  pred1_fg <- predict(fit_fg, X1)
-  times_fg <- pred0_fg[, 1]
-  cif0_fg  <- rowMeans(pred0_fg[, -1, drop = FALSE])
-  cif1_fg  <- rowMeans(pred1_fg[, -1, drop = FALSE])
-
-  ## ---- Cause-specific Cox -------------------------------------------------
-  d2 <- as.data.frame(X_full, check.names = FALSE)
-  d2$.time_  <- time_num
-  d2$.event_ <- as.integer(stat_num == 1)
-  d2$.death_ <- as.integer(stat_num == 2)
-  rhs <- paste(sprintf("`%s`", colnames(X_full)), collapse = " + ")
-
-  fit1 <- survival::coxph(
-    as.formula(paste("survival::Surv(.time_, .event_) ~", rhs)),
-    data = d2)
-  fit2 <- survival::coxph(
-    as.formula(paste("survival::Surv(.time_, .death_) ~", rhs)),
-    data = d2)
-
-  beta_cox <- unname(coef(fit1)["dose_discrep_ge25"])
-  se_cox   <- sqrt(vcov(fit1)["dose_discrep_ge25", "dose_discrep_ge25"])
-  hr_cox   <- exp(beta_cox)
-  lcl_cox  <- exp(beta_cox - 1.96 * se_cox)
-  ucl_cox  <- exp(beta_cox + 1.96 * se_cox)
-  p_cox    <- 2 * (1 - pnorm(abs(beta_cox / se_cox)))
-
-  bh1 <- survival::basehaz(fit1, centered = FALSE)
-  bh2 <- survival::basehaz(fit2, centered = FALSE)
-  beta1 <- coef(fit1); beta2 <- coef(fit2)
-
-  align <- function(t_query, bh_df) {
-    idx <- findInterval(t_query, bh_df$time)
-    H   <- numeric(length(t_query))
-    pos <- idx > 0
-    if (any(pos)) H[pos] <- bh_df$hazard[idx[pos]]
-    H
-  }
-  times_cox <- sort(unique(c(0, bh1$time, bh2$time)))
-  H1_base <- align(times_cox, bh1)
-  H2_base <- align(times_cox, bh2)
-
-  compute_avg_cif <- function(Xmat) {
-    lp1 <- as.vector(Xmat %*% beta1)
-    lp2 <- as.vector(Xmat %*% beta2)
-    H1  <- H1_base %o% exp(lp1)
-    H2  <- H2_base %o% exp(lp2)
-    dH1 <- rbind(H1[1, , drop = FALSE], diff(H1))
-    Htotal <- H1 + H2
-    Htotal_prev <- rbind(matrix(0, 1, ncol(Htotal)),
-                         Htotal[-nrow(Htotal), , drop = FALSE])
-    S_prev <- exp(-Htotal_prev)
-    cif_inc <- S_prev * (1 - exp(-dH1))
-    rowMeans(apply(cif_inc, 2, cumsum))
-  }
-  cif0_cox <- compute_avg_cif(X0)
-  cif1_cox <- compute_avg_cif(X1)
-
-  ## ---- Plot ---------------------------------------------------------------
   df <- bind_rows(
-    tibble(time = times_fg,  cif = cif0_fg,  group = "Discrep < +25 mg",
-           method = "Fine-Gray"),
-    tibble(time = times_fg,  cif = cif1_fg,  group = "Discrep >= +25 mg",
-           method = "Fine-Gray"),
-    tibble(time = times_cox, cif = cif0_cox, group = "Discrep < +25 mg",
-           method = "Cause-specific Cox"),
-    tibble(time = times_cox, cif = cif1_cox, group = "Discrep >= +25 mg",
-           method = "Cause-specific Cox")
+    tibble(time = times, cif = cif0, group = "Discrep < +25 mg"),
+    tibble(time = times, cif = cif1, group = "Discrep >= +25 mg")
   )
-  df$method <- factor(df$method, levels = c("Fine-Gray", "Cause-specific Cox"))
 
   ymax <- max(df$cif, na.rm = TRUE)
 
-  subtitle_str <- sprintf(
-    "FG subHR = %.2f (%.2f-%.2f, p = %s)  |  Cox CSH HR = %.2f (%.2f-%.2f, p = %s)",
-    hr_fg, lcl_fg, ucl_fg, fmt_p(p_fg),
-    hr_cox, lcl_cox, ucl_cox, fmt_p(p_cox)
-  )
-
-  ggplot(df, aes(x = time, y = cif, color = group, linetype = method)) +
-    geom_step(linewidth = 0.9) +
+  ggplot(df, aes(x = time, y = cif, color = group)) +
+    geom_step(linewidth = 1) +
     scale_color_manual(values = c("Discrep < +25 mg"  = "#1F78B4",
                                   "Discrep >= +25 mg" = "#E31A1C")) +
-    scale_linetype_manual(values = c("Fine-Gray"          = "solid",
-                                     "Cause-specific Cox" = "dashed")) +
     coord_cartesian(ylim = c(0, max(0.05, ymax * 1.05))) +
     labs(x = "Days from baseline",
          y = "Cumulative incidence",
-         color = NULL, linetype = NULL,
+         color = NULL,
          title = label,
          subtitle = subtitle_str) +
     theme_minimal(base_size = 11) +
     theme(legend.position = "top",
-          legend.box = "horizontal",
-          plot.subtitle = element_text(size = 9, color = "grey25"))
+          plot.subtitle = element_text(size = 10, color = "grey25"))
+}
+
+adj_death_curve <- function(time_var = "time_to_death_90",
+                            status_var = "death_90", label) {
+  base_adj <- c("age","sex","score","ecog_score_cat2",
+                "cancer_type_cat_7","tumor_stage","high_dose",
+                "Paclitaxel","Pemetrexed","Gemcitabine","ici",
+                "bmi","smoking","steroids","thyroid","cockcroft")
+  vars <- c("dose_discrep_ge25", base_adj)
+  d <- dat %>%
+    dplyr::select(all_of(c(time_var, status_var, vars))) %>%
+    tidyr::drop_na()
+
+  rhs <- paste(c("dose_discrep_ge25", base_adj), collapse = " + ")
+  fmla <- as.formula(sprintf("survival::Surv(%s, %s) ~ %s",
+                             time_var, status_var, rhs))
+  fit <- survival::coxph(fmla, data = d)
+
+  beta_e <- unname(coef(fit)["dose_discrep_ge25"])
+  se_e   <- sqrt(vcov(fit)["dose_discrep_ge25", "dose_discrep_ge25"])
+  hr     <- exp(beta_e)
+  lcl    <- exp(beta_e - 1.96 * se_e)
+  ucl    <- exp(beta_e + 1.96 * se_e)
+  pval   <- 2 * (1 - pnorm(abs(beta_e / se_e)))
+  p_str  <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+  subtitle_str <- sprintf(
+    "Discrep >= +25 vs <+25: HR = %.2f (95%% CI %.2f-%.2f), p = %s   (Cox PH)",
+    hr, lcl, ucl, p_str
+  )
+
+  d0 <- d; d0$dose_discrep_ge25 <- 0
+  d1 <- d; d1$dose_discrep_ge25 <- 1
+
+  sf0 <- survival::survfit(fit, newdata = d0)
+  sf1 <- survival::survfit(fit, newdata = d1)
+
+  s0 <- if (is.matrix(sf0$surv)) sf0$surv else as.matrix(sf0$surv)
+  s1 <- if (is.matrix(sf1$surv)) sf1$surv else as.matrix(sf1$surv)
+
+  cif0 <- 1 - rowMeans(s0)
+  cif1 <- 1 - rowMeans(s1)
+
+  df <- bind_rows(
+    tibble(time = sf0$time, cif = cif0, group = "Discrep < +25 mg"),
+    tibble(time = sf1$time, cif = cif1, group = "Discrep >= +25 mg")
+  )
+
+  ymax <- max(df$cif, na.rm = TRUE)
+
+  ggplot(df, aes(x = time, y = cif, color = group)) +
+    geom_step(linewidth = 1) +
+    scale_color_manual(values = c("Discrep < +25 mg"  = "#1F78B4",
+                                  "Discrep >= +25 mg" = "#E31A1C")) +
+    coord_cartesian(ylim = c(0, max(0.05, ymax * 1.05))) +
+    labs(x = "Days from baseline",
+         y = "Cumulative incidence (1 - S)",
+         color = NULL,
+         title = label,
+         subtitle = subtitle_str) +
+    theme_minimal(base_size = 11) +
+    theme(legend.position = "top",
+          plot.subtitle = element_text(size = 10, color = "grey25"))
 }
 ```
 
@@ -1573,4 +1569,13 @@ adj_cif("cmp_time_any_hosp", "cmp_status_any_hosp",
 #| fig-height: 4
 adj_cif("cmp_time_side_effect", "cmp_status_side_effect",
         NULL, "Platinum-Related Hospitalization")
+```
+
+## 14.11 90-Day Death (Cox PH)
+
+```{r}
+#| label: jx-auc3-adjcif-death
+#| fig-width: 7
+#| fig-height: 4
+adj_death_curve("time_to_death_90", "death_90", "90-Day Death")
 ```

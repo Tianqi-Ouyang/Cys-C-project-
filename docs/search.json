@@ -3659,5 +3659,19 @@
     "title": "Jiaxuan Project — Whole Cohort",
     "section": "10.6 Sex",
     "text": "10.6 Sex\n\n\nCode\nd_sex &lt;- dat %&gt;%\n  filter(!is.na(cockcroft), !is.na(ckd_epi_gfr_cre_cys_unindex), !is.na(sex))\n\nggplot(d_sex, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex,\n                  color = sex)) +\n  geom_abline(slope = 1, intercept = 0, linetype = \"dashed\",\n              color = \"grey50\") +\n  geom_point(alpha = 0.6, size = 1.6) +\n  scale_color_manual(values = c(\"Female\" = \"#1F78B4\", \"Male\" = \"#E31A1C\")) +\n  coord_cartesian(xlim = c(0, 200), ylim = c(0, 200)) +\n  labs(x = \"Cockcroft-Gault eGFR (mL/min)\",\n       y = \"CKD-EPI Cr-Cys eGFR, unindexed (mL/min)\",\n       color = NULL,\n       title = sprintf(\"Sex   |   N = %d (Female %d, Male %d)\",\n                       nrow(d_sex),\n                       sum(d_sex$sex == \"Female\"),\n                       sum(d_sex$sex == \"Male\"))) +\n  theme_minimal(base_size = 11) +\n  theme(legend.position = \"top\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#day-death-cox-ph-7",
+    "href": "qmd/jiaxuan_carbo.html#day-death-cox-ph-7",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "14.11 90-Day Death (Cox PH)",
+    "text": "14.11 90-Day Death (Cox PH)\n\n\nCode\nadj_death_curve(\"time_to_death_90\", \"death_90\", \"90-Day Death\")"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#day-death-cox-ph-7",
+    "href": "qmd/jiaxuan_carbo_auc3.html#day-death-cox-ph-7",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "14.11 90-Day Death (Cox PH)",
+    "text": "14.11 90-Day Death (Cox PH)\n\n\nCode\nadj_death_curve(\"time_to_death_90\", \"death_90\", \"90-Day Death\")"
   }
 ]
