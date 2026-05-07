@@ -1651,3 +1651,17 @@ adj_cif("cmp_time_side_effect", "cmp_status_side_effect",
 #| fig-height: 4
 adj_death_curve("time_to_death_90", "death_90", "90-Day Death")
 ```
+
+# 15 Paper
+
+```{r}
+#| label: jx-carbo-paper-stats
+#| include: false
+n_excess  <- sum(dat$dose_discrep_ge25 == 1, na.rm = TRUE)
+n_with_dx <- sum(!is.na(dat$dose_discrepancy))
+pct_excess <- round(n_excess / n_with_dx * 100, 1)
+```
+
+A total of `r n_excess` (`r pct_excess`%) patients received an excess dose of carboplatin, defined as ≥ 25 mg higher than the dose that would have been predicted using the CKD-EPI eGFR~CR-CYS~ equation adjusted for actual BSA.
+
+(Denominator: `r n_with_dx` carboplatin patients with a computable predicted dose.)
