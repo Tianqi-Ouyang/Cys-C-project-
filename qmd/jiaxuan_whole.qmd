@@ -658,6 +658,17 @@ plot_subhr_linear_disc <- function(time_var, status_var, extra_adj = NULL,
 
   beta   <- fit$coef[1]
   V_beta <- fit$var[1, 1]
+  se_b   <- sqrt(V_beta)
+
+  # subHR summaries: per 1 mL/min, and per IQR (Q3 - Q1) of egfr_discrepancy
+  q1    <- as.numeric(quantile(d$egfr_discrepancy, 0.25, na.rm = TRUE))
+  q3    <- as.numeric(quantile(d$egfr_discrepancy, 0.75, na.rm = TRUE))
+  iqr_w <- q3 - q1
+  hr1   <- exp(beta);             hr1_l <- exp(beta - 1.96 * se_b);             hr1_u <- exp(beta + 1.96 * se_b)
+  hri   <- exp(beta * iqr_w);     hri_l <- exp(beta * iqr_w - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(beta * iqr_w + 1.96 * abs(iqr_w) * se_b)
+  subtitle_str <- sprintf(
+    "subHR per 1 mL/min: %.2f (%.2f-%.2f)  |  per IQR (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
+    hr1, hr1_l, hr1_u, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_discrepancy, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_discrepancy, 0.025, na.rm = TRUE),
@@ -679,11 +690,15 @@ plot_subhr_linear_disc <- function(time_var, status_var, extra_adj = NULL,
     geom_line(color = "darkorange", linewidth = 1) +
     geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
     geom_vline(xintercept = ref_x, linetype = "dotted", color = "grey40") +
+    geom_vline(xintercept = c(q1, q3), linetype = "dashed",
+               color = "steelblue", alpha = 0.7) +
     labs(x = "eGFR Discrepancy (mL/min)",
          y = "subHR (95% CI)",
-         title = outcome_label) +
+         title = outcome_label,
+         subtitle = subtitle_str) +
     coord_cartesian(ylim = c(0, 4)) +
-    theme_minimal(base_size = 11)
+    theme_minimal(base_size = 11) +
+    theme(plot.subtitle = element_text(size = 9, color = "grey25"))
 }
 
 plot_cox_linear_disc <- function(time_var, status_var, extra_adj = NULL,
@@ -703,6 +718,16 @@ plot_cox_linear_disc <- function(time_var, status_var, extra_adj = NULL,
 
   beta   <- coef(fit)["egfr_discrepancy"]
   V_beta <- vcov(fit)["egfr_discrepancy", "egfr_discrepancy"]
+  se_b   <- sqrt(V_beta)
+
+  q1    <- as.numeric(quantile(d$egfr_discrepancy, 0.25, na.rm = TRUE))
+  q3    <- as.numeric(quantile(d$egfr_discrepancy, 0.75, na.rm = TRUE))
+  iqr_w <- q3 - q1
+  hr1   <- exp(beta);             hr1_l <- exp(beta - 1.96 * se_b);             hr1_u <- exp(beta + 1.96 * se_b)
+  hri   <- exp(beta * iqr_w);     hri_l <- exp(beta * iqr_w - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(beta * iqr_w + 1.96 * abs(iqr_w) * se_b)
+  subtitle_str <- sprintf(
+    "HR per 1 mL/min: %.2f (%.2f-%.2f)  |  per IQR (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
+    hr1, hr1_l, hr1_u, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_discrepancy, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_discrepancy, 0.025, na.rm = TRUE),
@@ -724,11 +749,15 @@ plot_cox_linear_disc <- function(time_var, status_var, extra_adj = NULL,
     geom_line(color = "darkorange", linewidth = 1) +
     geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
     geom_vline(xintercept = ref_x, linetype = "dotted", color = "grey40") +
+    geom_vline(xintercept = c(q1, q3), linetype = "dashed",
+               color = "steelblue", alpha = 0.7) +
     labs(x = "eGFR Discrepancy (mL/min)",
          y = "HR (95% CI)",
-         title = outcome_label) +
+         title = outcome_label,
+         subtitle = subtitle_str) +
     coord_cartesian(ylim = c(0, 4)) +
-    theme_minimal(base_size = 11)
+    theme_minimal(base_size = 11) +
+    theme(plot.subtitle = element_text(size = 9, color = "grey25"))
 }
 ```
 
