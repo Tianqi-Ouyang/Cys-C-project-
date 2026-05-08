@@ -572,6 +572,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Days from baseline to hospitalization by reason (90 if none)</td>
 </tr>
 <tr class="odd">
+<td><code>event_hosp_immune_other</code></td>
+<td>Binary: 1 if hospitalised for Immune-related AE (<code>hosp_9</code>) OR Other (<code>hosp_11</code>)</td>
+</tr>
+<tr class="even">
+<td><code>time_to_event_hosp_immune_other</code></td>
+<td>Earliest of <code>time_to_event_hosp_9</code> and <code>time_to_event_hosp_11</code> (90 if neither occurred)</td>
+</tr>
+<tr class="odd">
 <td><code>side_effect</code></td>
 <td>Binary: 1 if any hospitalization for reasons 1–7 (platinum-related AEs)</td>
 </tr>
@@ -2356,23 +2364,39 @@ Thoracic   Breast       GI       GU      GYN    HEENT    Other
 <span id="cb57-37"><a href="#cb57-37" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_10, <span class="at">event_status =</span> event_hosp_10, <span class="at">name =</span> <span class="st">"hosp_10"</span>)</span>
 <span id="cb57-38"><a href="#cb57-38" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master, <span class="at">event_time =</span> time_to_event_hosp_11, <span class="at">event_status =</span> event_hosp_11, <span class="at">name =</span> <span class="st">"hosp_11"</span>)</span>
 <span id="cb57-39"><a href="#cb57-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-40"><a href="#cb57-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Overall hospitalization (any reason 1–11)</span></span>
-<span id="cb57-41"><a href="#cb57-41" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master,</span>
-<span id="cb57-42"><a href="#cb57-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_time =</span> time_to_any_hosp, <span class="at">event_status =</span> any_hosp, <span class="at">name =</span> <span class="st">"any_hosp"</span>)</span>
-<span id="cb57-43"><a href="#cb57-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-44"><a href="#cb57-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert all cmp_status_* columns to factor (required by tidycmprsk)</span></span>
+<span id="cb57-40"><a href="#cb57-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Combined Immune-related AE (hosp_9) &amp; Other (hosp_11): event = 1 if either</span></span>
+<span id="cb57-41"><a href="#cb57-41" aria-hidden="true" tabindex="-1"></a><span class="co"># occurred within 90 days, time = earliest of the two (90 if neither). All</span></span>
+<span id="cb57-42"><a href="#cb57-42" aria-hidden="true" tabindex="-1"></a><span class="co"># event/time variables already follow the convention "time = 90 if no event",</span></span>
+<span id="cb57-43"><a href="#cb57-43" aria-hidden="true" tabindex="-1"></a><span class="co"># so pmin() naturally yields the earliest event time when one or both occurred,</span></span>
+<span id="cb57-44"><a href="#cb57-44" aria-hidden="true" tabindex="-1"></a><span class="co"># and 90 when neither did.</span></span>
 <span id="cb57-45"><a href="#cb57-45" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
-<span id="cb57-46"><a href="#cb57-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"cmp_status_"</span>), as.factor))</span>
-<span id="cb57-47"><a href="#cb57-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-48"><a href="#cb57-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop record 911 — all RPDR pre-baseline labs are NA (see Section 6.1 note).</span></span>
-<span id="cb57-49"><a href="#cb57-49" aria-hidden="true" tabindex="-1"></a><span class="co"># This patient's nearest RPDR labs are ~189 days before baseline, well outside</span></span>
-<span id="cb57-50"><a href="#cb57-50" aria-hidden="true" tabindex="-1"></a><span class="co"># the 45-day pre_lab() window, so they are dropped from every Fine-Gray model</span></span>
-<span id="cb57-51"><a href="#cb57-51" aria-hidden="true" tabindex="-1"></a><span class="co"># via complete-case analysis anyway. Removing them up front keeps the cohort</span></span>
-<span id="cb57-52"><a href="#cb57-52" aria-hidden="true" tabindex="-1"></a><span class="co"># denominator consistent across tables and plots.</span></span>
-<span id="cb57-53"><a href="#cb57-53" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">filter</span>(record_id <span class="sc">!=</span> <span class="dv">911</span>)</span>
-<span id="cb57-54"><a href="#cb57-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-55"><a href="#cb57-55" aria-hidden="true" tabindex="-1"></a><span class="co"># Save final_master for use by analysis.qmd</span></span>
-<span id="cb57-56"><a href="#cb57-56" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_master, <span class="st">"jiaxuan_final_master.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb57-46"><a href="#cb57-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb57-47"><a href="#cb57-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">event_hosp_immune_other =</span> <span class="fu">pmax</span>(event_hosp_9, event_hosp_11, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-48"><a href="#cb57-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_to_event_hosp_immune_other =</span> <span class="fu">pmin</span>(time_to_event_hosp_9,</span>
+<span id="cb57-49"><a href="#cb57-49" aria-hidden="true" tabindex="-1"></a>                                           time_to_event_hosp_11, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb57-50"><a href="#cb57-50" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb57-51"><a href="#cb57-51" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master,</span>
+<span id="cb57-52"><a href="#cb57-52" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_time =</span> time_to_event_hosp_immune_other,</span>
+<span id="cb57-53"><a href="#cb57-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_status =</span> event_hosp_immune_other,</span>
+<span id="cb57-54"><a href="#cb57-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">"hosp_immune_other"</span>)</span>
+<span id="cb57-55"><a href="#cb57-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-56"><a href="#cb57-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Overall hospitalization (any reason 1–11)</span></span>
+<span id="cb57-57"><a href="#cb57-57" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> <span class="fu">cmp_variable</span>(final_master,</span>
+<span id="cb57-58"><a href="#cb57-58" aria-hidden="true" tabindex="-1"></a>  <span class="at">event_time =</span> time_to_any_hosp, <span class="at">event_status =</span> any_hosp, <span class="at">name =</span> <span class="st">"any_hosp"</span>)</span>
+<span id="cb57-59"><a href="#cb57-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-60"><a href="#cb57-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert all cmp_status_* columns to factor (required by tidycmprsk)</span></span>
+<span id="cb57-61"><a href="#cb57-61" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span></span>
+<span id="cb57-62"><a href="#cb57-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"cmp_status_"</span>), as.factor))</span>
+<span id="cb57-63"><a href="#cb57-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-64"><a href="#cb57-64" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop record 911 — all RPDR pre-baseline labs are NA (see Section 6.1 note).</span></span>
+<span id="cb57-65"><a href="#cb57-65" aria-hidden="true" tabindex="-1"></a><span class="co"># This patient's nearest RPDR labs are ~189 days before baseline, well outside</span></span>
+<span id="cb57-66"><a href="#cb57-66" aria-hidden="true" tabindex="-1"></a><span class="co"># the 45-day pre_lab() window, so they are dropped from every Fine-Gray model</span></span>
+<span id="cb57-67"><a href="#cb57-67" aria-hidden="true" tabindex="-1"></a><span class="co"># via complete-case analysis anyway. Removing them up front keeps the cohort</span></span>
+<span id="cb57-68"><a href="#cb57-68" aria-hidden="true" tabindex="-1"></a><span class="co"># denominator consistent across tables and plots.</span></span>
+<span id="cb57-69"><a href="#cb57-69" aria-hidden="true" tabindex="-1"></a>final_master <span class="ot">&lt;-</span> final_master <span class="sc">%&gt;%</span> <span class="fu">filter</span>(record_id <span class="sc">!=</span> <span class="dv">911</span>)</span>
+<span id="cb57-70"><a href="#cb57-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-71"><a href="#cb57-71" aria-hidden="true" tabindex="-1"></a><span class="co"># Save final_master for use by analysis.qmd</span></span>
+<span id="cb57-72"><a href="#cb57-72" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(final_master, <span class="st">"jiaxuan_final_master.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>

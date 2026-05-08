@@ -1366,14 +1366,17 @@ plot_subhr_linear_ratio("cmp_time_hosp_8", "cmp_status_hosp_8",
                         NULL, "Cancer Progression (Carboplatin AUC ≥ 3)")
 ```
 
-## 12.9 Immune-related AE
+## 12.9 Immune-related AE & Other
+
+Composite competing-risk outcome combining hospitalisations coded as Immune-related AE (reason 9) and Other (reason 11). Event = 1 if either occurred within 90 days; time = earliest of the two.
 
 ```{r}
-#| label: jx-auc3-linsubhr-ratio-hosp9
+#| label: jx-auc3-linsubhr-ratio-hosp-immune-other
 #| fig-width: 6
 #| fig-height: 4
-plot_subhr_linear_ratio("cmp_time_hosp_9", "cmp_status_hosp_9",
-                        NULL, "Immune-related AE (Carboplatin AUC ≥ 3)")
+plot_subhr_linear_ratio("cmp_time_hosp_immune_other",
+                        "cmp_status_hosp_immune_other",
+                        NULL, "Immune-related AE & Other (Carboplatin AUC ≥ 3)")
 ```
 
 ## 12.10 Planned Surgery/Port
@@ -1384,16 +1387,6 @@ plot_subhr_linear_ratio("cmp_time_hosp_9", "cmp_status_hosp_9",
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_10", "cmp_status_hosp_10",
                         NULL, "Planned Surgery/Port (Carboplatin AUC ≥ 3)")
-```
-
-## 12.11 Other
-
-```{r}
-#| label: jx-auc3-linsubhr-ratio-hosp11
-#| fig-width: 6
-#| fig-height: 4
-plot_subhr_linear_ratio("cmp_time_hosp_11", "cmp_status_hosp_11",
-                        NULL, "Other (Carboplatin AUC ≥ 3)")
 ```
 
 # 13 Scatter Plots — Dose Discrepancy vs eGFR (Carboplatin AUC ≥ 3)

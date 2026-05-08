@@ -97,6 +97,8 @@ Hospitalization reasons 1–11 per REDCap codebook:
 |---|---|
 | `event_hosp_1` … `event_hosp_11` | Binary: 1 if hospitalized for that reason within 90 days |
 | `time_to_event_hosp_1` … `time_to_event_hosp_11` | Days from baseline to hospitalization by reason (90 if none) |
+| `event_hosp_immune_other` | Binary: 1 if hospitalised for Immune-related AE (`hosp_9`) OR Other (`hosp_11`) |
+| `time_to_event_hosp_immune_other` | Earliest of `time_to_event_hosp_9` and `time_to_event_hosp_11` (90 if neither occurred) |
 | `side_effect` | Binary: 1 if any hospitalization for reasons 1–7 (platinum-related AEs) |
 | `time_to_side_effect` | Days to first platinum-related hospitalization (90 if none) |
 | `extra_ed_n` | Count of additional ED visits (beyond the first) |
@@ -1574,6 +1576,22 @@ final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_8,  e
 final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_9,  event_status = event_hosp_9,  name = "hosp_9")
 final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_10, event_status = event_hosp_10, name = "hosp_10")
 final_master <- cmp_variable(final_master, event_time = time_to_event_hosp_11, event_status = event_hosp_11, name = "hosp_11")
+
+# Combined Immune-related AE (hosp_9) & Other (hosp_11): event = 1 if either
+# occurred within 90 days, time = earliest of the two (90 if neither). All
+# event/time variables already follow the convention "time = 90 if no event",
+# so pmin() naturally yields the earliest event time when one or both occurred,
+# and 90 when neither did.
+final_master <- final_master %>%
+  mutate(
+    event_hosp_immune_other = pmax(event_hosp_9, event_hosp_11, na.rm = TRUE),
+    time_to_event_hosp_immune_other = pmin(time_to_event_hosp_9,
+                                           time_to_event_hosp_11, na.rm = TRUE)
+  )
+final_master <- cmp_variable(final_master,
+  event_time = time_to_event_hosp_immune_other,
+  event_status = event_hosp_immune_other,
+  name = "hosp_immune_other")
 
 # Overall hospitalization (any reason 1–11)
 final_master <- cmp_variable(final_master,
