@@ -22,11 +22,56 @@ library(tidycmprsk)
 library(ggsurvfit)
 library(gtsummary)
 library(flextable)
+library(rvg)
+library(officer)
 
 # Output directory for downloadable Word tables (placed under docs/ so the
 # rendered website can serve them from ../tables/carbo/<name>.docx).
 docx_dir <- "docs/tables/carbo"
 dir.create(docx_dir, recursive = TRUE, showWarnings = FALSE)
+
+# Output directory for editable PowerPoint copies of every figure. A knitr
+# plot hook (defined below) saves last_plot() to docs/pptx/carbo/<label>.pptx
+# and appends a download link after the figure in the rendered HTML.
+dir.create("docs/pptx/carbo", recursive = TRUE, showWarnings = FALSE)
+pptx_dir <- normalizePath("docs/pptx/carbo", mustWork = TRUE)
+pptx_rel_prefix <- "../pptx/carbo/"
+
+.pptx_written <- new.env()
+
+knitr::opts_chunk$set(fig.process = function(filename) {
+  label <- knitr::opts_current$get("label")
+  if (is.null(label)) return(filename)
+  p <- tryCatch(ggplot2::last_plot(), error = function(e) NULL)
+  if (is.null(p) || !inherits(p, "ggplot")) return(filename)
+  pptx_path <- file.path(pptx_dir, paste0(label, ".pptx"))
+  tryCatch({
+    doc <- officer::read_pptx()
+    doc <- officer::add_slide(doc, layout = "Title and Content",
+                              master = "Office Theme")
+    doc <- officer::ph_with(doc, rvg::dml(ggobj = p),
+                            location = officer::ph_location_type(type = "body"))
+    print(doc, target = pptx_path)
+    .pptx_written[[label]] <- paste0(pptx_rel_prefix, label, ".pptx")
+  }, error = function(e) NULL)
+  filename
+})
+
+local({
+  default_chunk_hook <- knitr::knit_hooks$get("chunk")
+  knitr::knit_hooks$set(chunk = function(x, options) {
+    out <- default_chunk_hook(x, options)
+    label <- options$label
+    if (!is.null(label) && !is.null(.pptx_written[[label]])) {
+      rel <- .pptx_written[[label]]
+      link <- sprintf(
+        '\n\n<p style="margin-top:-0.5em;font-size:0.9em;"><a href="%s" download>📊 Download as PowerPoint (editable)</a></p>\n\n',
+        rel)
+      out <- paste0(out, link)
+    }
+    out
+  })
+})
 
 save_tbl_docx <- function(tbl, docx_name) {
   ft <- gtsummary::as_flex_table(tbl)
