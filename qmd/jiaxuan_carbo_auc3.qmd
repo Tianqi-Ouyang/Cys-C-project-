@@ -96,6 +96,10 @@ dat <- dat %>%
     egfr_ratio    = ckd_epi_gfr_cre_cys_unindex / cockcroft,
     egfr_ratio_per10 = -egfr_ratio * 10,  # per 0.1-unit *decrease* reporting scale
     egfr_discrepancy = ckd_epi_gfr_cre_cys_unindex - cockcroft,
+    # per-10-mL/min DECLINE reporting scale for eGFR discrepancy: HR for this
+    # variable reads as the multiplicative change in subHR per 10 mL/min lower
+    # discrepancy (i.e., when CKD-EPI Cr-Cys is 10 mL/min farther below CG).
+    egfr_disc_per10dec = -egfr_discrepancy / 10,
     # Dose discrepancy uses CAPPED eGFR (already computed in jiaxuan_data.qmd)
     dose_discrep_per25increase = dose_discrepancy / 25,
     abs_dose_discrep = abs(dose_discrepancy),
@@ -885,6 +889,91 @@ plot_cox_linear_ratio("time_to_death_90", "death_90",
 
 # 10 Linear subHR Curves — eGFR Discrepancy (raw scale) (Carboplatin AUC ≥ 3)
 
+## 10.0 Summary table: Fine-Gray subHR per 10 mL/min decline in eGFR discrepancy
+
+One row per outcome. Multivariable Fine-Gray model fit with `egfr_disc_per10dec = -egfr_discrepancy / 10` (positive when CKD-EPI Cr-Cys is below CG) plus the same adjusters used by the curves below (no `platin_group` in the AUC ≥ 3 cohort). The HR for `egfr_disc_per10dec` is the multiplicative change in subHR per **10 mL/min lower** eGFR discrepancy. 90-day death uses Cox PH.
+
+[📄 Download Word table](../tables/auc3/sec10_disc_summary.docx)
+
+```{r}
+#| label: jx-auc3-fg-disc-summary
+.disc_adj_set <- function(pre_labs = NULL) {
+  base_adj <- c("age","sex","score","ecog_score_cat2",
+                "cancer_type_cat_7","tumor_stage","high_dose",
+                "Paclitaxel","Pemetrexed","Gemcitabine","ici",
+                "bmi","smoking","steroids","thyroid")
+  if (!is.null(pre_labs)) base_adj <- c(base_adj, pre_labs)
+  base_adj
+}
+
+fg_disc_row <- function(time_var, status_var, label, pre_labs = NULL) {
+  adj <- .disc_adj_set(pre_labs)
+  d <- dat %>%
+    dplyr::select(all_of(c("egfr_disc_per10dec", time_var, status_var, adj))) %>%
+    tidyr::drop_na()
+  adj_df <- d[, adj, drop = FALSE]
+  X_adj  <- model.matrix(~ ., data = adj_df)[, -1, drop = FALSE]
+  X      <- cbind(egfr_disc_per10dec = d$egfr_disc_per10dec, X_adj)
+  stat_num <- suppressWarnings(as.integer(as.character(d[[status_var]])))
+  time_num <- as.numeric(d[[time_var]])
+  fit <- cmprsk::crr(time_num, stat_num, cov1 = X, failcode = 1)
+  b <- unname(fit$coef[1]); se <- sqrt(fit$var[1, 1])
+  hr <- exp(b); lcl <- exp(b - 1.96 * se); ucl <- exp(b + 1.96 * se)
+  pv <- 2 * (1 - pnorm(abs(b / se)))
+  tibble(
+    Outcome = label,
+    Model   = "Fine-Gray",
+    N       = nrow(d),
+    Events  = sum(stat_num == 1, na.rm = TRUE),
+    `(sub)HR (95% CI)` = sprintf("%.2f (%.2f, %.2f)", hr, lcl, ucl),
+    `p-value` = ifelse(pv < 0.001, "<0.001", sprintf("%.3f", pv))
+  )
+}
+
+cox_disc_row <- function(time_var, status_var, label, pre_labs = NULL) {
+  adj <- .disc_adj_set(pre_labs)
+  d <- dat %>%
+    dplyr::select(all_of(c("egfr_disc_per10dec", time_var, status_var, adj))) %>%
+    tidyr::drop_na()
+  fmla <- as.formula(paste0("Surv(", time_var, ", ", status_var,
+                            ") ~ egfr_disc_per10dec + ",
+                            paste(adj, collapse = " + ")))
+  fit <- survival::coxph(fmla, data = d)
+  b   <- unname(coef(fit)["egfr_disc_per10dec"])
+  se  <- sqrt(vcov(fit)["egfr_disc_per10dec", "egfr_disc_per10dec"])
+  hr  <- exp(b); lcl <- exp(b - 1.96 * se); ucl <- exp(b + 1.96 * se)
+  pv  <- 2 * (1 - pnorm(abs(b / se)))
+  tibble(
+    Outcome = label,
+    Model   = "Cox PH",
+    N       = nrow(d),
+    Events  = sum(d[[status_var]] == 1, na.rm = TRUE),
+    `(sub)HR (95% CI)` = sprintf("%.2f (%.2f, %.2f)", hr, lcl, ucl),
+    `p-value` = ifelse(pv < 0.001, "<0.001", sprintf("%.3f", pv))
+  )
+}
+
+disc_summary <- bind_rows(
+  fg_disc_row ("cmp_time_anemia_2",     "cmp_status_anemia_2",     "Anemia Grade 2",                   "pre_HGB_45days"),
+  fg_disc_row ("cmp_time_anemia_3",     "cmp_status_anemia_3",     "Anemia Grade 3",                   "pre_HGB_45days"),
+  fg_disc_row ("cmp_time_throm_2",      "cmp_status_throm_2",      "Thrombocytopenia Grade 2",         "pre_PLT_45days"),
+  fg_disc_row ("cmp_time_throm_3",      "cmp_status_throm_3",      "Thrombocytopenia Grade 3",         "pre_PLT_45days"),
+  fg_disc_row ("cmp_time_aki_2",        "cmp_status_aki_2",        "AKI Grade 2"),
+  fg_disc_row ("cmp_time_aki_kdigo",    "cmp_status_aki_kdigo",    "AKI (KDIGO)"),
+  fg_disc_row ("cmp_time_grade_2_aes",  "cmp_status_grade_2_aes",  "Composite Grade 2 AEs"),
+  fg_disc_row ("cmp_time_grade_3_aes",  "cmp_status_grade_3_aes",  "Composite Grade 3 AEs"),
+  fg_disc_row ("cmp_time_any_hosp",     "cmp_status_any_hosp",     "Overall Hospitalization"),
+  fg_disc_row ("cmp_time_side_effect",  "cmp_status_side_effect",  "Platinum-Related Hospitalization"),
+  cox_disc_row("time_to_death_90",      "death_90",                "90-Day Death")
+)
+
+ft_disc <- flextable::flextable(disc_summary) |>
+  flextable::set_caption("Multivariable (sub)HR per 10 mL/min decline in eGFR discrepancy (CKD-EPI Cr-Cys − Cockcroft-Gault) — Carboplatin AUC ≥ 3 cohort. Fine-Gray for competing-risk outcomes; Cox PH for 90-day death.") |>
+  flextable::autofit()
+flextable::save_as_docx(ft_disc,
+  path = file.path(docx_dir, "sec10_disc_summary.docx"))
+ft_disc
+```
 ```{r}
 #| label: jx-auc3-linsubhr-disc-egfr-helper
 plot_subhr_linear_egfrdisc <- function(time_var, status_var, extra_adj = NULL,
@@ -913,11 +1002,11 @@ plot_subhr_linear_egfrdisc <- function(time_var, status_var, extra_adj = NULL,
   q1    <- as.numeric(quantile(d$egfr_discrepancy, 0.25, na.rm = TRUE))
   q3    <- as.numeric(quantile(d$egfr_discrepancy, 0.75, na.rm = TRUE))
   iqr_w <- q3 - q1
-  hr1   <- exp(beta);             hr1_l <- exp(beta - 1.96 * se_b);             hr1_u <- exp(beta + 1.96 * se_b)
-  hri   <- exp(beta * iqr_w);     hri_l <- exp(beta * iqr_w - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(beta * iqr_w + 1.96 * abs(iqr_w) * se_b)
+  hr10  <- exp(-10 * beta);       hr10_l <- exp(-10 * beta - 1.96 * 10 * se_b);     hr10_u <- exp(-10 * beta + 1.96 * 10 * se_b)
+  hri   <- exp(-iqr_w * beta);    hri_l <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   subtitle_str <- sprintf(
-    "subHR per 1 mL/min: %.2f (%.2f-%.2f)  |  per IQR (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
-    hr1, hr1_l, hr1_u, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "subHR per 10 mL/min decline: %.2f (%.2f-%.2f)  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
+    hr10, hr10_l, hr10_u, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_discrepancy, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_discrepancy, 0.025, na.rm = TRUE),
@@ -972,11 +1061,11 @@ plot_cox_linear_egfrdisc <- function(time_var, status_var, extra_adj = NULL,
   q1    <- as.numeric(quantile(d$egfr_discrepancy, 0.25, na.rm = TRUE))
   q3    <- as.numeric(quantile(d$egfr_discrepancy, 0.75, na.rm = TRUE))
   iqr_w <- q3 - q1
-  hr1   <- exp(beta);             hr1_l <- exp(beta - 1.96 * se_b);             hr1_u <- exp(beta + 1.96 * se_b)
-  hri   <- exp(beta * iqr_w);     hri_l <- exp(beta * iqr_w - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(beta * iqr_w + 1.96 * abs(iqr_w) * se_b)
+  hr10  <- exp(-10 * beta);       hr10_l <- exp(-10 * beta - 1.96 * 10 * se_b);     hr10_u <- exp(-10 * beta + 1.96 * 10 * se_b)
+  hri   <- exp(-iqr_w * beta);    hri_l <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   subtitle_str <- sprintf(
-    "HR per 1 mL/min: %.2f (%.2f-%.2f)  |  per IQR (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
-    hr1, hr1_l, hr1_u, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "HR per 10 mL/min decline: %.2f (%.2f-%.2f)  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
+    hr10, hr10_l, hr10_u, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_discrepancy, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_discrepancy, 0.025, na.rm = TRUE),
