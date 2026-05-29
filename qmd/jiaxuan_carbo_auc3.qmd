@@ -703,6 +703,16 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
 
   beta   <- fit$coef[1]
   V_beta <- fit$var[1, 1]
+  se_b   <- sqrt(V_beta)
+
+  q1    <- as.numeric(quantile(d$egfr_ratio, 0.25, na.rm = TRUE))
+  q3    <- as.numeric(quantile(d$egfr_ratio, 0.75, na.rm = TRUE))
+  iqr_w <- q3 - q1
+  hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
+  hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
+  subtitle_str <- sprintf(
+    "subHR per 0.1 ratio decline: %.2f (%.2f-%.2f)  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
+    hr01, hr01_l, hr01_u, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_ratio, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_ratio, 0.025, na.rm = TRUE),
@@ -726,9 +736,11 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     geom_vline(xintercept = ref_x, linetype = "dotted", color = "grey40") +
     labs(x = "CKD-EPI Cr-Cys / CG ratio",
          y = "subHR (95% CI)",
-         title = outcome_label) +
+         title = outcome_label,
+         subtitle = subtitle_str) +
     coord_cartesian(xlim = c(0.65, 1.45), ylim = c(0, 4)) +
-    theme_minimal(base_size = 11)
+    theme_minimal(base_size = 11) +
+    theme(plot.subtitle = element_text(size = 9, color = "grey25"))
 }
 
 plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
@@ -748,6 +760,16 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
 
   beta   <- coef(fit)["egfr_ratio"]
   V_beta <- vcov(fit)["egfr_ratio", "egfr_ratio"]
+  se_b   <- sqrt(V_beta)
+
+  q1    <- as.numeric(quantile(d$egfr_ratio, 0.25, na.rm = TRUE))
+  q3    <- as.numeric(quantile(d$egfr_ratio, 0.75, na.rm = TRUE))
+  iqr_w <- q3 - q1
+  hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
+  hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
+  subtitle_str <- sprintf(
+    "HR per 0.1 ratio decline: %.2f (%.2f-%.2f)  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
+    hr01, hr01_l, hr01_u, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_ratio, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_ratio, 0.025, na.rm = TRUE),
@@ -771,9 +793,11 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     geom_vline(xintercept = ref_x, linetype = "dotted", color = "grey40") +
     labs(x = "CKD-EPI Cr-Cys / CG ratio",
          y = "HR (95% CI)",
-         title = outcome_label) +
+         title = outcome_label,
+         subtitle = subtitle_str) +
     coord_cartesian(xlim = c(0.65, 1.45), ylim = c(0, 4)) +
-    theme_minimal(base_size = 11)
+    theme_minimal(base_size = 11) +
+    theme(plot.subtitle = element_text(size = 9, color = "grey25"))
 }
 ```
 
