@@ -481,9 +481,11 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
   iqr_w <- q3 - q1
   hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
   hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
+  pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
+  p_str <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
   subtitle_str <- sprintf(
-    "subHR per 0.1 ratio decline: %.2f (%.2f-%.2f)  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
-    hr01, hr01_l, hr01_u, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "subHR per 0.1 ratio decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
+    hr01, hr01_l, hr01_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_ratio, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_ratio, 0.025, na.rm = TRUE),
@@ -555,9 +557,11 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
   iqr_w <- q3 - q1
   hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
   hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
+  pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
+  p_str <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
   subtitle_str <- sprintf(
-    "HR per 0.1 ratio decline: %.2f (%.2f-%.2f)  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
-    hr01, hr01_l, hr01_u, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "HR per 0.1 ratio decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
+    hr01, hr01_l, hr01_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_ratio, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_ratio, 0.025, na.rm = TRUE),
@@ -835,9 +839,11 @@ plot_subhr_linear_disc <- function(time_var, status_var, extra_adj = NULL,
   hr10  <- exp(-10 * beta);       hr10_l <- exp(-10 * beta - 1.96 * 10 * se_b);     hr10_u <- exp(-10 * beta + 1.96 * 10 * se_b)
   # per IQR DECLINE: HR = exp(-iqr_w * beta); SE on log scale = |iqr_w| * se_b
   hri   <- exp(-iqr_w * beta);    hri_l <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
+  pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
+  p_str <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
   subtitle_str <- sprintf(
-    "subHR per 10 mL/min decline: %.2f (%.2f-%.2f)  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
-    hr10, hr10_l, hr10_u, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "subHR per 10 mL/min decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
+    hr10, hr10_l, hr10_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_discrepancy, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_discrepancy, 0.025, na.rm = TRUE),
@@ -894,9 +900,11 @@ plot_cox_linear_disc <- function(time_var, status_var, extra_adj = NULL,
   iqr_w <- q3 - q1
   hr10  <- exp(-10 * beta);       hr10_l <- exp(-10 * beta - 1.96 * 10 * se_b);     hr10_u <- exp(-10 * beta + 1.96 * 10 * se_b)
   hri   <- exp(-iqr_w * beta);    hri_l <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
+  pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
+  p_str <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
   subtitle_str <- sprintf(
-    "HR per 10 mL/min decline: %.2f (%.2f-%.2f)  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
-    hr10, hr10_l, hr10_u, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "HR per 10 mL/min decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
+    hr10, hr10_l, hr10_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_discrepancy, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_discrepancy, 0.025, na.rm = TRUE),
