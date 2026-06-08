@@ -3715,5 +3715,236 @@
     "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
     "section": "10.0 Summary table: Fine-Gray subHR per 10 mL/min decline in eGFR discrepancy",
     "text": "10.0 Summary table: Fine-Gray subHR per 10 mL/min decline in eGFR discrepancy\nOne row per outcome. Multivariable Fine-Gray model fit with egfr_disc_per10dec = -egfr_discrepancy / 10 (positive when CKD-EPI Cr-Cys is below CG) plus the same adjusters used by the curves below (no platin_group in the AUC ≥ 3 cohort). The HR for egfr_disc_per10dec is the multiplicative change in subHR per 10 mL/min lower eGFR discrepancy. 90-day death uses Cox PH.\n📄 Download Word table\n\n\nCode\n.disc_adj_set &lt;- function(pre_labs = NULL) {\n  base_adj &lt;- c(\"age\",\"sex\",\"score\",\"ecog_score_cat2\",\n                \"cancer_type_cat_7\",\"tumor_stage\",\"high_dose\",\n                \"Paclitaxel\",\"Pemetrexed\",\"Gemcitabine\",\"ici\",\n                \"bmi\",\"smoking\",\"steroids\",\"thyroid\")\n  if (!is.null(pre_labs)) base_adj &lt;- c(base_adj, pre_labs)\n  base_adj\n}\n\nfg_disc_row &lt;- function(time_var, status_var, label, pre_labs = NULL) {\n  adj &lt;- .disc_adj_set(pre_labs)\n  d &lt;- dat %&gt;%\n    dplyr::select(all_of(c(\"egfr_disc_per10dec\", time_var, status_var, adj))) %&gt;%\n    tidyr::drop_na()\n  adj_df &lt;- d[, adj, drop = FALSE]\n  X_adj  &lt;- model.matrix(~ ., data = adj_df)[, -1, drop = FALSE]\n  X      &lt;- cbind(egfr_disc_per10dec = d$egfr_disc_per10dec, X_adj)\n  stat_num &lt;- suppressWarnings(as.integer(as.character(d[[status_var]])))\n  time_num &lt;- as.numeric(d[[time_var]])\n  fit &lt;- cmprsk::crr(time_num, stat_num, cov1 = X, failcode = 1)\n  b &lt;- unname(fit$coef[1]); se &lt;- sqrt(fit$var[1, 1])\n  hr &lt;- exp(b); lcl &lt;- exp(b - 1.96 * se); ucl &lt;- exp(b + 1.96 * se)\n  pv &lt;- 2 * (1 - pnorm(abs(b / se)))\n  tibble(\n    Outcome = label,\n    Model   = \"Fine-Gray\",\n    N       = nrow(d),\n    Events  = sum(stat_num == 1, na.rm = TRUE),\n    `(sub)HR (95% CI)` = sprintf(\"%.2f (%.2f, %.2f)\", hr, lcl, ucl),\n    `p-value` = ifelse(pv &lt; 0.001, \"&lt;0.001\", sprintf(\"%.3f\", pv))\n  )\n}\n\ncox_disc_row &lt;- function(time_var, status_var, label, pre_labs = NULL) {\n  adj &lt;- .disc_adj_set(pre_labs)\n  d &lt;- dat %&gt;%\n    dplyr::select(all_of(c(\"egfr_disc_per10dec\", time_var, status_var, adj))) %&gt;%\n    tidyr::drop_na()\n  fmla &lt;- as.formula(paste0(\"Surv(\", time_var, \", \", status_var,\n                            \") ~ egfr_disc_per10dec + \",\n                            paste(adj, collapse = \" + \")))\n  fit &lt;- survival::coxph(fmla, data = d)\n  b   &lt;- unname(coef(fit)[\"egfr_disc_per10dec\"])\n  se  &lt;- sqrt(vcov(fit)[\"egfr_disc_per10dec\", \"egfr_disc_per10dec\"])\n  hr  &lt;- exp(b); lcl &lt;- exp(b - 1.96 * se); ucl &lt;- exp(b + 1.96 * se)\n  pv  &lt;- 2 * (1 - pnorm(abs(b / se)))\n  tibble(\n    Outcome = label,\n    Model   = \"Cox PH\",\n    N       = nrow(d),\n    Events  = sum(d[[status_var]] == 1, na.rm = TRUE),\n    `(sub)HR (95% CI)` = sprintf(\"%.2f (%.2f, %.2f)\", hr, lcl, ucl),\n    `p-value` = ifelse(pv &lt; 0.001, \"&lt;0.001\", sprintf(\"%.3f\", pv))\n  )\n}\n\ndisc_summary &lt;- bind_rows(\n  fg_disc_row (\"cmp_time_anemia_2\",     \"cmp_status_anemia_2\",     \"Anemia Grade 2\",                   \"pre_HGB_45days\"),\n  fg_disc_row (\"cmp_time_anemia_3\",     \"cmp_status_anemia_3\",     \"Anemia Grade 3\",                   \"pre_HGB_45days\"),\n  fg_disc_row (\"cmp_time_throm_2\",      \"cmp_status_throm_2\",      \"Thrombocytopenia Grade 2\",         \"pre_PLT_45days\"),\n  fg_disc_row (\"cmp_time_throm_3\",      \"cmp_status_throm_3\",      \"Thrombocytopenia Grade 3\",         \"pre_PLT_45days\"),\n  fg_disc_row (\"cmp_time_aki_2\",        \"cmp_status_aki_2\",        \"AKI Grade 2\"),\n  fg_disc_row (\"cmp_time_aki_kdigo\",    \"cmp_status_aki_kdigo\",    \"AKI (KDIGO)\"),\n  fg_disc_row (\"cmp_time_grade_2_aes\",  \"cmp_status_grade_2_aes\",  \"Composite Grade 2 AEs\"),\n  fg_disc_row (\"cmp_time_grade_3_aes\",  \"cmp_status_grade_3_aes\",  \"Composite Grade 3 AEs\"),\n  fg_disc_row (\"cmp_time_any_hosp\",     \"cmp_status_any_hosp\",     \"Overall Hospitalization\"),\n  fg_disc_row (\"cmp_time_side_effect\",  \"cmp_status_side_effect\",  \"Platinum-Related Hospitalization\"),\n  cox_disc_row(\"time_to_death_90\",      \"death_90\",                \"90-Day Death\")\n)\n\nft_disc &lt;- flextable::flextable(disc_summary) |&gt;\n  flextable::set_caption(\"Multivariable (sub)HR per 10 mL/min decline in eGFR discrepancy (CKD-EPI Cr-Cys − Cockcroft-Gault) — Carboplatin AUC ≥ 3 cohort. Fine-Gray for competing-risk outcomes; Cox PH for 90-day death.\") |&gt;\n  flextable::autofit()\nflextable::save_as_docx(ft_disc,\n  path = file.path(docx_dir, \"sec10_disc_summary.docx\"))\nft_disc\n\n\nOutcomeModelNEvents(sub)HR (95% CI)p-valueAnemia Grade 2Fine-Gray4632010.99 (0.90, 1.08)0.772Anemia Grade 3Fine-Gray463581.04 (0.92, 1.18)0.515Thrombocytopenia Grade 2Fine-Gray463391.01 (0.88, 1.17)0.875Thrombocytopenia Grade 3Fine-Gray463151.45 (1.06, 1.96)0.018AKI Grade 2Fine-Gray463281.13 (0.95, 1.34)0.160AKI (KDIGO)Fine-Gray463331.13 (0.96, 1.32)0.137Composite Grade 2 AEsFine-Gray4632151.08 (0.99, 1.18)0.071Composite Grade 3 AEsFine-Gray463631.20 (1.06, 1.35)0.003Overall HospitalizationFine-Gray4631241.10 (0.99, 1.22)0.064Platinum-Related HospitalizationFine-Gray463671.12 (0.97, 1.30)0.10990-Day DeathCox PH463182.19 (1.44, 3.34)&lt;0.001\n\n\n\n\nCode\nplot_subhr_linear_egfrdisc &lt;- function(time_var, status_var, extra_adj = NULL,\n                                       outcome_label) {\n  base_adj &lt;- c(\"age\",\"sex\",\"score\",\"ecog_score_cat2\",\n                \"cancer_type_cat_7\",\"tumor_stage\",\"high_dose\",\n                \"Paclitaxel\",\"Pemetrexed\",\"Gemcitabine\",\"ici\",\n                \"bmi\",\"smoking\",\"steroids\",\"thyroid\")\n  keep &lt;- c(\"egfr_discrepancy\", time_var, status_var, base_adj, extra_adj)\n  d &lt;- dat %&gt;% dplyr::select(all_of(keep)) %&gt;% tidyr::drop_na()\n\n  adj_df &lt;- d[, c(base_adj, extra_adj), drop = FALSE]\n  X_adj &lt;- model.matrix(~ ., data = adj_df)[, -1, drop = FALSE]\n  X &lt;- cbind(egfr_discrepancy = d$egfr_discrepancy, X_adj)\n\n  stat_num &lt;- suppressWarnings(as.integer(as.character(d[[status_var]])))\n  time_num &lt;- as.numeric(d[[time_var]])\n\n  fit &lt;- cmprsk::crr(ftime = time_num, fstatus = stat_num,\n                     cov1 = X, failcode = 1)\n\n  beta   &lt;- fit$coef[1]\n  V_beta &lt;- fit$var[1, 1]\n  se_b   &lt;- sqrt(V_beta)\n\n  q1    &lt;- as.numeric(quantile(d$egfr_discrepancy, 0.25, na.rm = TRUE))\n  q3    &lt;- as.numeric(quantile(d$egfr_discrepancy, 0.75, na.rm = TRUE))\n  iqr_w &lt;- q3 - q1\n  hr10  &lt;- exp(-10 * beta);       hr10_l &lt;- exp(-10 * beta - 1.96 * 10 * se_b);     hr10_u &lt;- exp(-10 * beta + 1.96 * 10 * se_b)\n  hri   &lt;- exp(-iqr_w * beta);    hri_l &lt;- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u &lt;- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)\n  pval  &lt;- 2 * (1 - pnorm(abs(beta / se_b)))\n  p_str &lt;- ifelse(pval &lt; 0.001, \"&lt;0.001\", sprintf(\"%.3f\", pval))\n  subtitle_str &lt;- sprintf(\n    \"subHR per 10 mL/min decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]\",\n    hr10, hr10_l, hr10_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)\n\n  ref_x  &lt;- median(d$egfr_discrepancy, na.rm = TRUE)\n  grid_x &lt;- seq(quantile(d$egfr_discrepancy, 0.025, na.rm = TRUE),\n                quantile(d$egfr_discrepancy, 0.975, na.rm = TRUE),\n                length.out = 100)\n\n  log_hr &lt;- beta * (grid_x - ref_x)\n  se     &lt;- sqrt((grid_x - ref_x)^2 * V_beta)\n\n  df_plot &lt;- tibble(\n    x     = grid_x,\n    subhr = exp(log_hr),\n    lcl   = exp(log_hr - 1.96 * se),\n    ucl   = exp(log_hr + 1.96 * se)\n  )\n\n  ggplot(df_plot, aes(x = x, y = subhr)) +\n    geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = \"darkorange\") +\n    geom_line(color = \"darkorange\", linewidth = 1) +\n    geom_hline(yintercept = 1, linetype = \"dashed\", color = \"grey50\") +\n    geom_vline(xintercept = ref_x, linetype = \"dotted\", color = \"grey40\") +\n    geom_vline(xintercept = c(q1, q3), linetype = \"dashed\",\n               color = \"steelblue\", alpha = 0.7) +\n    labs(x = \"eGFR Discrepancy (mL/min)\",\n         y = \"subHR (95% CI)\",\n         title = outcome_label,\n         subtitle = subtitle_str) +\n    coord_cartesian(ylim = c(0, 4)) +\n    theme_minimal(base_size = 11) +\n    theme(plot.subtitle = element_text(size = 9, color = \"grey25\"))\n}\n\nplot_cox_linear_egfrdisc &lt;- function(time_var, status_var, extra_adj = NULL,\n                                     outcome_label) {\n  base_adj &lt;- c(\"age\",\"sex\",\"score\",\"ecog_score_cat2\",\n                \"cancer_type_cat_7\",\"tumor_stage\",\"high_dose\",\n                \"Paclitaxel\",\"Pemetrexed\",\"Gemcitabine\",\"ici\",\n                \"bmi\",\"smoking\",\"steroids\",\"thyroid\")\n  keep &lt;- c(\"egfr_discrepancy\", time_var, status_var, base_adj, extra_adj)\n  d &lt;- dat %&gt;% dplyr::select(all_of(keep)) %&gt;% tidyr::drop_na()\n\n  fmla &lt;- as.formula(paste0(\n    \"Surv(\", time_var, \", \", status_var, \") ~ egfr_discrepancy + \",\n    paste(c(base_adj, extra_adj), collapse = \" + \")\n  ))\n  fit &lt;- survival::coxph(fmla, data = d)\n\n  beta   &lt;- coef(fit)[\"egfr_discrepancy\"]\n  V_beta &lt;- vcov(fit)[\"egfr_discrepancy\", \"egfr_discrepancy\"]\n  se_b   &lt;- sqrt(V_beta)\n\n  q1    &lt;- as.numeric(quantile(d$egfr_discrepancy, 0.25, na.rm = TRUE))\n  q3    &lt;- as.numeric(quantile(d$egfr_discrepancy, 0.75, na.rm = TRUE))\n  iqr_w &lt;- q3 - q1\n  hr10  &lt;- exp(-10 * beta);       hr10_l &lt;- exp(-10 * beta - 1.96 * 10 * se_b);     hr10_u &lt;- exp(-10 * beta + 1.96 * 10 * se_b)\n  hri   &lt;- exp(-iqr_w * beta);    hri_l &lt;- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u &lt;- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)\n  pval  &lt;- 2 * (1 - pnorm(abs(beta / se_b)))\n  p_str &lt;- ifelse(pval &lt; 0.001, \"&lt;0.001\", sprintf(\"%.3f\", pval))\n  subtitle_str &lt;- sprintf(\n    \"HR per 10 mL/min decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]\",\n    hr10, hr10_l, hr10_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)\n\n  ref_x  &lt;- median(d$egfr_discrepancy, na.rm = TRUE)\n  grid_x &lt;- seq(quantile(d$egfr_discrepancy, 0.025, na.rm = TRUE),\n                quantile(d$egfr_discrepancy, 0.975, na.rm = TRUE),\n                length.out = 100)\n\n  log_hr &lt;- beta * (grid_x - ref_x)\n  se     &lt;- sqrt((grid_x - ref_x)^2 * V_beta)\n\n  df_plot &lt;- tibble(\n    x   = grid_x,\n    hr  = exp(log_hr),\n    lcl = exp(log_hr - 1.96 * se),\n    ucl = exp(log_hr + 1.96 * se)\n  )\n\n  ggplot(df_plot, aes(x = x, y = hr)) +\n    geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = \"darkorange\") +\n    geom_line(color = \"darkorange\", linewidth = 1) +\n    geom_hline(yintercept = 1, linetype = \"dashed\", color = \"grey50\") +\n    geom_vline(xintercept = ref_x, linetype = \"dotted\", color = \"grey40\") +\n    geom_vline(xintercept = c(q1, q3), linetype = \"dashed\",\n               color = \"steelblue\", alpha = 0.7) +\n    labs(x = \"eGFR Discrepancy (mL/min)\",\n         y = \"HR (95% CI)\",\n         title = outcome_label,\n         subtitle = subtitle_str) +\n    coord_cartesian(ylim = c(0, 4)) +\n    theme_minimal(base_size = 11) +\n    theme(plot.subtitle = element_text(size = 9, color = \"grey25\"))\n}"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#anemia-grade-2-4",
+    "href": "qmd/jiaxuan_whole.html#anemia-grade-2-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.1 Anemia Grade 2",
+    "text": "11.1 Anemia Grade 2\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n                       \"pre_HGB_45days\", \"Anemia Grade 2 (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#anemia-grade-3-4",
+    "href": "qmd/jiaxuan_whole.html#anemia-grade-3-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.2 Anemia Grade 3",
+    "text": "11.2 Anemia Grade 3\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n                       \"pre_HGB_45days\", \"Anemia Grade 3 (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-2-4",
+    "href": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-2-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.3 Thrombocytopenia Grade 2",
+    "text": "11.3 Thrombocytopenia Grade 2\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n                       \"pre_PLT_45days\", \"Thrombocytopenia Grade 2 (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-3-4",
+    "href": "qmd/jiaxuan_whole.html#thrombocytopenia-grade-3-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.4 Thrombocytopenia Grade 3",
+    "text": "11.4 Thrombocytopenia Grade 3\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n                       \"pre_PLT_45days\", \"Thrombocytopenia Grade 3 (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#aki-grade-2-4",
+    "href": "qmd/jiaxuan_whole.html#aki-grade-2-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.5 AKI Grade 2",
+    "text": "11.5 AKI Grade 2\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n                       NULL, \"AKI Grade 2 (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#aki-kdigo-4",
+    "href": "qmd/jiaxuan_whole.html#aki-kdigo-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.6 AKI (KDIGO)",
+    "text": "11.6 AKI (KDIGO)\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n                       NULL, \"AKI (KDIGO) (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#composite-grade-2-aes-4",
+    "href": "qmd/jiaxuan_whole.html#composite-grade-2-aes-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.7 Composite Grade 2 AEs",
+    "text": "11.7 Composite Grade 2 AEs\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n                       NULL, \"Composite Grade 2 AEs (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#composite-grade-3-aes-4",
+    "href": "qmd/jiaxuan_whole.html#composite-grade-3-aes-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.8 Composite Grade 3 AEs",
+    "text": "11.8 Composite Grade 3 AEs\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n                       NULL, \"Composite Grade 3 AEs (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#overall-hospitalization-4",
+    "href": "qmd/jiaxuan_whole.html#overall-hospitalization-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.9 Overall Hospitalization",
+    "text": "11.9 Overall Hospitalization\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n                       NULL, \"Overall Hospitalization (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#platinum-related-hospitalization-4",
+    "href": "qmd/jiaxuan_whole.html#platinum-related-hospitalization-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.10 Platinum-Related Hospitalization",
+    "text": "11.10 Platinum-Related Hospitalization\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n                       NULL, \"Platinum-Related Hospitalization (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#day-death-cox-ph-4",
+    "href": "qmd/jiaxuan_whole.html#day-death-cox-ph-4",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "11.11 90-Day Death (Cox PH)",
+    "text": "11.11 90-Day Death (Cox PH)\n\n\nCode\nplot_cox_linear_sens(\"time_to_death_90\", \"death_90\",\n                     NULL, \"90-Day Death (Cox PH) (Sensitivity)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#anemia-grade-2-8",
+    "href": "qmd/jiaxuan_carbo.html#anemia-grade-2-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.1 Anemia Grade 2",
+    "text": "16.1 Anemia Grade 2\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n                       \"pre_HGB_45days\", \"Anemia Grade 2 (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#anemia-grade-3-8",
+    "href": "qmd/jiaxuan_carbo.html#anemia-grade-3-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.2 Anemia Grade 3",
+    "text": "16.2 Anemia Grade 3\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n                       \"pre_HGB_45days\", \"Anemia Grade 3 (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#thrombocytopenia-grade-2-8",
+    "href": "qmd/jiaxuan_carbo.html#thrombocytopenia-grade-2-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.3 Thrombocytopenia Grade 2",
+    "text": "16.3 Thrombocytopenia Grade 2\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n                       \"pre_PLT_45days\", \"Thrombocytopenia Grade 2 (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#thrombocytopenia-grade-3-8",
+    "href": "qmd/jiaxuan_carbo.html#thrombocytopenia-grade-3-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.4 Thrombocytopenia Grade 3",
+    "text": "16.4 Thrombocytopenia Grade 3\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n                       \"pre_PLT_45days\", \"Thrombocytopenia Grade 3 (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#aki-grade-2-8",
+    "href": "qmd/jiaxuan_carbo.html#aki-grade-2-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.5 AKI Grade 2",
+    "text": "16.5 AKI Grade 2\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n                       NULL, \"AKI Grade 2 (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#aki-kdigo-8",
+    "href": "qmd/jiaxuan_carbo.html#aki-kdigo-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.6 AKI (KDIGO)",
+    "text": "16.6 AKI (KDIGO)\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n                       NULL, \"AKI (KDIGO) (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#composite-grade-2-aes-8",
+    "href": "qmd/jiaxuan_carbo.html#composite-grade-2-aes-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.7 Composite Grade 2 AEs",
+    "text": "16.7 Composite Grade 2 AEs\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n                       NULL, \"Composite Grade 2 AEs (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#composite-grade-3-aes-8",
+    "href": "qmd/jiaxuan_carbo.html#composite-grade-3-aes-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.8 Composite Grade 3 AEs",
+    "text": "16.8 Composite Grade 3 AEs\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n                       NULL, \"Composite Grade 3 AEs (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#overall-hospitalization-8",
+    "href": "qmd/jiaxuan_carbo.html#overall-hospitalization-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.9 Overall Hospitalization",
+    "text": "16.9 Overall Hospitalization\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n                       NULL, \"Overall Hospitalization (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#platinum-related-hospitalization-8",
+    "href": "qmd/jiaxuan_carbo.html#platinum-related-hospitalization-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.10 Platinum-Related Hospitalization",
+    "text": "16.10 Platinum-Related Hospitalization\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n                       NULL, \"Platinum-Related Hospitalization (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo.html#day-death-cox-ph-8",
+    "href": "qmd/jiaxuan_carbo.html#day-death-cox-ph-8",
+    "title": "Jiaxuan Project — Carboplatin Cohort",
+    "section": "16.11 90-Day Death (Cox PH)",
+    "text": "16.11 90-Day Death (Cox PH)\n\n\nCode\nplot_cox_linear_sens(\"time_to_death_90\", \"death_90\",\n                     NULL, \"90-Day Death (Cox PH) (Sensitivity, Carboplatin)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#anemia-grade-2-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#anemia-grade-2-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.1 Anemia Grade 2",
+    "text": "16.1 Anemia Grade 2\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_anemia_2\", \"cmp_status_anemia_2\",\n                       \"pre_HGB_45days\", \"Anemia Grade 2 (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#anemia-grade-3-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#anemia-grade-3-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.2 Anemia Grade 3",
+    "text": "16.2 Anemia Grade 3\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_anemia_3\", \"cmp_status_anemia_3\",\n                       \"pre_HGB_45days\", \"Anemia Grade 3 (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#thrombocytopenia-grade-2-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#thrombocytopenia-grade-2-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.3 Thrombocytopenia Grade 2",
+    "text": "16.3 Thrombocytopenia Grade 2\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_throm_2\", \"cmp_status_throm_2\",\n                       \"pre_PLT_45days\", \"Thrombocytopenia Grade 2 (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#thrombocytopenia-grade-3-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#thrombocytopenia-grade-3-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.4 Thrombocytopenia Grade 3",
+    "text": "16.4 Thrombocytopenia Grade 3\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_throm_3\", \"cmp_status_throm_3\",\n                       \"pre_PLT_45days\", \"Thrombocytopenia Grade 3 (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#aki-grade-2-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#aki-grade-2-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.5 AKI Grade 2",
+    "text": "16.5 AKI Grade 2\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_aki_2\", \"cmp_status_aki_2\",\n                       NULL, \"AKI Grade 2 (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#aki-kdigo-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#aki-kdigo-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.6 AKI (KDIGO)",
+    "text": "16.6 AKI (KDIGO)\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_aki_kdigo\", \"cmp_status_aki_kdigo\",\n                       NULL, \"AKI (KDIGO) (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#composite-grade-2-aes-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#composite-grade-2-aes-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.7 Composite Grade 2 AEs",
+    "text": "16.7 Composite Grade 2 AEs\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_grade_2_aes\", \"cmp_status_grade_2_aes\",\n                       NULL, \"Composite Grade 2 AEs (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#composite-grade-3-aes-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#composite-grade-3-aes-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.8 Composite Grade 3 AEs",
+    "text": "16.8 Composite Grade 3 AEs\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_grade_3_aes\", \"cmp_status_grade_3_aes\",\n                       NULL, \"Composite Grade 3 AEs (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#overall-hospitalization-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#overall-hospitalization-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.9 Overall Hospitalization",
+    "text": "16.9 Overall Hospitalization\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_any_hosp\", \"cmp_status_any_hosp\",\n                       NULL, \"Overall Hospitalization (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#platinum-related-hospitalization-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#platinum-related-hospitalization-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.10 Platinum-Related Hospitalization",
+    "text": "16.10 Platinum-Related Hospitalization\n\n\nCode\nplot_subhr_linear_sens(\"cmp_time_side_effect\", \"cmp_status_side_effect\",\n                       NULL, \"Platinum-Related Hospitalization (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_carbo_auc3.html#day-death-cox-ph-8",
+    "href": "qmd/jiaxuan_carbo_auc3.html#day-death-cox-ph-8",
+    "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
+    "section": "16.11 90-Day Death (Cox PH)",
+    "text": "16.11 90-Day Death (Cox PH)\n\n\nCode\nplot_cox_linear_sens(\"time_to_death_90\", \"death_90\",\n                     NULL, \"90-Day Death (Cox PH) (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
   }
 ]
