@@ -459,7 +459,8 @@ Three reasons to anchor at the **median**:
 ```{r}
 #| label: jx-linsubhr-helper
 plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
-                                    outcome_label, x_axis = c("ratio","percentile")) {
+                                    outcome_label, x_axis = c("ratio","percentile"),
+                                    n_bonf = 6) {
   x_axis <- match.arg(x_axis)
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
@@ -489,10 +490,12 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
   hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
   hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
-  p_str <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+  pval_bonf <- min(pval * n_bonf, 1)
+  p_shown <- if (n_bonf > 1) pval_bonf else pval
+  p_lbl   <- if (n_bonf > 1) sprintf("p_Bonf = %s (n = %d)", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)), n_bonf) else sprintf("p = %s", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)))
   subtitle_str <- sprintf(
-    "subHR per 0.1 ratio decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
-    hr01, hr01_l, hr01_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "subHR per 0.1 ratio decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
+    hr01, hr01_l, hr01_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_ratio, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_ratio, 0.025, na.rm = TRUE),
@@ -540,7 +543,8 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
 }
 
 plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
-                                  outcome_label, x_axis = c("ratio","percentile")) {
+                                  outcome_label, x_axis = c("ratio","percentile"),
+                                  n_bonf = 6) {
   x_axis <- match.arg(x_axis)
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
@@ -565,10 +569,12 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
   hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
   hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
-  p_str <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+  pval_bonf <- min(pval * n_bonf, 1)
+  p_shown <- if (n_bonf > 1) pval_bonf else pval
+  p_lbl   <- if (n_bonf > 1) sprintf("p_Bonf = %s (n = %d)", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)), n_bonf) else sprintf("p = %s", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)))
   subtitle_str <- sprintf(
-    "HR per 0.1 ratio decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
-    hr01, hr01_l, hr01_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "HR per 0.1 ratio decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
+    hr01, hr01_l, hr01_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_ratio, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_ratio, 0.025, na.rm = TRUE),
@@ -816,7 +822,7 @@ ft_disc
 ```{r}
 #| label: jx-linsubhr-disc-helper
 plot_subhr_linear_disc <- function(time_var, status_var, extra_adj = NULL,
-                                   outcome_label) {
+                                   outcome_label, n_bonf = 6) {
   base_adj <- c("age","sex","score","ecog_score_cat2",
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine","ici",
@@ -847,10 +853,12 @@ plot_subhr_linear_disc <- function(time_var, status_var, extra_adj = NULL,
   # per IQR DECLINE: HR = exp(-iqr_w * beta); SE on log scale = |iqr_w| * se_b
   hri   <- exp(-iqr_w * beta);    hri_l <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
-  p_str <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+  pval_bonf <- min(pval * n_bonf, 1)
+  p_shown <- if (n_bonf > 1) pval_bonf else pval
+  p_lbl   <- if (n_bonf > 1) sprintf("p_Bonf = %s (n = %d)", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)), n_bonf) else sprintf("p = %s", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)))
   subtitle_str <- sprintf(
-    "subHR per 10 mL/min decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
-    hr10, hr10_l, hr10_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "subHR per 10 mL/min decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
+    hr10, hr10_l, hr10_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_discrepancy, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_discrepancy, 0.025, na.rm = TRUE),
@@ -884,7 +892,7 @@ plot_subhr_linear_disc <- function(time_var, status_var, extra_adj = NULL,
 }
 
 plot_cox_linear_disc <- function(time_var, status_var, extra_adj = NULL,
-                                 outcome_label) {
+                                 outcome_label, n_bonf = 6) {
   base_adj <- c("age","sex","score","ecog_score_cat2",
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine","ici",
@@ -908,10 +916,12 @@ plot_cox_linear_disc <- function(time_var, status_var, extra_adj = NULL,
   hr10  <- exp(-10 * beta);       hr10_l <- exp(-10 * beta - 1.96 * 10 * se_b);     hr10_u <- exp(-10 * beta + 1.96 * 10 * se_b)
   hri   <- exp(-iqr_w * beta);    hri_l <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
-  p_str <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+  pval_bonf <- min(pval * n_bonf, 1)
+  p_shown <- if (n_bonf > 1) pval_bonf else pval
+  p_lbl   <- if (n_bonf > 1) sprintf("p_Bonf = %s (n = %d)", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)), n_bonf) else sprintf("p = %s", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)))
   subtitle_str <- sprintf(
-    "HR per 10 mL/min decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
-    hr10, hr10_l, hr10_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "HR per 10 mL/min decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.1f): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f]",
+    hr10, hr10_l, hr10_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_discrepancy, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_discrepancy, 0.025, na.rm = TRUE),
@@ -1064,7 +1074,7 @@ plot_cox_linear_disc("time_to_death_90", "death_90",
 #| fig-width: 6
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_1", "cmp_status_hosp_1",
-                        NULL, "Nausea/Vomiting/GI")
+                        NULL, "Nausea/Vomiting/GI", n_bonf = 1)
 ```
 
 ## 8.2 Failure to Thrive/Fatigue/Dehydration
@@ -1074,7 +1084,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_1", "cmp_status_hosp_1",
 #| fig-width: 6
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_2", "cmp_status_hosp_2",
-                        NULL, "Failure to Thrive/Fatigue/Dehydration")
+                        NULL, "Failure to Thrive/Fatigue/Dehydration", n_bonf = 1)
 ```
 
 ## 8.3 AKI
@@ -1084,7 +1094,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_2", "cmp_status_hosp_2",
 #| fig-width: 6
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_3", "cmp_status_hosp_3",
-                        NULL, "AKI")
+                        NULL, "AKI", n_bonf = 1)
 ```
 
 ## 8.4 Electrolyte Abnormalities
@@ -1094,7 +1104,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_3", "cmp_status_hosp_3",
 #| fig-width: 6
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_4", "cmp_status_hosp_4",
-                        NULL, "Electrolyte Abnormalities")
+                        NULL, "Electrolyte Abnormalities", n_bonf = 1)
 ```
 
 ## 8.5 Cytopenia
@@ -1104,7 +1114,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_4", "cmp_status_hosp_4",
 #| fig-width: 6
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_5", "cmp_status_hosp_5",
-                        NULL, "Cytopenia")
+                        NULL, "Cytopenia", n_bonf = 1)
 ```
 
 ## 8.6 Febrile Neutropenia
@@ -1114,7 +1124,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_5", "cmp_status_hosp_5",
 #| fig-width: 6
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_6", "cmp_status_hosp_6",
-                        NULL, "Febrile Neutropenia")
+                        NULL, "Febrile Neutropenia", n_bonf = 1)
 ```
 
 ## 8.7 Infection/Sepsis
@@ -1124,7 +1134,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_6", "cmp_status_hosp_6",
 #| fig-width: 6
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_7", "cmp_status_hosp_7",
-                        NULL, "Infection/Sepsis")
+                        NULL, "Infection/Sepsis", n_bonf = 1)
 ```
 
 ## 8.8 Cancer Progression
@@ -1134,7 +1144,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_7", "cmp_status_hosp_7",
 #| fig-width: 6
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_8", "cmp_status_hosp_8",
-                        NULL, "Cancer Progression")
+                        NULL, "Cancer Progression", n_bonf = 1)
 ```
 
 ## 8.9 Immune-related AE & Other
@@ -1145,9 +1155,8 @@ Composite competing-risk outcome combining hospitalisations coded as Immune-rela
 #| label: jx-linsubhr-ratio-hosp-immune-other
 #| fig-width: 6
 #| fig-height: 4
-plot_subhr_linear_ratio("cmp_time_hosp_immune_other",
-                        "cmp_status_hosp_immune_other",
-                        NULL, "Immune-related AE & Other")
+plot_subhr_linear_ratio("cmp_time_hosp_immune_other", "cmp_status_hosp_immune_other",
+                        NULL, "Immune-related AE & Other", n_bonf = 1)
 ```
 
 ## 8.10 Planned Surgery/Port
@@ -1157,7 +1166,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_immune_other",
 #| fig-width: 6
 #| fig-height: 4
 plot_subhr_linear_ratio("cmp_time_hosp_10", "cmp_status_hosp_10",
-                        NULL, "Planned Surgery/Port")
+                        NULL, "Planned Surgery/Port", n_bonf = 1)
 ```
 
 # 9 Scatter Plots — eGFR Discrepancy
@@ -1395,7 +1404,7 @@ ft_sens
 ```{r}
 #| label: jx-linsubhr-sens-helper
 plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
-                                   outcome_label) {
+                                   outcome_label, n_bonf = 6) {
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine","ici",
@@ -1423,10 +1432,12 @@ plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
   hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
   hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
-  p_str <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+  pval_bonf <- min(pval * n_bonf, 1)
+  p_shown <- if (n_bonf > 1) pval_bonf else pval
+  p_lbl   <- if (n_bonf > 1) sprintf("p_Bonf = %s (n = %d)", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)), n_bonf) else sprintf("p = %s", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)))
   subtitle_str <- sprintf(
-    "subHR per 0.1 ratio decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
-    hr01, hr01_l, hr01_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "subHR per 0.1 ratio decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
+    hr01, hr01_l, hr01_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_ratio_sens, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_ratio_sens, 0.025, na.rm = TRUE),
@@ -1460,7 +1471,7 @@ plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
 }
 
 plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
-                                 outcome_label) {
+                                 outcome_label, n_bonf = 6) {
   base_adj <- c("age","sex","score","ecog_score_cat2","cockcroft",
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine","ici",
@@ -1484,10 +1495,12 @@ plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
   hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
   hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
-  p_str <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+  pval_bonf <- min(pval * n_bonf, 1)
+  p_shown <- if (n_bonf > 1) pval_bonf else pval
+  p_lbl   <- if (n_bonf > 1) sprintf("p_Bonf = %s (n = %d)", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)), n_bonf) else sprintf("p = %s", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)))
   subtitle_str <- sprintf(
-    "HR per 0.1 ratio decline: %.2f (%.2f-%.2f), p = %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
-    hr01, hr01_l, hr01_u, p_str, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "HR per 0.1 ratio decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
+    hr01, hr01_l, hr01_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
 
   ref_x  <- median(d$egfr_ratio_sens, na.rm = TRUE)
   grid_x <- seq(quantile(d$egfr_ratio_sens, 0.025, na.rm = TRUE),
