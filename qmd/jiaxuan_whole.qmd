@@ -1266,9 +1266,8 @@ plot_cg_vs_epi <- function(highlight_var, threshold, label) {
                 color = highlight, fill = highlight)) +
     geom_abline(slope = 1, intercept = 0, linetype = "dashed",
                 color = "grey50") +
-    geom_point(alpha = 0.6, size = 1.6) +
     # One OLS regression line per level of `highlight` (color and CI ribbon
-    # match the dot colour).
+    # match the level).
     geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
                 alpha = 0.15, linewidth = 1) +
     scale_color_manual(values = c("FALSE" = "grey60", "TRUE" = "#E31A1C"),
@@ -1342,8 +1341,7 @@ ggplot(d_sex, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex,
                   color = sex, fill = sex)) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed",
               color = "grey50") +
-  geom_point(alpha = 0.6, size = 1.6) +
-  # One OLS regression line per sex (colour and CI ribbon match dot colour).
+  # One OLS regression line per sex (colour and CI ribbon match the level).
   geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
               alpha = 0.15, linewidth = 1) +
   scale_color_manual(values = c("Female" = "#E31A1C", "Male" = "grey60")) +
