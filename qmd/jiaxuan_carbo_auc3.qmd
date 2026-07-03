@@ -223,13 +223,17 @@ dat %>%
 #| label: jx-auc3-egfr-ratio-hist
 #| fig-width: 8
 #| fig-height: 5
-ratio_hist <- dat %>% filter(!is.na(egfr_ratio))
+ratio_hist <- dat %>%
+  filter(!is.na(egfr_ratio)) %>%
+  mutate(side = ifelse(egfr_ratio < 1, "neg", "pos"))
 
-ggplot(ratio_hist, aes(x = egfr_ratio)) +
+ggplot(ratio_hist, aes(x = egfr_ratio, fill = side)) +
   geom_histogram(aes(y = after_stat(count) / sum(after_stat(count)) * 100),
                  binwidth = 0.1, boundary = 0,
-                 fill = "steelblue", color = "black", alpha = 0.7) +
-  geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
+                 color = "black", alpha = 0.85) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "grey30") +
+  scale_fill_manual(values = c(neg = "#E31A1C", pos = "grey60"),
+                    guide = "none") +
   labs(title = "Distribution of eGFR Ratio (Carboplatin AUC ≥ 3)",
        x = "eGFR Ratio",
        y = "Percent of Patients (%)") +
