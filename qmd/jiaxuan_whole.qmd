@@ -456,6 +456,12 @@ Three reasons to anchor at the **median**:
 
 # 6 Linear subHR Curves — eGFR Ratio (raw scale)
 
+::: {.callout-note}
+## p-value convention
+
+The p-value shown in each panel subtitle below is **Bonferroni-adjusted** across the six primary manuscript-figure AE outcomes (platinum-related hospitalisation, overall hospitalisation, 90-day mortality, grade ≥ 3 anemia, grade ≥ 3 thrombocytopenia, acute kidney injury): `p_Bonf = min(raw p × 6, 1)`. `n = 6` is displayed alongside for transparency. Raw Wald p is preserved in the Section 4 regression tables and their downloadable Word versions.
+:::
+
 ```{r}
 #| label: jx-linsubhr-helper
 plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
@@ -736,7 +742,7 @@ plot_cox_linear_ratio("time_to_death_90", "death_90",
 
 ## 7.0 Summary table: Fine-Gray subHR per 10 mL/min decline in eGFR discrepancy
 
-One row per outcome. Multivariable Fine-Gray model fit with `egfr_disc_per10dec = -egfr_discrepancy / 10` (positive when CKD-EPI Cr-Cys is below CG) plus the same adjusters used by the curves below. The HR for `egfr_disc_per10dec` is the multiplicative change in subHR per **10 mL/min lower** eGFR discrepancy. 90-day death uses Cox PH (no competing event); all other outcomes use Fine-Gray with death as the competing event. p-values are Wald.
+One row per outcome. Multivariable Fine-Gray model fit with `egfr_disc_per10dec = -egfr_discrepancy / 10` (positive when CKD-EPI Cr-Cys is below CG) plus the same adjusters used by the curves below. The HR for `egfr_disc_per10dec` is the multiplicative change in subHR per **10 mL/min lower** eGFR discrepancy. 90-day death uses Cox PH (no competing event); all other outcomes use Fine-Gray with death as the competing event. p-values in this summary table are **raw Wald** (not Bonferroni-adjusted); the plot subtitles in Sections 7.1–7.11 apply Bonferroni correction across the six primary AE outcomes.
 
 [📄 Download Word table](../tables/whole/sec7_disc_summary.docx)
 
@@ -1317,7 +1323,7 @@ Sensitivity analysis using an alternative eGFR ratio definition for the linear e
 - **Denominator**: eGFR<sub>CR</sub> — CKD-EPI **2021** race-free creatinine-only equation (`baseline_cre_egfr_unindexed`)
 - Ratio: `egfr_ratio_sens = baseline_cys_c_egfr_unindexed / baseline_cre_egfr_unindexed`
 
-One row per outcome. Multivariable Fine-Gray model fit with `egfr_ratio_sens_per10 = -egfr_ratio_sens * 10` plus the same adjuster set as Section 4 (eGFR ratio FG adjusted for Cockcroft-Gault). The HR for this variable reads as the multiplicative subHR per **0.1 unit lower** sensitivity eGFR ratio. 90-day death uses Cox PH.
+One row per outcome. Multivariable Fine-Gray model fit with `egfr_ratio_sens_per10 = -egfr_ratio_sens * 10` plus the same adjuster set as Section 4 (eGFR ratio FG adjusted for Cockcroft-Gault). The HR for this variable reads as the multiplicative subHR per **0.1 unit lower** sensitivity eGFR ratio. 90-day death uses Cox PH. p-values in this summary table are **raw Wald** (not Bonferroni-adjusted); the plot subtitles in Sections 11.1–11.11 apply Bonferroni correction across the six primary AE outcomes.
 
 [📄 Download Word table](../tables/whole/sec11_egfr_ratio_sens_summary.docx)
 
