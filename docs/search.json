@@ -3946,5 +3946,19 @@
     "title": "Jiaxuan Project — Carboplatin AUC ≥ 3 Cohort",
     "section": "16.11 90-Day Death (Cox PH)",
     "text": "16.11 90-Day Death (Cox PH)\n\n\nCode\nplot_cox_linear_sens(\"time_to_death_90\", \"death_90\",\n                     NULL, \"90-Day Death (Cox PH) (Sensitivity, Carboplatin AUC ≥ 3)\")\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#egfr-ratio-distribution",
+    "href": "qmd/jiaxuan_whole.html#egfr-ratio-distribution",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "3.1 eGFR Ratio distribution",
+    "text": "3.1 eGFR Ratio distribution\n\n\nCode\nratio_hist &lt;- dat %&gt;% filter(!is.na(egfr_ratio))\n\nggplot(ratio_hist, aes(x = egfr_ratio)) +\n  geom_histogram(aes(y = after_stat(count) / sum(after_stat(count)) * 100),\n                 binwidth = 0.1, boundary = 0,\n                 fill = \"steelblue\", color = \"black\", alpha = 0.7) +\n  labs(title = \"Distribution of eGFR Ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault)\",\n       x = \"eGFR Ratio\",\n       y = \"Percent of Patients (%)\") +\n  scale_x_continuous(breaks = seq(0, 3, 0.2)) +\n  theme_minimal(base_size = 14)\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
+  },
+  {
+    "objectID": "qmd/jiaxuan_whole.html#egfr-discordance-distribution",
+    "href": "qmd/jiaxuan_whole.html#egfr-discordance-distribution",
+    "title": "Jiaxuan Project — Whole Cohort",
+    "section": "3.2 eGFR Discordance distribution",
+    "text": "3.2 eGFR Discordance distribution\nSigned eGFR discordance = CKD-EPI Cr-Cys unindexed − Cockcroft-Gault (mL/min). Red bins highlight the negative side (CKD-EPI Cr-Cys below Cockcroft-Gault — the direction that flags reduced cystatin-based eGFR relative to creatinine-based, consistent with muscle wasting / sarcopenia); gray bins are the positive side.\n\n\nCode\ndisc_hist &lt;- dat %&gt;%\n  filter(!is.na(egfr_discrepancy)) %&gt;%\n  mutate(side = ifelse(egfr_discrepancy &lt; 0, \"neg\", \"pos\"))\n\nggplot(disc_hist, aes(x = egfr_discrepancy, fill = side)) +\n  geom_histogram(aes(y = after_stat(count) / sum(after_stat(count)) * 100),\n                 binwidth = 5, boundary = 0,\n                 color = \"black\", alpha = 0.85) +\n  geom_vline(xintercept = 0, linetype = \"dashed\", color = \"grey30\") +\n  scale_fill_manual(values = c(neg = \"#E31A1C\", pos = \"grey60\"),\n                    guide = \"none\") +\n  labs(title = \"Distribution of eGFR Discordance (CKD-EPI Cr-Cys − Cockcroft-Gault)\",\n       x = \"eGFR Discordance (mL/min)\",\n       y = \"Percent of Patients (%)\") +\n  theme_minimal(base_size = 14)\n\n\n\n\n\n\n\n\n\n\n&lt;U+0001F4CA&gt; Download as PowerPoint (editable)"
   }
 ]

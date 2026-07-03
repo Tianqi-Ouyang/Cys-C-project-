@@ -147,7 +147,9 @@ dat %>%
   modify_spanning_header(all_stat_cols() ~ "**Platinum group**")
 ```
 
-# 3 eGFR Ratio Distribution (Overall)
+# 3 eGFR Ratio and Discordance Distributions (Overall)
+
+## 3.1 eGFR Ratio distribution
 
 ```{r}
 #| label: jx-egfr-ratio-hist
@@ -163,6 +165,31 @@ ggplot(ratio_hist, aes(x = egfr_ratio)) +
        x = "eGFR Ratio",
        y = "Percent of Patients (%)") +
   scale_x_continuous(breaks = seq(0, 3, 0.2)) +
+  theme_minimal(base_size = 14)
+```
+
+## 3.2 eGFR Discordance distribution
+
+Signed eGFR discordance = CKD-EPI Cr-Cys unindexed − Cockcroft-Gault (mL/min). Red bins highlight the negative side (CKD-EPI Cr-Cys **below** Cockcroft-Gault — the direction that flags reduced cystatin-based eGFR relative to creatinine-based, consistent with muscle wasting / sarcopenia); gray bins are the positive side.
+
+```{r}
+#| label: jx-egfr-discordance-hist
+#| fig-width: 8
+#| fig-height: 5
+disc_hist <- dat %>%
+  filter(!is.na(egfr_discrepancy)) %>%
+  mutate(side = ifelse(egfr_discrepancy < 0, "neg", "pos"))
+
+ggplot(disc_hist, aes(x = egfr_discrepancy, fill = side)) +
+  geom_histogram(aes(y = after_stat(count) / sum(after_stat(count)) * 100),
+                 binwidth = 5, boundary = 0,
+                 color = "black", alpha = 0.85) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey30") +
+  scale_fill_manual(values = c(neg = "#E31A1C", pos = "grey60"),
+                    guide = "none") +
+  labs(title = "Distribution of eGFR Discordance (CKD-EPI Cr-Cys − Cockcroft-Gault)",
+       x = "eGFR Discordance (mL/min)",
+       y = "Percent of Patients (%)") +
   theme_minimal(base_size = 14)
 ```
 
