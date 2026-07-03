@@ -116,7 +116,9 @@ dat <- dat %>%
   )
 ```
 
-# 2 Table 1: Baseline Characteristics (Overall)
+# 2 Table 1: Baseline Characteristics (Overall + Cisplatin / Carboplatin)
+
+Table 1 is now stratified by `platin_group`. Columns show the overall cohort, the cisplatin subgroup, and the carboplatin subgroup side-by-side, with a between-group p-value in the final column (Wilcoxon rank-sum for continuous, Fisher exact for categorical with expected cell < 5, else χ²). The `platin_group`, `carbo_AUC`, and `cis_dose`-related variables are removed from the row list because they are collinear with the stratification column.
 
 ```{r}
 #| label: jx-table1-whole
@@ -135,8 +137,14 @@ dat %>%
     cockcroft, egfr_ratio
   ) %>%
   tbl_summary(
-    statistic = list(age ~ "{mean} ({sd})")
-  )
+    by = platin_group,
+    statistic = list(age ~ "{mean} ({sd})"),
+    missing = "no"
+  ) %>%
+  add_overall(last = FALSE) %>%
+  add_p() %>%
+  modify_header(label ~ "**Characteristic**") %>%
+  modify_spanning_header(all_stat_cols() ~ "**Platinum group**")
 ```
 
 # 3 eGFR Ratio Distribution (Overall)
