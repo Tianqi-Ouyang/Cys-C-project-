@@ -1444,6 +1444,153 @@ ggplot(d_sex, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex,
   theme(legend.position = "top")
 ```
 
+## 10.7 – 10.12 eGFR Ratio distribution by category
+
+For each of the same six splits as 10.1 – 10.6, overlaid kernel density curves of the eGFR ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault). Red = highlighted level (≥ threshold, or Female for the sex panel); grey = reference level. Dashed grey vertical line marks the ratio = 1 concordance point; dotted verticals mark each group's median. Subtitle carries N and median for each level plus a two-sided Wilcoxon rank-sum p-value comparing the two distributions.
+
+```{r}
+#| label: jx-ratio-by-group-helper
+plot_ratio_by_group <- function(highlight_var, threshold, label,
+                                highlight_label, reference_label) {
+  d <- dat %>%
+    dplyr::filter(!is.na(egfr_ratio), !is.na(.data[[highlight_var]])) %>%
+    dplyr::mutate(grp = factor(
+      ifelse(.data[[highlight_var]] >= threshold, highlight_label, reference_label),
+      levels = c(highlight_label, reference_label)))
+
+  med_tbl <- d %>%
+    dplyr::group_by(grp) %>%
+    dplyr::summarise(m = median(egfr_ratio, na.rm = TRUE),
+                     n = dplyr::n(), .groups = "drop")
+
+  pval <- tryCatch(
+    wilcox.test(egfr_ratio ~ grp, data = d)$p.value,
+    error = function(e) NA_real_)
+  p_str <- if (is.na(pval)) "NA" else
+    ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+
+  col_vec <- setNames(c("#E31A1C", "grey50"),
+                      c(highlight_label, reference_label))
+
+  ggplot(d, aes(x = egfr_ratio, fill = grp, color = grp)) +
+    geom_density(alpha = 0.35, linewidth = 0.9) +
+    geom_vline(xintercept = 1, linetype = "dashed", color = "grey30") +
+    geom_vline(data = med_tbl, aes(xintercept = m, color = grp),
+               linetype = "dotted", linewidth = 0.8, show.legend = FALSE) +
+    scale_fill_manual(values = col_vec) +
+    scale_color_manual(values = col_vec) +
+    coord_cartesian(xlim = c(0.4, 2.0)) +
+    labs(x = "eGFR ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault)",
+         y = "Density",
+         fill = NULL, color = NULL,
+         title = label,
+         subtitle = sprintf(
+           "%s: N = %d, median = %.2f   |   %s: N = %d, median = %.2f   |   Wilcoxon p = %s",
+           highlight_label,
+           med_tbl$n[med_tbl$grp == highlight_label],
+           med_tbl$m[med_tbl$grp == highlight_label],
+           reference_label,
+           med_tbl$n[med_tbl$grp == reference_label],
+           med_tbl$m[med_tbl$grp == reference_label],
+           p_str)) +
+    theme_minimal(base_size = 12) +
+    theme(legend.position = "top",
+          plot.subtitle = element_text(size = 9, color = "grey25"))
+}
+```
+
+### 10.7 eGFR Ratio by Age >= 70
+
+```{r}
+#| label: jx-ratio-by-age70
+#| fig-width: 7
+#| fig-height: 4.5
+plot_ratio_by_group("age", 70, "eGFR Ratio by Age >= 70",
+                    "Age >= 70", "Age < 70")
+```
+
+### 10.8 eGFR Ratio by Age >= 75
+
+```{r}
+#| label: jx-ratio-by-age75
+#| fig-width: 7
+#| fig-height: 4.5
+plot_ratio_by_group("age", 75, "eGFR Ratio by Age >= 75",
+                    "Age >= 75", "Age < 75")
+```
+
+### 10.9 eGFR Ratio by Age >= 80
+
+```{r}
+#| label: jx-ratio-by-age80
+#| fig-width: 7
+#| fig-height: 4.5
+plot_ratio_by_group("age", 80, "eGFR Ratio by Age >= 80",
+                    "Age >= 80", "Age < 80")
+```
+
+### 10.10 eGFR Ratio by BMI >= 25
+
+```{r}
+#| label: jx-ratio-by-bmi25
+#| fig-width: 7
+#| fig-height: 4.5
+plot_ratio_by_group("bmi", 25, "eGFR Ratio by BMI >= 25",
+                    "BMI >= 25", "BMI < 25")
+```
+
+### 10.11 eGFR Ratio by BMI >= 30
+
+```{r}
+#| label: jx-ratio-by-bmi30
+#| fig-width: 7
+#| fig-height: 4.5
+plot_ratio_by_group("bmi", 30, "eGFR Ratio by BMI >= 30",
+                    "BMI >= 30", "BMI < 30")
+```
+
+### 10.12 eGFR Ratio by Sex
+
+```{r}
+#| label: jx-ratio-by-sex
+#| fig-width: 7
+#| fig-height: 4.5
+d_sex_r <- dat %>%
+  dplyr::filter(!is.na(egfr_ratio), !is.na(sex))
+
+med_sex <- d_sex_r %>%
+  dplyr::group_by(sex) %>%
+  dplyr::summarise(m = median(egfr_ratio, na.rm = TRUE),
+                   n = dplyr::n(), .groups = "drop")
+
+p_sex <- tryCatch(
+  wilcox.test(egfr_ratio ~ sex, data = d_sex_r)$p.value,
+  error = function(e) NA_real_)
+p_sex_str <- if (is.na(p_sex)) "NA" else
+  ifelse(p_sex < 0.001, "<0.001", sprintf("%.3f", p_sex))
+
+ggplot(d_sex_r, aes(x = egfr_ratio, fill = sex, color = sex)) +
+  geom_density(alpha = 0.35, linewidth = 0.9) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "grey30") +
+  geom_vline(data = med_sex, aes(xintercept = m, color = sex),
+             linetype = "dotted", linewidth = 0.8, show.legend = FALSE) +
+  scale_fill_manual(values  = c("Female" = "#E31A1C", "Male" = "grey50")) +
+  scale_color_manual(values = c("Female" = "#E31A1C", "Male" = "grey50")) +
+  coord_cartesian(xlim = c(0.4, 2.0)) +
+  labs(x = "eGFR ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault)",
+       y = "Density",
+       fill = NULL, color = NULL,
+       title = "eGFR Ratio by Sex",
+       subtitle = sprintf(
+         "Female: N = %d, median = %.2f   |   Male: N = %d, median = %.2f   |   Wilcoxon p = %s",
+         med_sex$n[med_sex$sex == "Female"], med_sex$m[med_sex$sex == "Female"],
+         med_sex$n[med_sex$sex == "Male"],   med_sex$m[med_sex$sex == "Male"],
+         p_sex_str)) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "top",
+        plot.subtitle = element_text(size = 9, color = "grey25"))
+```
+
 # 11 Sensitivity Analysis — eGFR Ratio (CKD-EPI 2012 CysC / CKD-EPI 2021 Cr)
 
 Sensitivity analysis using an alternative eGFR ratio definition for the linear exposure:
