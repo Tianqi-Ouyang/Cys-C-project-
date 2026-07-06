@@ -120,7 +120,7 @@ dat <- dat %>%
 
 Table 1 is now stratified by `platin_group`. Columns show the overall cohort, the cisplatin subgroup, and the carboplatin subgroup side-by-side, with a between-group p-value in the final column (Wilcoxon rank-sum for continuous, Fisher exact for categorical with expected cell < 5, else χ²). The `platin_group`, `carbo_AUC`, and `cis_dose`-related variables are removed from the row list because they are collinear with the stratification column.
 
-**Missing counts.** `missing = "ifany"` — each variable's Unknown row appears only when the variable actually has missing values in that column. The largest sources of covariate missingness in this cohort are the RPDR pre-baseline labs (`pre_HGB_45days`, `pre_PLT_45days`, `pre_ALB_45days`) — these drive most of the complete-case exclusions in the model tables in Sections 4/7/11.
+**Missing counts.** `missing = "ifany"` — each variable's Unknown row appears only when the variable actually has missing values in that column. In practice this cohort is complete on the entire adjuster / predictor set once record 911 is dropped upstream in `jiaxuan_data.qmd`: `pre_HGB_45days`, `pre_PLT_45days`, `pre_ALB_45days`, and `pre_CRE_45days` all show 0/943 missing, and the age / sex / BMI / smoking / thyroid / steroids / RPDR-comorbidity / eGFR variables are also fully populated. The only NA-by-design variables in the row list are `carbo_AUC` / `carbo_AUC_cat` (NA for cisplatin patients) and `cis_dose` / `cis_dose_high` (NA for carboplatin patients). Consequently, the "Excluded (missing cov.)" column in the Section 4 / 7 / 11 summary tables is 0 for every outcome.
 
 ```{r}
 #| label: jx-table1-whole
@@ -132,7 +132,7 @@ dat %>%
     Gemcitabine, Pertuzumab, Trastuzumab, Docetaxel, other_chemo, Administered_alone,
     hiv_rpdr, thyroid, smoking, steroids,
     cci, score, ecog_score, bmi, bmi_cat,
-    pre_HGB_45days, pre_PLT_45days, pre_ALB_45days,
+    pre_HGB_45days, pre_PLT_45days, pre_ALB_45days, pre_CRE_45days,
     baseline_cys_c, baseline_cre, cr_cys,
     baseline_cre_egfr, baseline_cys_c_egfr,
     ckd_epi_gfr_cre_cys, ckd_epi_gfr_cre_cys_unindex,
