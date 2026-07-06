@@ -1320,14 +1320,28 @@ plot_cg_vs_epi <- function(highlight_var, threshold, label) {
   n_total <- nrow(d)
   n_red   <- sum(d$highlight)
 
+  # Fit two separate OLS models so we can annotate each with its equation + R².
+  fit_true  <- lm(ckd_epi_gfr_cre_cys_unindex ~ cockcroft,
+                  data = d %>% filter(highlight))
+  fit_false <- lm(ckd_epi_gfr_cre_cys_unindex ~ cockcroft,
+                  data = d %>% filter(!highlight))
+  eq_str <- function(fit) {
+    b  <- coef(fit)
+    r2 <- summary(fit)$r.squared
+    sprintf("y = %.2f x %+.1f   (R² = %.2f)", b[2], b[1], r2)
+  }
+
   ggplot(d, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex,
                 color = highlight, fill = highlight)) +
-    geom_abline(slope = 1, intercept = 0, linetype = "dashed",
-                color = "grey50") +
-    # One OLS regression line per level of `highlight` (color and CI ribbon
-    # match the level).
+    geom_point(alpha = 0.6, size = 1.6) +
+    # One OLS regression line per level of `highlight` (colour + CI ribbon
+    # match the dot colour).
     geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
                 alpha = 0.15, linewidth = 1) +
+    annotate("text", x = 5, y = 195, hjust = 0, size = 3.4,
+             color = "#E31A1C", label = paste0(">= threshold: ", eq_str(fit_true))) +
+    annotate("text", x = 5, y = 182, hjust = 0, size = 3.4,
+             color = "grey40",  label = paste0("< threshold:  ", eq_str(fit_false))) +
     scale_color_manual(values = c("FALSE" = "grey60", "TRUE" = "#E31A1C"),
                        guide = "none") +
     scale_fill_manual(values = c("FALSE" = "grey60", "TRUE" = "#E31A1C"),
@@ -1395,13 +1409,26 @@ plot_cg_vs_epi("bmi", 30, "BMI >= 30")
 d_sex <- dat %>%
   filter(!is.na(cockcroft), !is.na(ckd_epi_gfr_cre_cys_unindex), !is.na(sex))
 
+fit_f_sex <- lm(ckd_epi_gfr_cre_cys_unindex ~ cockcroft,
+                data = d_sex %>% filter(sex == "Female"))
+fit_m_sex <- lm(ckd_epi_gfr_cre_cys_unindex ~ cockcroft,
+                data = d_sex %>% filter(sex == "Male"))
+eq_str_sex <- function(fit) {
+  b  <- coef(fit)
+  r2 <- summary(fit)$r.squared
+  sprintf("y = %.2f x %+.1f   (R² = %.2f)", b[2], b[1], r2)
+}
+
 ggplot(d_sex, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex,
                   color = sex, fill = sex)) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed",
-              color = "grey50") +
-  # One OLS regression line per sex (colour and CI ribbon match the level).
+  geom_point(alpha = 0.6, size = 1.6) +
+  # One OLS regression line per sex (colour + CI ribbon match dot colour).
   geom_smooth(method = "lm", formula = y ~ x, se = TRUE,
               alpha = 0.15, linewidth = 1) +
+  annotate("text", x = 5, y = 195, hjust = 0, size = 3.4,
+           color = "#E31A1C", label = paste0("Female: ", eq_str_sex(fit_f_sex))) +
+  annotate("text", x = 5, y = 182, hjust = 0, size = 3.4,
+           color = "grey40",  label = paste0("Male:   ", eq_str_sex(fit_m_sex))) +
   scale_color_manual(values = c("Female" = "#E31A1C", "Male" = "grey60")) +
   scale_fill_manual(values = c("Female" = "#E31A1C", "Male" = "grey60"),
                     guide = "none") +
