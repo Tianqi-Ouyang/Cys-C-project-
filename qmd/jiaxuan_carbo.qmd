@@ -161,6 +161,24 @@ ggplot(dose_long, aes(x = dose_mg, fill = dose_type)) +
   theme_minimal(base_size = 14)
 ```
 
+Smoothed kernel-density version of the same two distributions (Actual REDCap dose in red, CKD-EPI Cr-Cys–predicted Calvert dose in blue). Easier to see location / spread differences without the histogram jitter.
+
+```{r}
+#| label: jx-carbo-dose-overlay-density
+#| fig-width: 8
+#| fig-height: 5
+ggplot(dose_long, aes(x = dose_mg, fill = dose_type, color = dose_type)) +
+  geom_density(alpha = 0.35, linewidth = 0.9) +
+  scale_fill_manual(values = c("Actual (REDCap)" = "#E31A1C",
+                                "Predicted (CKD-EPI Cr-Cys)" = "#1F78B4")) +
+  scale_color_manual(values = c("Actual (REDCap)" = "#E31A1C",
+                                 "Predicted (CKD-EPI Cr-Cys)" = "#1F78B4")) +
+  labs(title = "Carboplatin Dose Distribution — density",
+       x = "Dose (mg)", y = "Density",
+       fill = "Dose Type", color = "Dose Type") +
+  theme_minimal(base_size = 14)
+```
+
 ## 2.2 Signed Dose Discrepancy Distribution
 
 Smooth kernel density estimate of the signed dose discrepancy (actual − predicted, CKD-EPI Cr-Cys). The area under the curve is shaded by sign — negative (under-dosed region) on one side, positive on the other.
