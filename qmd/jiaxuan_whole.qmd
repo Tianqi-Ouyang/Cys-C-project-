@@ -1465,7 +1465,7 @@ ggplot(d_sex, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex,
 
 ## 10.7 – 10.12 eGFR Ratio distribution by category
 
-For each of the same six splits as 10.1 – 10.6, overlaid kernel density curves of the eGFR ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault). Red = highlighted level (≥ threshold, or Female for the sex panel); grey = reference level. Dashed grey vertical line marks the ratio = 1 concordance point; dotted verticals mark each group's median. Subtitle carries N and median for each level plus a two-sided Wilcoxon rank-sum p-value comparing the two distributions.
+For each of the same six splits as 10.1 – 10.6, overlaid kernel density curves of the eGFR ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault). Red = highlighted level (≥ threshold, or Female for the sex panel); grey = reference level. Dashed grey vertical line marks the ratio = 1 concordance point; dotted verticals mark each group's median. Subtitle carries N and median for each level plus a two-sided Mann-Whitney U p-value (equivalent to Wilcoxon rank-sum) comparing the two distributions.
 
 ```{r}
 #| label: jx-ratio-by-group-helper
@@ -1504,7 +1504,7 @@ plot_ratio_by_group <- function(highlight_var, threshold, label,
          fill = NULL, color = NULL,
          title = label,
          subtitle = sprintf(
-           "%s: N = %d, median = %.2f   |   %s: N = %d, median = %.2f   |   Wilcoxon p = %s",
+           "%s: N = %d, median = %.2f   |   %s: N = %d, median = %.2f   |   Mann-Whitney U p = %s",
            highlight_label,
            med_tbl$n[med_tbl$grp == highlight_label],
            med_tbl$m[med_tbl$grp == highlight_label],
@@ -1601,7 +1601,7 @@ ggplot(d_sex_r, aes(x = egfr_ratio, fill = sex, color = sex)) +
        fill = NULL, color = NULL,
        title = "eGFR Ratio by Sex",
        subtitle = sprintf(
-         "Female: N = %d, median = %.2f   |   Male: N = %d, median = %.2f   |   Wilcoxon p = %s",
+         "Female: N = %d, median = %.2f   |   Male: N = %d, median = %.2f   |   Mann-Whitney U p = %s",
          med_sex$n[med_sex$sex == "Female"], med_sex$m[med_sex$sex == "Female"],
          med_sex$n[med_sex$sex == "Male"],   med_sex$m[med_sex$sex == "Male"],
          p_sex_str)) +
