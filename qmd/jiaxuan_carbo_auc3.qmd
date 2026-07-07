@@ -237,31 +237,42 @@ dat %>%
 
 ## 3.1 Follow-up time (days from baseline to last known status)
 
-`days_last_follow_up = last_follow_up_date − baseline_sample_date`; analytic window capped at 90 days. Patients whose last known status is < 90 days from baseline are treated as lost to follow-up (LTFU).
+Four alternative definitions of follow-up time shown side-by-side:
+
+- **A — Raw days**: unrestricted calendar follow-up (median dominated by patients who kept returning for years).
+- **B — Raw days, ≤ 365 days**: restricts to patients whose last-known contact was within 1 year of baseline.
+- **C — Analytic, capped at 90 days**: `min(days_last_follow_up, 90)` — actual risk time in the 90-day models.
+- **D — Analytic (capped at 90) & ≤ 365 days raw**: same as C but excluding long-tail returners.
 
 ```{r}
 #| label: jx-auc3-followup-desc
 followup_summary <- dat %>%
   dplyr::select(record_id, days_last_follow_up) %>%
-  tidyr::drop_na(days_last_follow_up) %>%
-  dplyr::mutate(reached_90 = ifelse(days_last_follow_up >= 90, 1, 0))
+  tidyr::drop_na(days_last_follow_up)
 
-followup_tbl <- followup_summary %>%
-  dplyr::summarise(
-    Group = "Carboplatin AUC ≥ 3",
-    N            = dplyr::n(),
-    `Median [IQR] follow-up (days)` = sprintf("%.0f [%.0f, %.0f]",
-      median(days_last_follow_up),
-      quantile(days_last_follow_up, 0.25),
-      quantile(days_last_follow_up, 0.75)),
-    `Reached 90 days, N (%)`   = sprintf("%d (%.1f%%)",
-      sum(reached_90 == 1), 100 * mean(reached_90 == 1)),
-    `LTFU before 90 days, N (%)` = sprintf("%d (%.1f%%)",
-      sum(reached_90 == 0), 100 * mean(reached_90 == 0))
+fmt_med_iqr <- function(x) {
+  if (length(x) == 0) return("—")
+  sprintf("%.0f [%.0f, %.0f]", median(x), quantile(x, 0.25), quantile(x, 0.75))
+}
+
+fu_row <- function(label, v) {
+  tibble::tibble(
+    Interpretation                  = label,
+    N                               = length(v),
+    `Median [IQR] follow-up (days)` = fmt_med_iqr(v)
   )
+}
+
+v <- followup_summary$days_last_follow_up
+followup_tbl <- dplyr::bind_rows(
+  fu_row("A — Raw days",                                 v),
+  fu_row("B — Raw days, ≤ 365 days",                     v[v <= 365]),
+  fu_row("C — Analytic (capped at 90 days)",             pmin(v, 90)),
+  fu_row("D — Analytic (capped at 90 days), ≤ 365 days", pmin(v[v <= 365], 90))
+)
 
 flextable::flextable(followup_tbl) |>
-  flextable::set_caption("Follow-up time from baseline to last known status (Carboplatin AUC ≥ 3 cohort).") |>
+  flextable::set_caption("Follow-up time from baseline to last known status (Carboplatin AUC ≥ 3 cohort). Four alternative definitions.") |>
   flextable::autofit()
 ```
 
