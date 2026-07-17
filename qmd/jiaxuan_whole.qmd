@@ -111,6 +111,15 @@ dat <- dat %>%
     # because BSA cancels.) per10 below is the per-0.1 DECLINE reporting scale.
     egfr_ratio_sens       = baseline_cys_c_egfr_unindexed / baseline_cre_egfr_unindexed,
     egfr_ratio_sens_per10 = -egfr_ratio_sens * 10,
+    # Percent-difference eGFR (new primary exposure):
+    # egfr_diff_pct = 100 * (CKD-EPI Cr-Cys unindexed - Cockcroft-Gault) / Cockcroft-Gault
+    # egfr_diff_pct_per10: HR reads as multiplicative change per 10 percentage-point DECLINE.
+    egfr_diff_pct         = 100 * (ckd_epi_gfr_cre_cys_unindex - cockcroft) / cockcroft,
+    egfr_diff_pct_per10   = -egfr_diff_pct / 10,
+    # Percent-difference eGFR for sensitivity analysis:
+    # numerator - denominator = CKD-EPI 2012 CysC - CKD-EPI 2021 Cr, both unindexed.
+    egfr_diff_pct_sens        = 100 * (baseline_cys_c_egfr_unindexed - baseline_cre_egfr_unindexed) / baseline_cre_egfr_unindexed,
+    egfr_diff_pct_sens_per10  = -egfr_diff_pct_sens / 10,
     cockcroft_per10 = cockcroft / 10,
     ckd_epi_per10   = ckd_epi_gfr_cre_cys_unindex / 10
   )
@@ -268,7 +277,32 @@ ggplot(disc_hist, aes(x = egfr_discrepancy, fill = side)) +
   theme_minimal(base_size = 14)
 ```
 
-# 4 Fine-Gray Models — eGFR Ratio (adjusted for Cockcroft-Gault)
+## 3.3 eGFR Difference (%) distribution
+
+Signed eGFR difference (%) = 100 × (CKD-EPI Cr-Cys unindexed − Cockcroft-Gault) / Cockcroft-Gault. Concordance sits at 0 %. Red bins highlight the negative side (CKD-EPI Cr-Cys below CG by more than 0 %, consistent with muscle wasting / sarcopenia); gray bins are the positive side.
+
+```{r}
+#| label: jx-egfr-diffpct-hist
+#| fig-width: 8
+#| fig-height: 5
+diffpct_hist <- dat %>%
+  filter(!is.na(egfr_diff_pct)) %>%
+  mutate(side = ifelse(egfr_diff_pct < 0, "neg", "pos"))
+
+ggplot(diffpct_hist, aes(x = egfr_diff_pct, fill = side)) +
+  geom_histogram(aes(y = after_stat(count) / sum(after_stat(count)) * 100),
+                 binwidth = 5, boundary = 0,
+                 color = "black", alpha = 0.85) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey30") +
+  scale_fill_manual(values = c(neg = "#E31A1C", pos = "grey60"),
+                    guide = "none") +
+  labs(title = "Distribution of eGFR Difference (%): 100 × (CKD-EPI Cr-Cys − CG) / CG",
+       x = "eGFR Difference (%)",
+       y = "Percent of Patients (%)") +
+  theme_minimal(base_size = 14)
+```
+
+# 4 Fine-Gray Models — eGFR Difference (%) (per 10 % decline, adjusted for Cockcroft-Gault)
 
 Each table below shows univariable (one variable at a time) and multivariable Fine-Gray subdistribution hazard ratios side-by-side. A Word version of every table is saved during render — click any link below to download:
 
@@ -379,80 +413,80 @@ cox_model <- function(time_var, status_var, pred_var, pre_labs = NULL,
 
 ```{r}
 #| label: jx-fg-cg-anemia2
-fg_model("cmp_time_anemia_2", "cmp_status_anemia_2", "egfr_ratio_per10", "pre_HGB_45days", "cockcroft", docx_name = "sec4_anemia_2")
+fg_model("cmp_time_anemia_2", "cmp_status_anemia_2", "egfr_diff_pct_per10", "pre_HGB_45days", "cockcroft", docx_name = "sec4_anemia_2")
 ```
 
 ## 4.2 Anemia Grade 3
 
 ```{r}
 #| label: jx-fg-cg-anemia3
-fg_model("cmp_time_anemia_3", "cmp_status_anemia_3", "egfr_ratio_per10", "pre_HGB_45days", "cockcroft", docx_name = "sec4_anemia_3")
+fg_model("cmp_time_anemia_3", "cmp_status_anemia_3", "egfr_diff_pct_per10", "pre_HGB_45days", "cockcroft", docx_name = "sec4_anemia_3")
 ```
 
 ## 4.3 Thrombocytopenia Grade 2
 
 ```{r}
 #| label: jx-fg-cg-throm2
-fg_model("cmp_time_throm_2", "cmp_status_throm_2", "egfr_ratio_per10", "pre_PLT_45days", "cockcroft", docx_name = "sec4_throm_2")
+fg_model("cmp_time_throm_2", "cmp_status_throm_2", "egfr_diff_pct_per10", "pre_PLT_45days", "cockcroft", docx_name = "sec4_throm_2")
 ```
 
 ## 4.4 Thrombocytopenia Grade 3
 
 ```{r}
 #| label: jx-fg-cg-throm3
-fg_model("cmp_time_throm_3", "cmp_status_throm_3", "egfr_ratio_per10", "pre_PLT_45days", "cockcroft", docx_name = "sec4_throm_3")
+fg_model("cmp_time_throm_3", "cmp_status_throm_3", "egfr_diff_pct_per10", "pre_PLT_45days", "cockcroft", docx_name = "sec4_throm_3")
 ```
 
 ## 4.5 AKI Grade 2
 
 ```{r}
 #| label: jx-fg-cg-aki2
-fg_model("cmp_time_aki_2", "cmp_status_aki_2", "egfr_ratio_per10", egfr_adj = "cockcroft", docx_name = "sec4_aki_2")
+fg_model("cmp_time_aki_2", "cmp_status_aki_2", "egfr_diff_pct_per10", egfr_adj = "cockcroft", docx_name = "sec4_aki_2")
 ```
 
 ## 4.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-fg-cg-akikdigo
-fg_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "egfr_ratio_per10", egfr_adj = "cockcroft", docx_name = "sec4_aki_kdigo")
+fg_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "egfr_diff_pct_per10", egfr_adj = "cockcroft", docx_name = "sec4_aki_kdigo")
 ```
 
 ## 4.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-fg-cg-grade2
-fg_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "egfr_ratio_per10", egfr_adj = "cockcroft", docx_name = "sec4_grade_2_aes")
+fg_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "egfr_diff_pct_per10", egfr_adj = "cockcroft", docx_name = "sec4_grade_2_aes")
 ```
 
 ## 4.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-fg-cg-grade3
-fg_model("cmp_time_grade_3_aes", "cmp_status_grade_3_aes", "egfr_ratio_per10", egfr_adj = "cockcroft", docx_name = "sec4_grade_3_aes")
+fg_model("cmp_time_grade_3_aes", "cmp_status_grade_3_aes", "egfr_diff_pct_per10", egfr_adj = "cockcroft", docx_name = "sec4_grade_3_aes")
 ```
 
 ## 4.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-fg-cg-anyhosp
-fg_model("cmp_time_any_hosp", "cmp_status_any_hosp", "egfr_ratio_per10", egfr_adj = "cockcroft", docx_name = "sec4_any_hosp")
+fg_model("cmp_time_any_hosp", "cmp_status_any_hosp", "egfr_diff_pct_per10", egfr_adj = "cockcroft", docx_name = "sec4_any_hosp")
 ```
 
 ## 4.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-fg-cg-sideeffect
-fg_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_ratio_per10", egfr_adj = "cockcroft", docx_name = "sec4_side_effect")
+fg_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_diff_pct_per10", egfr_adj = "cockcroft", docx_name = "sec4_side_effect")
 ```
 
 ## 4.11 90-Day Death (Cox PH)
 
 ```{r}
 #| label: jx-cox-cg-death
-cox_model("time_to_death_90", "death_90", "egfr_ratio_per10", egfr_adj = "cockcroft", docx_name = "sec4_death_90")
+cox_model("time_to_death_90", "death_90", "egfr_diff_pct_per10", egfr_adj = "cockcroft", docx_name = "sec4_death_90")
 ```
 
-# 5 Cause-Specific Hazard Models — eGFR Ratio (adjusted for Cockcroft-Gault)
+# 5 Cause-Specific Hazard Models — eGFR Difference (%) (per 10 % decline, adjusted for Cockcroft-Gault)
 
 ```{r}
 #| label: jx-csh-helper
@@ -481,77 +515,77 @@ csh_model <- function(time_var, status_var, pred_var, pre_labs = NULL) {
 
 ```{r}
 #| label: jx-csh-anemia2
-csh_model("cmp_time_anemia_2", "cmp_status_anemia_2", "egfr_ratio_per10", "pre_HGB_45days")
+csh_model("cmp_time_anemia_2", "cmp_status_anemia_2", "egfr_diff_pct_per10", "pre_HGB_45days")
 ```
 
 ## 5.2 Anemia Grade 3
 
 ```{r}
 #| label: jx-csh-anemia3
-csh_model("cmp_time_anemia_3", "cmp_status_anemia_3", "egfr_ratio_per10", "pre_HGB_45days")
+csh_model("cmp_time_anemia_3", "cmp_status_anemia_3", "egfr_diff_pct_per10", "pre_HGB_45days")
 ```
 
 ## 5.3 Thrombocytopenia Grade 2
 
 ```{r}
 #| label: jx-csh-throm2
-csh_model("cmp_time_throm_2", "cmp_status_throm_2", "egfr_ratio_per10", "pre_PLT_45days")
+csh_model("cmp_time_throm_2", "cmp_status_throm_2", "egfr_diff_pct_per10", "pre_PLT_45days")
 ```
 
 ## 5.4 Thrombocytopenia Grade 3
 
 ```{r}
 #| label: jx-csh-throm3
-csh_model("cmp_time_throm_3", "cmp_status_throm_3", "egfr_ratio_per10", "pre_PLT_45days")
+csh_model("cmp_time_throm_3", "cmp_status_throm_3", "egfr_diff_pct_per10", "pre_PLT_45days")
 ```
 
 ## 5.5 AKI Grade 2
 
 ```{r}
 #| label: jx-csh-aki2
-csh_model("cmp_time_aki_2", "cmp_status_aki_2", "egfr_ratio_per10")
+csh_model("cmp_time_aki_2", "cmp_status_aki_2", "egfr_diff_pct_per10")
 ```
 
 ## 5.6 AKI (KDIGO)
 
 ```{r}
 #| label: jx-csh-akikdigo
-csh_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "egfr_ratio_per10")
+csh_model("cmp_time_aki_kdigo", "cmp_status_aki_kdigo", "egfr_diff_pct_per10")
 ```
 
 ## 5.7 Composite Grade 2 AEs
 
 ```{r}
 #| label: jx-csh-grade2
-csh_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "egfr_ratio_per10")
+csh_model("cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "egfr_diff_pct_per10")
 ```
 
 ## 5.8 Composite Grade 3 AEs
 
 ```{r}
 #| label: jx-csh-grade3
-csh_model("cmp_time_grade_3_aes", "cmp_status_grade_3_aes", "egfr_ratio_per10")
+csh_model("cmp_time_grade_3_aes", "cmp_status_grade_3_aes", "egfr_diff_pct_per10")
 ```
 
 ## 5.9 Overall Hospitalization
 
 ```{r}
 #| label: jx-csh-anyhosp
-csh_model("cmp_time_any_hosp", "cmp_status_any_hosp", "egfr_ratio_per10")
+csh_model("cmp_time_any_hosp", "cmp_status_any_hosp", "egfr_diff_pct_per10")
 ```
 
 ## 5.10 Platinum-Related Hospitalization
 
 ```{r}
 #| label: jx-csh-sideeffect
-csh_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_ratio_per10")
+csh_model("cmp_time_side_effect", "cmp_status_side_effect", "egfr_diff_pct_per10")
 ```
 
 ## 5.11 90-Day Death (Cox PH)
 
 ```{r}
 #| label: jx-csh-death
-cox_model("time_to_death_90", "death_90", "egfr_ratio_per10", egfr_adj = "cockcroft")
+cox_model("time_to_death_90", "death_90", "egfr_diff_pct_per10", egfr_adj = "cockcroft")
 ```
 
 ::: {.callout-note}
@@ -564,7 +598,7 @@ Three reasons to anchor at the **median**:
 3. **No arbitrary choice**: If we picked 1.0 arbitrarily, the plot would look almost identical here (because median ≈ 1), but in cohorts where the median is 0.9 or 1.1, picking 1.0 would either shift or distort the curve without changing the actual model.
 :::
 
-# 6 Linear subHR Curves — eGFR Ratio (raw scale)
+# 6 Linear subHR Curves — eGFR Difference (%) (raw scale)
 
 ::: {.callout-note}
 ## p-value convention
@@ -582,12 +616,12 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine","ici",
                 "bmi","smoking","steroids","thyroid")
-  keep <- c("egfr_ratio", time_var, status_var, base_adj, extra_adj)
+  keep <- c("egfr_diff_pct", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
 
   adj_df <- d[, c(base_adj, extra_adj), drop = FALSE]
   X_adj <- model.matrix(~ ., data = adj_df)[, -1, drop = FALSE]
-  X <- cbind(egfr_ratio = d$egfr_ratio, X_adj)
+  X <- cbind(egfr_diff_pct = d$egfr_diff_pct, X_adj)
 
   stat_num <- suppressWarnings(as.integer(as.character(d[[status_var]])))
   time_num <- as.numeric(d[[time_var]])
@@ -599,37 +633,37 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
   V_beta <- fit$var[1, 1]
   se_b   <- sqrt(V_beta)
 
-  # subHR per 0.1 ratio decline and per IQR decline (delta-method CIs)
-  q1    <- as.numeric(quantile(d$egfr_ratio, 0.25, na.rm = TRUE))
-  q3    <- as.numeric(quantile(d$egfr_ratio, 0.75, na.rm = TRUE))
+  # subHR per 10 percentage-point decline and per IQR decline (delta-method CIs)
+  q1    <- as.numeric(quantile(d$egfr_diff_pct, 0.25, na.rm = TRUE))
+  q3    <- as.numeric(quantile(d$egfr_diff_pct, 0.75, na.rm = TRUE))
   iqr_w <- q3 - q1
-  hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
+  hr10  <- exp(-10 * beta);     hr10_l <- exp(-10 * beta - 1.96 * 10 * se_b);   hr10_u <- exp(-10 * beta + 1.96 * 10 * se_b)
   hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
   pval_bonf <- min(pval * n_bonf, 1)
   p_shown <- if (n_bonf > 1) pval_bonf else pval
   p_lbl   <- if (n_bonf > 1) sprintf("p_Bonf = %s (n = %d)", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)), n_bonf) else sprintf("p = %s", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)))
   subtitle_str <- sprintf(
-    "subHR per 0.1 ratio decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
-    hr01, hr01_l, hr01_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "subHR per 10 %% decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.1f %%): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f] %%",
+    hr10, hr10_l, hr10_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
 
-  ref_x  <- median(d$egfr_ratio, na.rm = TRUE)
-  grid_x <- seq(quantile(d$egfr_ratio, 0.025, na.rm = TRUE),
-                quantile(d$egfr_ratio, 0.975, na.rm = TRUE),
+  ref_x  <- median(d$egfr_diff_pct, na.rm = TRUE)
+  grid_x <- seq(quantile(d$egfr_diff_pct, 0.025, na.rm = TRUE),
+                quantile(d$egfr_diff_pct, 0.975, na.rm = TRUE),
                 length.out = 100)
 
   log_hr <- beta * (grid_x - ref_x)
   se     <- sqrt((grid_x - ref_x)^2 * V_beta)
 
   if (x_axis == "percentile") {
-    ecdf_fn      <- ecdf(d$egfr_ratio)
+    ecdf_fn      <- ecdf(d$egfr_diff_pct)
     grid_display <- ecdf_fn(grid_x) * 100
     ref_display  <- ecdf_fn(ref_x)  * 100
-    xlab <- "Percentile of eGFR Ratio"
+    xlab <- "Percentile of eGFR Difference (%)"
   } else {
     grid_display <- grid_x
     ref_display  <- ref_x
-    xlab <- "CKD-EPI Cr-Cys / CG ratio"
+    xlab <- "eGFR difference (%): 100 × (CKD-EPI Cr-Cys − CG) / CG"
   }
 
   df_plot <- tibble(
@@ -650,12 +684,7 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
 
-  if (x_axis == "ratio") {
-    p <- p + coord_cartesian(xlim = c(0.65, 1.45), ylim = c(0, 4))
-  } else {
-    p <- p + coord_cartesian(xlim = c(0.65, 1.45), ylim = c(0, 4))
-  }
-  p
+  p + coord_cartesian(ylim = c(0, 4))
 }
 
 plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
@@ -666,49 +695,49 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine","ici",
                 "bmi","smoking","steroids","thyroid")
-  keep <- c("egfr_ratio", time_var, status_var, base_adj, extra_adj)
+  keep <- c("egfr_diff_pct", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
 
   fmla <- as.formula(paste0(
-    "Surv(", time_var, ", ", status_var, ") ~ egfr_ratio + ",
+    "Surv(", time_var, ", ", status_var, ") ~ egfr_diff_pct + ",
     paste(c(base_adj, extra_adj), collapse = " + ")
   ))
   fit <- survival::coxph(fmla, data = d)
 
-  beta   <- coef(fit)["egfr_ratio"]
-  V_beta <- vcov(fit)["egfr_ratio", "egfr_ratio"]
+  beta   <- coef(fit)["egfr_diff_pct"]
+  V_beta <- vcov(fit)["egfr_diff_pct", "egfr_diff_pct"]
   se_b   <- sqrt(V_beta)
 
-  q1    <- as.numeric(quantile(d$egfr_ratio, 0.25, na.rm = TRUE))
-  q3    <- as.numeric(quantile(d$egfr_ratio, 0.75, na.rm = TRUE))
+  q1    <- as.numeric(quantile(d$egfr_diff_pct, 0.25, na.rm = TRUE))
+  q3    <- as.numeric(quantile(d$egfr_diff_pct, 0.75, na.rm = TRUE))
   iqr_w <- q3 - q1
-  hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
+  hr10  <- exp(-10 * beta);     hr10_l <- exp(-10 * beta - 1.96 * 10 * se_b);   hr10_u <- exp(-10 * beta + 1.96 * 10 * se_b)
   hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
   pval_bonf <- min(pval * n_bonf, 1)
   p_shown <- if (n_bonf > 1) pval_bonf else pval
   p_lbl   <- if (n_bonf > 1) sprintf("p_Bonf = %s (n = %d)", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)), n_bonf) else sprintf("p = %s", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)))
   subtitle_str <- sprintf(
-    "HR per 0.1 ratio decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
-    hr01, hr01_l, hr01_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "HR per 10 %% decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.1f %%): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f] %%",
+    hr10, hr10_l, hr10_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
 
-  ref_x  <- median(d$egfr_ratio, na.rm = TRUE)
-  grid_x <- seq(quantile(d$egfr_ratio, 0.025, na.rm = TRUE),
-                quantile(d$egfr_ratio, 0.975, na.rm = TRUE),
+  ref_x  <- median(d$egfr_diff_pct, na.rm = TRUE)
+  grid_x <- seq(quantile(d$egfr_diff_pct, 0.025, na.rm = TRUE),
+                quantile(d$egfr_diff_pct, 0.975, na.rm = TRUE),
                 length.out = 100)
 
   log_hr <- beta * (grid_x - ref_x)
   se     <- sqrt((grid_x - ref_x)^2 * V_beta)
 
   if (x_axis == "percentile") {
-    ecdf_fn      <- ecdf(d$egfr_ratio)
+    ecdf_fn      <- ecdf(d$egfr_diff_pct)
     grid_display <- ecdf_fn(grid_x) * 100
     ref_display  <- ecdf_fn(ref_x)  * 100
-    xlab <- "Percentile of eGFR Ratio"
+    xlab <- "Percentile of eGFR Difference (%)"
   } else {
     grid_display <- grid_x
     ref_display  <- ref_x
-    xlab <- "CKD-EPI Cr-Cys / CG ratio"
+    xlab <- "eGFR difference (%): 100 × (CKD-EPI Cr-Cys − CG) / CG"
   }
 
   df_plot <- tibble(
@@ -729,12 +758,7 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
 
-  if (x_axis == "ratio") {
-    p <- p + coord_cartesian(xlim = c(0.65, 1.45), ylim = c(0, 4))
-  } else {
-    p <- p + coord_cartesian(xlim = c(0.65, 1.45), ylim = c(0, 4))
-  }
-  p
+  p + coord_cartesian(ylim = c(0, 4))
 }
 ```
 
@@ -1463,27 +1487,27 @@ ggplot(d_sex, aes(x = cockcroft, y = ckd_epi_gfr_cre_cys_unindex,
   theme(legend.position = "top")
 ```
 
-## 10.7 – 10.12 eGFR Ratio distribution by category
+## 10.7 – 10.12 eGFR Difference (%) distribution by category
 
-For each of the same six splits as 10.1 – 10.6, overlaid kernel density curves of the eGFR ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault). Red = highlighted level (≥ threshold, or Female for the sex panel); grey = reference level. Dashed grey vertical line marks the ratio = 1 concordance point; dotted verticals mark each group's median. Subtitle carries N and median for each level plus a two-sided Mann-Whitney U p-value (equivalent to Wilcoxon rank-sum) comparing the two distributions.
+For each of the same six splits as 10.1 – 10.6, overlaid kernel density curves of the eGFR difference (%) = 100 × (CKD-EPI Cr-Cys unindexed − Cockcroft-Gault) / Cockcroft-Gault. Red = highlighted level (≥ threshold, or Female for the sex panel); grey = reference level. Dashed grey vertical line marks the 0 % concordance point; dotted verticals mark each group's median. Subtitle carries N and median for each level plus a two-sided Mann-Whitney U p-value (equivalent to Wilcoxon rank-sum) comparing the two distributions.
 
 ```{r}
 #| label: jx-ratio-by-group-helper
 plot_ratio_by_group <- function(highlight_var, threshold, label,
                                 highlight_label, reference_label) {
   d <- dat %>%
-    dplyr::filter(!is.na(egfr_ratio), !is.na(.data[[highlight_var]])) %>%
+    dplyr::filter(!is.na(egfr_diff_pct), !is.na(.data[[highlight_var]])) %>%
     dplyr::mutate(grp = factor(
       ifelse(.data[[highlight_var]] >= threshold, highlight_label, reference_label),
       levels = c(highlight_label, reference_label)))
 
   med_tbl <- d %>%
     dplyr::group_by(grp) %>%
-    dplyr::summarise(m = median(egfr_ratio, na.rm = TRUE),
+    dplyr::summarise(m = median(egfr_diff_pct, na.rm = TRUE),
                      n = dplyr::n(), .groups = "drop")
 
   pval <- tryCatch(
-    wilcox.test(egfr_ratio ~ grp, data = d)$p.value,
+    wilcox.test(egfr_diff_pct ~ grp, data = d)$p.value,
     error = function(e) NA_real_)
   p_str <- if (is.na(pval)) "NA" else
     ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
@@ -1491,20 +1515,19 @@ plot_ratio_by_group <- function(highlight_var, threshold, label,
   col_vec <- setNames(c("#E31A1C", "grey50"),
                       c(highlight_label, reference_label))
 
-  ggplot(d, aes(x = egfr_ratio, fill = grp, color = grp)) +
+  ggplot(d, aes(x = egfr_diff_pct, fill = grp, color = grp)) +
     geom_density(alpha = 0.35, linewidth = 0.9) +
-    geom_vline(xintercept = 1, linetype = "dashed", color = "grey30") +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "grey30") +
     geom_vline(data = med_tbl, aes(xintercept = m, color = grp),
                linetype = "dotted", linewidth = 0.8, show.legend = FALSE) +
     scale_fill_manual(values = col_vec) +
     scale_color_manual(values = col_vec) +
-    coord_cartesian(xlim = c(0.4, 2.0)) +
-    labs(x = "eGFR ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault)",
+    labs(x = "eGFR difference (%): 100 × (CKD-EPI Cr-Cys − CG) / CG",
          y = "Density",
          fill = NULL, color = NULL,
          title = label,
          subtitle = sprintf(
-           "%s: N = %d, median = %.2f   |   %s: N = %d, median = %.2f   |   Mann-Whitney U p = %s",
+           "%s: N = %d, median = %.1f %%   |   %s: N = %d, median = %.1f %%   |   Mann-Whitney U p = %s",
            highlight_label,
            med_tbl$n[med_tbl$grp == highlight_label],
            med_tbl$m[med_tbl$grp == highlight_label],
@@ -1518,90 +1541,89 @@ plot_ratio_by_group <- function(highlight_var, threshold, label,
 }
 ```
 
-### 10.7 eGFR Ratio by Age >= 70
+### 10.7 eGFR Difference (%) by Age >= 70
 
 ```{r}
 #| label: jx-ratio-by-age70
 #| fig-width: 7
 #| fig-height: 4.5
-plot_ratio_by_group("age", 70, "eGFR Ratio by Age >= 70",
+plot_ratio_by_group("age", 70, "eGFR Difference (%) by Age >= 70",
                     "Age >= 70", "Age < 70")
 ```
 
-### 10.8 eGFR Ratio by Age >= 75
+### 10.8 eGFR Difference (%) by Age >= 75
 
 ```{r}
 #| label: jx-ratio-by-age75
 #| fig-width: 7
 #| fig-height: 4.5
-plot_ratio_by_group("age", 75, "eGFR Ratio by Age >= 75",
+plot_ratio_by_group("age", 75, "eGFR Difference (%) by Age >= 75",
                     "Age >= 75", "Age < 75")
 ```
 
-### 10.9 eGFR Ratio by Age >= 80
+### 10.9 eGFR Difference (%) by Age >= 80
 
 ```{r}
 #| label: jx-ratio-by-age80
 #| fig-width: 7
 #| fig-height: 4.5
-plot_ratio_by_group("age", 80, "eGFR Ratio by Age >= 80",
+plot_ratio_by_group("age", 80, "eGFR Difference (%) by Age >= 80",
                     "Age >= 80", "Age < 80")
 ```
 
-### 10.10 eGFR Ratio by BMI >= 25
+### 10.10 eGFR Difference (%) by BMI >= 25
 
 ```{r}
 #| label: jx-ratio-by-bmi25
 #| fig-width: 7
 #| fig-height: 4.5
-plot_ratio_by_group("bmi", 25, "eGFR Ratio by BMI >= 25",
+plot_ratio_by_group("bmi", 25, "eGFR Difference (%) by BMI >= 25",
                     "BMI >= 25", "BMI < 25")
 ```
 
-### 10.11 eGFR Ratio by BMI >= 30
+### 10.11 eGFR Difference (%) by BMI >= 30
 
 ```{r}
 #| label: jx-ratio-by-bmi30
 #| fig-width: 7
 #| fig-height: 4.5
-plot_ratio_by_group("bmi", 30, "eGFR Ratio by BMI >= 30",
+plot_ratio_by_group("bmi", 30, "eGFR Difference (%) by BMI >= 30",
                     "BMI >= 30", "BMI < 30")
 ```
 
-### 10.12 eGFR Ratio by Sex
+### 10.12 eGFR Difference (%) by Sex
 
 ```{r}
 #| label: jx-ratio-by-sex
 #| fig-width: 7
 #| fig-height: 4.5
 d_sex_r <- dat %>%
-  dplyr::filter(!is.na(egfr_ratio), !is.na(sex))
+  dplyr::filter(!is.na(egfr_diff_pct), !is.na(sex))
 
 med_sex <- d_sex_r %>%
   dplyr::group_by(sex) %>%
-  dplyr::summarise(m = median(egfr_ratio, na.rm = TRUE),
+  dplyr::summarise(m = median(egfr_diff_pct, na.rm = TRUE),
                    n = dplyr::n(), .groups = "drop")
 
 p_sex <- tryCatch(
-  wilcox.test(egfr_ratio ~ sex, data = d_sex_r)$p.value,
+  wilcox.test(egfr_diff_pct ~ sex, data = d_sex_r)$p.value,
   error = function(e) NA_real_)
 p_sex_str <- if (is.na(p_sex)) "NA" else
   ifelse(p_sex < 0.001, "<0.001", sprintf("%.3f", p_sex))
 
-ggplot(d_sex_r, aes(x = egfr_ratio, fill = sex, color = sex)) +
+ggplot(d_sex_r, aes(x = egfr_diff_pct, fill = sex, color = sex)) +
   geom_density(alpha = 0.35, linewidth = 0.9) +
-  geom_vline(xintercept = 1, linetype = "dashed", color = "grey30") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey30") +
   geom_vline(data = med_sex, aes(xintercept = m, color = sex),
              linetype = "dotted", linewidth = 0.8, show.legend = FALSE) +
   scale_fill_manual(values  = c("Female" = "#E31A1C", "Male" = "grey50")) +
   scale_color_manual(values = c("Female" = "#E31A1C", "Male" = "grey50")) +
-  coord_cartesian(xlim = c(0.4, 2.0)) +
-  labs(x = "eGFR ratio (CKD-EPI Cr-Cys unindexed / Cockcroft-Gault)",
+  labs(x = "eGFR difference (%): 100 × (CKD-EPI Cr-Cys − CG) / CG",
        y = "Density",
        fill = NULL, color = NULL,
-       title = "eGFR Ratio by Sex",
+       title = "eGFR Difference (%) by Sex",
        subtitle = sprintf(
-         "Female: N = %d, median = %.2f   |   Male: N = %d, median = %.2f   |   Mann-Whitney U p = %s",
+         "Female: N = %d, median = %.1f %%   |   Male: N = %d, median = %.1f %%   |   Mann-Whitney U p = %s",
          med_sex$n[med_sex$sex == "Female"], med_sex$m[med_sex$sex == "Female"],
          med_sex$n[med_sex$sex == "Male"],   med_sex$m[med_sex$sex == "Male"],
          p_sex_str)) +
@@ -1610,15 +1632,15 @@ ggplot(d_sex_r, aes(x = egfr_ratio, fill = sex, color = sex)) +
         plot.subtitle = element_text(size = 9, color = "grey25"))
 ```
 
-# 11 Sensitivity Analysis — eGFR Ratio (CKD-EPI 2012 CysC / CKD-EPI 2021 Cr)
+# 11 Sensitivity Analysis — eGFR Difference (%) — (CKD-EPI 2012 CysC − CKD-EPI 2021 Cr) / CKD-EPI 2021 Cr, per 10 % decline
 
-Sensitivity analysis using an alternative eGFR ratio definition for the linear exposure:
+Sensitivity analysis using an alternative eGFR-difference (%) definition for the linear exposure:
 
-- **Numerator**: eGFR<sub>CYS</sub> — CKD-EPI **2012** cystatin C-only equation (`baseline_cys_c_egfr_unindexed`)
-- **Denominator**: eGFR<sub>CR</sub> — CKD-EPI **2021** race-free creatinine-only equation (`baseline_cre_egfr_unindexed`)
-- Ratio: `egfr_ratio_sens = baseline_cys_c_egfr_unindexed / baseline_cre_egfr_unindexed`
+- **Numerator**: eGFR<sub>CYS</sub> − eGFR<sub>CR</sub>, where eGFR<sub>CYS</sub> = CKD-EPI **2012** cystatin C-only (`baseline_cys_c_egfr_unindexed`) and eGFR<sub>CR</sub> = CKD-EPI **2021** race-free creatinine-only (`baseline_cre_egfr_unindexed`).
+- **Denominator**: eGFR<sub>CR</sub>.
+- Percent difference: `egfr_diff_pct_sens = 100 * (baseline_cys_c_egfr_unindexed - baseline_cre_egfr_unindexed) / baseline_cre_egfr_unindexed`.
 
-One row per outcome. Multivariable Fine-Gray model fit with `egfr_ratio_sens_per10 = -egfr_ratio_sens * 10` plus the same adjuster set as Section 4 (eGFR ratio FG adjusted for Cockcroft-Gault). The HR for this variable reads as the multiplicative subHR per **0.1 unit lower** sensitivity eGFR ratio. 90-day death uses Cox PH. p-values in this summary table are **raw Wald** (not Bonferroni-adjusted); the plot subtitles in Sections 11.1–11.11 apply Bonferroni correction across the six primary AE outcomes.
+One row per outcome. Multivariable Fine-Gray model fit with `egfr_diff_pct_sens_per10 = -egfr_diff_pct_sens / 10` plus the same adjuster set as Section 4 (eGFR difference FG adjusted for Cockcroft-Gault). The HR for this variable reads as the multiplicative subHR per **10 % decline** in sensitivity eGFR difference. 90-day death uses Cox PH. p-values in this summary table are **raw Wald** (not Bonferroni-adjusted); the plot subtitles in Sections 11.1–11.11 apply Bonferroni correction across the six primary AE outcomes.
 
 [📄 Download Word table](../tables/whole/sec11_egfr_ratio_sens_summary.docx)
 
@@ -1636,11 +1658,11 @@ One row per outcome. Multivariable Fine-Gray model fit with `egfr_ratio_sens_per
 fg_sens_row <- function(time_var, status_var, label, pre_labs = NULL) {
   adj <- .sens_adj_set(pre_labs)
   d <- dat %>%
-    dplyr::select(all_of(c("egfr_ratio_sens_per10", time_var, status_var, adj))) %>%
+    dplyr::select(all_of(c("egfr_diff_pct_sens_per10", time_var, status_var, adj))) %>%
     tidyr::drop_na()
   adj_df <- d[, adj, drop = FALSE]
   X_adj  <- model.matrix(~ ., data = adj_df)[, -1, drop = FALSE]
-  X      <- cbind(egfr_ratio_sens_per10 = d$egfr_ratio_sens_per10, X_adj)
+  X      <- cbind(egfr_diff_pct_sens_per10 = d$egfr_diff_pct_sens_per10, X_adj)
   stat_num <- suppressWarnings(as.integer(as.character(d[[status_var]])))
   time_num <- as.numeric(d[[time_var]])
   fit <- cmprsk::crr(time_num, stat_num, cov1 = X, failcode = 1)
@@ -1661,14 +1683,14 @@ fg_sens_row <- function(time_var, status_var, label, pre_labs = NULL) {
 cox_sens_row <- function(time_var, status_var, label, pre_labs = NULL) {
   adj <- .sens_adj_set(pre_labs)
   d <- dat %>%
-    dplyr::select(all_of(c("egfr_ratio_sens_per10", time_var, status_var, adj))) %>%
+    dplyr::select(all_of(c("egfr_diff_pct_sens_per10", time_var, status_var, adj))) %>%
     tidyr::drop_na()
   fmla <- as.formula(paste0("Surv(", time_var, ", ", status_var,
-                            ") ~ egfr_ratio_sens_per10 + ",
+                            ") ~ egfr_diff_pct_sens_per10 + ",
                             paste(adj, collapse = " + ")))
   fit <- survival::coxph(fmla, data = d)
-  b   <- unname(coef(fit)["egfr_ratio_sens_per10"])
-  se  <- sqrt(vcov(fit)["egfr_ratio_sens_per10", "egfr_ratio_sens_per10"])
+  b   <- unname(coef(fit)["egfr_diff_pct_sens_per10"])
+  se  <- sqrt(vcov(fit)["egfr_diff_pct_sens_per10", "egfr_diff_pct_sens_per10"])
   hr  <- exp(b); lcl <- exp(b - 1.96 * se); ucl <- exp(b + 1.96 * se)
   pv  <- 2 * (1 - pnorm(abs(b / se)))
   tibble(
@@ -1697,7 +1719,7 @@ sens_summary <- bind_rows(
 )
 
 ft_sens <- flextable::flextable(sens_summary) |>
-  flextable::set_caption("Sensitivity analysis: multivariable (sub)HR per 0.1 decline in eGFR ratio (CKD-EPI 2012 CysC / CKD-EPI 2021 Cr) — Whole cohort. Fine-Gray for competing-risk outcomes; Cox PH for 90-day death.") |>
+  flextable::set_caption("Sensitivity analysis: multivariable (sub)HR per 10 % decline in eGFR difference (%) — 100 × (CKD-EPI 2012 CysC − CKD-EPI 2021 Cr) / CKD-EPI 2021 Cr — Whole cohort. Fine-Gray for competing-risk outcomes; Cox PH for 90-day death.") |>
   flextable::autofit()
 flextable::save_as_docx(ft_sens,
   path = file.path(docx_dir, "sec11_egfr_ratio_sens_summary.docx"))
@@ -1712,12 +1734,12 @@ plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine","ici",
                 "bmi","smoking","steroids","thyroid")
-  keep <- c("egfr_ratio_sens", time_var, status_var, base_adj, extra_adj)
+  keep <- c("egfr_diff_pct_sens", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
 
   adj_df <- d[, c(base_adj, extra_adj), drop = FALSE]
   X_adj <- model.matrix(~ ., data = adj_df)[, -1, drop = FALSE]
-  X <- cbind(egfr_ratio_sens = d$egfr_ratio_sens, X_adj)
+  X <- cbind(egfr_diff_pct_sens = d$egfr_diff_pct_sens, X_adj)
 
   stat_num <- suppressWarnings(as.integer(as.character(d[[status_var]])))
   time_num <- as.numeric(d[[time_var]])
@@ -1729,22 +1751,22 @@ plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
   V_beta <- fit$var[1, 1]
   se_b   <- sqrt(V_beta)
 
-  q1    <- as.numeric(quantile(d$egfr_ratio_sens, 0.25, na.rm = TRUE))
-  q3    <- as.numeric(quantile(d$egfr_ratio_sens, 0.75, na.rm = TRUE))
+  q1    <- as.numeric(quantile(d$egfr_diff_pct_sens, 0.25, na.rm = TRUE))
+  q3    <- as.numeric(quantile(d$egfr_diff_pct_sens, 0.75, na.rm = TRUE))
   iqr_w <- q3 - q1
-  hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
+  hr10  <- exp(-10 * beta);      hr10_l <- exp(-10 * beta - 1.96 * 10 * se_b);   hr10_u <- exp(-10 * beta + 1.96 * 10 * se_b)
   hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
   pval_bonf <- min(pval * n_bonf, 1)
   p_shown <- if (n_bonf > 1) pval_bonf else pval
   p_lbl   <- if (n_bonf > 1) sprintf("p_Bonf = %s (n = %d)", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)), n_bonf) else sprintf("p = %s", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)))
   subtitle_str <- sprintf(
-    "subHR per 0.1 ratio decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
-    hr01, hr01_l, hr01_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "subHR per 10 %% decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.1f %%): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f] %%",
+    hr10, hr10_l, hr10_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
 
-  ref_x  <- median(d$egfr_ratio_sens, na.rm = TRUE)
-  grid_x <- seq(quantile(d$egfr_ratio_sens, 0.025, na.rm = TRUE),
-                quantile(d$egfr_ratio_sens, 0.975, na.rm = TRUE),
+  ref_x  <- median(d$egfr_diff_pct_sens, na.rm = TRUE)
+  grid_x <- seq(quantile(d$egfr_diff_pct_sens, 0.025, na.rm = TRUE),
+                quantile(d$egfr_diff_pct_sens, 0.975, na.rm = TRUE),
                 length.out = 100)
 
   log_hr <- beta * (grid_x - ref_x)
@@ -1764,7 +1786,7 @@ plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     geom_vline(xintercept = ref_x, linetype = "dotted", color = "grey40") +
     geom_vline(xintercept = c(q1, q3), linetype = "dashed",
                color = "steelblue", alpha = 0.7) +
-    labs(x = "Sensitivity eGFR Ratio (CKD-EPI 2012 CysC / CKD-EPI 2021 Cr)",
+    labs(x = "Sensitivity eGFR Difference (%): 100 × (CKD-EPI 2012 CysC − CKD-EPI 2021 Cr) / CKD-EPI 2021 Cr",
          y = "subHR (95% CI)",
          title = outcome_label,
          subtitle = subtitle_str) +
@@ -1779,35 +1801,35 @@ plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
                 "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
                 "Paclitaxel","Pemetrexed","Gemcitabine","ici",
                 "bmi","smoking","steroids","thyroid")
-  keep <- c("egfr_ratio_sens", time_var, status_var, base_adj, extra_adj)
+  keep <- c("egfr_diff_pct_sens", time_var, status_var, base_adj, extra_adj)
   d <- dat %>% dplyr::select(all_of(keep)) %>% tidyr::drop_na()
 
   fmla <- as.formula(paste0(
-    "Surv(", time_var, ", ", status_var, ") ~ egfr_ratio_sens + ",
+    "Surv(", time_var, ", ", status_var, ") ~ egfr_diff_pct_sens + ",
     paste(c(base_adj, extra_adj), collapse = " + ")
   ))
   fit <- survival::coxph(fmla, data = d)
 
-  beta   <- coef(fit)["egfr_ratio_sens"]
-  V_beta <- vcov(fit)["egfr_ratio_sens", "egfr_ratio_sens"]
+  beta   <- coef(fit)["egfr_diff_pct_sens"]
+  V_beta <- vcov(fit)["egfr_diff_pct_sens", "egfr_diff_pct_sens"]
   se_b   <- sqrt(V_beta)
 
-  q1    <- as.numeric(quantile(d$egfr_ratio_sens, 0.25, na.rm = TRUE))
-  q3    <- as.numeric(quantile(d$egfr_ratio_sens, 0.75, na.rm = TRUE))
+  q1    <- as.numeric(quantile(d$egfr_diff_pct_sens, 0.25, na.rm = TRUE))
+  q3    <- as.numeric(quantile(d$egfr_diff_pct_sens, 0.75, na.rm = TRUE))
   iqr_w <- q3 - q1
-  hr01  <- exp(-0.1 * beta);     hr01_l <- exp(-0.1 * beta - 1.96 * 0.1 * se_b);   hr01_u <- exp(-0.1 * beta + 1.96 * 0.1 * se_b)
+  hr10  <- exp(-10 * beta);      hr10_l <- exp(-10 * beta - 1.96 * 10 * se_b);   hr10_u <- exp(-10 * beta + 1.96 * 10 * se_b)
   hri   <- exp(-iqr_w * beta);   hri_l  <- exp(-iqr_w * beta - 1.96 * abs(iqr_w) * se_b); hri_u <- exp(-iqr_w * beta + 1.96 * abs(iqr_w) * se_b)
   pval  <- 2 * (1 - pnorm(abs(beta / se_b)))
   pval_bonf <- min(pval * n_bonf, 1)
   p_shown <- if (n_bonf > 1) pval_bonf else pval
   p_lbl   <- if (n_bonf > 1) sprintf("p_Bonf = %s (n = %d)", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)), n_bonf) else sprintf("p = %s", ifelse(p_shown < 0.001, "<0.001", sprintf("%.3f", p_shown)))
   subtitle_str <- sprintf(
-    "HR per 0.1 ratio decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.2f): %.2f (%.2f-%.2f)  |  IQR: [%.2f, %.2f]",
-    hr01, hr01_l, hr01_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
+    "HR per 10 %% decline: %.2f (%.2f-%.2f), %s  |  per IQR decline (Δ = %.1f %%): %.2f (%.2f-%.2f)  |  IQR: [%.1f, %.1f] %%",
+    hr10, hr10_l, hr10_u, p_lbl, iqr_w, hri, hri_l, hri_u, q1, q3)
 
-  ref_x  <- median(d$egfr_ratio_sens, na.rm = TRUE)
-  grid_x <- seq(quantile(d$egfr_ratio_sens, 0.025, na.rm = TRUE),
-                quantile(d$egfr_ratio_sens, 0.975, na.rm = TRUE),
+  ref_x  <- median(d$egfr_diff_pct_sens, na.rm = TRUE)
+  grid_x <- seq(quantile(d$egfr_diff_pct_sens, 0.025, na.rm = TRUE),
+                quantile(d$egfr_diff_pct_sens, 0.975, na.rm = TRUE),
                 length.out = 100)
 
   log_hr <- beta * (grid_x - ref_x)
@@ -1827,7 +1849,7 @@ plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     geom_vline(xintercept = ref_x, linetype = "dotted", color = "grey40") +
     geom_vline(xintercept = c(q1, q3), linetype = "dashed",
                color = "steelblue", alpha = 0.7) +
-    labs(x = "Sensitivity eGFR Ratio (CKD-EPI 2012 CysC / CKD-EPI 2021 Cr)",
+    labs(x = "Sensitivity eGFR Difference (%): 100 × (CKD-EPI 2012 CysC − CKD-EPI 2021 Cr) / CKD-EPI 2021 Cr",
          y = "HR (95% CI)",
          title = outcome_label,
          subtitle = subtitle_str) +
