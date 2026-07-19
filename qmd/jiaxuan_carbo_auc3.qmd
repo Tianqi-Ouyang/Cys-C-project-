@@ -212,7 +212,8 @@ ggplot() +
   geom_area(data = plot_df, aes(x = x, y = y, fill = side), alpha = 0.6) +
   geom_line(data = dens_df, aes(x = x, y = y), linewidth = 0.6, color = "black") +
   geom_vline(xintercept = 0, linetype = "dashed", color = "grey40") +
-  scale_fill_manual(values = c(neg = "#E31A1C", pos = "#1F78B4"),
+  geom_vline(xintercept = 25, linetype = "dotted", color = "grey30") +
+  scale_fill_manual(values = c(neg = "#E31A1C", pos = "grey60"),
                     guide = "none") +
   coord_cartesian(xlim = c(-250, 250), ylim = c(0, 0.010)) +
   labs(title = "Distribution of Signed Dose Discrepancy (Carboplatin AUC ≥ 3)",
