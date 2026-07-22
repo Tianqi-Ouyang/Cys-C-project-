@@ -39,22 +39,40 @@ pptx_dir <- normalizePath("docs/pptx/carbo", mustWork = TRUE)
 pptx_rel_prefix <- "../pptx/carbo/"
 
 .pptx_written <- new.env()
+.pptx_pair    <- new.env()
 
-knitr::opts_chunk$set(fig.process = function(filename) {
-  label <- knitr::opts_current$get("label")
-  if (is.null(label)) return(filename)
-  p <- tryCatch(ggplot2::last_plot(), error = function(e) NULL)
-  if (is.null(p) || !inherits(p, "ggplot")) return(filename)
-  pptx_path <- file.path(pptx_dir, paste0(label, ".pptx"))
+.save_pptx <- function(p, path) {
   tryCatch({
     doc <- officer::read_pptx()
     doc <- officer::add_slide(doc, layout = "Title and Content",
                               master = "Office Theme")
     doc <- officer::ph_with(doc, rvg::dml(ggobj = p),
                             location = officer::ph_location_type(type = "body"))
-    print(doc, target = pptx_path)
+    print(doc, target = path)
+    TRUE
+  }, error = function(e) FALSE)
+}
+
+knitr::opts_chunk$set(fig.process = function(filename) {
+  label <- knitr::opts_current$get("label")
+  if (is.null(label)) return(filename)
+  pair <- .pptx_pair[[label]]
+  if (!is.null(pair) && inherits(pair$default, "ggplot") && inherits(pair$fine, "ggplot")) {
+    p1 <- file.path(pptx_dir, paste0(label, ".pptx"))
+    p2 <- file.path(pptx_dir, paste0(label, "_10pct.pptx"))
+    ok1 <- .save_pptx(pair$default, p1)
+    ok2 <- .save_pptx(pair$fine,    p2)
+    rels <- c(if (ok1) paste0(pptx_rel_prefix, label, ".pptx"),
+              if (ok2) paste0(pptx_rel_prefix, label, "_10pct.pptx"))
+    if (length(rels)) .pptx_written[[label]] <- rels
+    return(filename)
+  }
+  p <- tryCatch(ggplot2::last_plot(), error = function(e) NULL)
+  if (is.null(p) || !inherits(p, "ggplot")) return(filename)
+  pptx_path <- file.path(pptx_dir, paste0(label, ".pptx"))
+  if (.save_pptx(p, pptx_path)) {
     .pptx_written[[label]] <- paste0(pptx_rel_prefix, label, ".pptx")
-  }, error = function(e) NULL)
+  }
   filename
 })
 
@@ -65,9 +83,15 @@ local({
     label <- options$label
     if (!is.null(label) && !is.null(.pptx_written[[label]])) {
       rel <- .pptx_written[[label]]
-      link <- sprintf(
-        '\n\n<p style="margin-top:-0.5em;font-size:0.9em;"><a href="%s" download>📊 Download as PowerPoint (editable)</a></p>\n\n',
-        rel)
+      if (length(rel) == 2) {
+        link <- sprintf(
+          '\n\n<p style="margin-top:-0.5em;font-size:0.9em;"><a href="%s" download>📊 Download top plot as PowerPoint</a> · <a href="%s" download>📊 Download bottom (10 %% ticks)</a></p>\n\n',
+          rel[1], rel[2])
+      } else {
+        link <- sprintf(
+          '\n\n<p style="margin-top:-0.5em;font-size:0.9em;"><a href="%s" download>📊 Download as PowerPoint (editable)</a></p>\n\n',
+          rel[1])
+      }
       out <- paste0(out, link)
     }
     out
@@ -835,6 +859,8 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
   p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  .lbl <- tryCatch(knitr::opts_current$get("label"), error = function(e) NULL)
+  if (!is.null(.lbl)) .pptx_pair[[.lbl]] <- list(default = p, fine = p_fine)
   p / p_fine
 }
 
@@ -898,6 +924,8 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
   p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  .lbl <- tryCatch(knitr::opts_current$get("label"), error = function(e) NULL)
+  if (!is.null(.lbl)) .pptx_pair[[.lbl]] <- list(default = p, fine = p_fine)
   p / p_fine
 }
 ```
@@ -2114,6 +2142,8 @@ plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
   p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  .lbl <- tryCatch(knitr::opts_current$get("label"), error = function(e) NULL)
+  if (!is.null(.lbl)) .pptx_pair[[.lbl]] <- list(default = p, fine = p_fine)
   p / p_fine
 }
 
@@ -2179,6 +2209,8 @@ plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
   p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  .lbl <- tryCatch(knitr::opts_current$get("label"), error = function(e) NULL)
+  if (!is.null(.lbl)) .pptx_pair[[.lbl]] <- list(default = p, fine = p_fine)
   p / p_fine
 }
 ```
