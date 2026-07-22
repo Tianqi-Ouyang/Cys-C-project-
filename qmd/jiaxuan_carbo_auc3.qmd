@@ -24,6 +24,7 @@ library(gtsummary)
 library(flextable)
 library(rvg)
 library(officer)
+library(patchwork)
 
 # Output directory for downloadable Word tables
 docx_dir <- "docs/tables/auc3"
@@ -818,7 +819,7 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     ucl   = exp(log_hr + 1.96 * se)
   )
 
-  ggplot(df_plot, aes(x = x, y = subhr)) +
+  p <- ggplot(df_plot, aes(x = x, y = subhr)) +
     geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "darkorange") +
     geom_line(color = "darkorange", linewidth = 1) +
     geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
@@ -830,6 +831,8 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     coord_cartesian(ylim = c(0, 4)) +
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
+  p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  p / p_fine
 }
 
 plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
@@ -879,7 +882,7 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     ucl = exp(log_hr + 1.96 * se)
   )
 
-  ggplot(df_plot, aes(x = x, y = hr)) +
+  p <- ggplot(df_plot, aes(x = x, y = hr)) +
     geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "darkorange") +
     geom_line(color = "darkorange", linewidth = 1) +
     geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
@@ -891,6 +894,8 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     coord_cartesian(ylim = c(0, 4)) +
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
+  p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  p / p_fine
 }
 ```
 
@@ -899,7 +904,7 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-anemia2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_anemia_2", "cmp_status_anemia_2",
                         "pre_HGB_45days", "Anemia Grade 2 (Carboplatin AUC ≥ 3)")
 ```
@@ -909,7 +914,7 @@ plot_subhr_linear_ratio("cmp_time_anemia_2", "cmp_status_anemia_2",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-anemia3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_anemia_3", "cmp_status_anemia_3",
                         "pre_HGB_45days", "Anemia Grade 3 (Carboplatin AUC ≥ 3)")
 ```
@@ -919,7 +924,7 @@ plot_subhr_linear_ratio("cmp_time_anemia_3", "cmp_status_anemia_3",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-throm2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_throm_2", "cmp_status_throm_2",
                         "pre_PLT_45days", "Thrombocytopenia Grade 2 (Carboplatin AUC ≥ 3)")
 ```
@@ -929,7 +934,7 @@ plot_subhr_linear_ratio("cmp_time_throm_2", "cmp_status_throm_2",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-throm3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_throm_3", "cmp_status_throm_3",
                         "pre_PLT_45days", "Thrombocytopenia Grade 3 (Carboplatin AUC ≥ 3)")
 ```
@@ -939,7 +944,7 @@ plot_subhr_linear_ratio("cmp_time_throm_3", "cmp_status_throm_3",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-aki2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_aki_2", "cmp_status_aki_2",
                         NULL, "AKI Grade 2 (Carboplatin AUC ≥ 3)")
 ```
@@ -949,7 +954,7 @@ plot_subhr_linear_ratio("cmp_time_aki_2", "cmp_status_aki_2",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-akikdigo
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                         NULL, "AKI (KDIGO) (Carboplatin AUC ≥ 3)")
 ```
@@ -959,7 +964,7 @@ plot_subhr_linear_ratio("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-grade2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                         NULL, "Composite Grade 2 AEs (Carboplatin AUC ≥ 3)")
 ```
@@ -969,7 +974,7 @@ plot_subhr_linear_ratio("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-grade3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                         NULL, "Composite Grade 3 AEs (Carboplatin AUC ≥ 3)")
 ```
@@ -979,7 +984,7 @@ plot_subhr_linear_ratio("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-anyhosp
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_any_hosp", "cmp_status_any_hosp",
                         NULL, "Overall Hospitalization (Carboplatin AUC ≥ 3)")
 ```
@@ -989,7 +994,7 @@ plot_subhr_linear_ratio("cmp_time_any_hosp", "cmp_status_any_hosp",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-sideeffect
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_side_effect", "cmp_status_side_effect",
                         NULL, "Platinum-Related Hospitalization (Carboplatin AUC ≥ 3)")
 ```
@@ -999,7 +1004,7 @@ plot_subhr_linear_ratio("cmp_time_side_effect", "cmp_status_side_effect",
 ```{r}
 #| label: jx-auc3-cox-linear-ratio-death
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_cox_linear_ratio("time_to_death_90", "death_90",
                       NULL, "90-Day Death (Cox PH) (Carboplatin AUC ≥ 3)")
 ```
@@ -1552,7 +1557,7 @@ plot_cox_linear("time_to_death_90", "death_90",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-hosp1
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_1", "cmp_status_hosp_1",
                         NULL, "Nausea/Vomiting/GI (Carboplatin AUC ≥ 3)", n_bonf = 1)
 ```
@@ -1562,7 +1567,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_1", "cmp_status_hosp_1",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-hosp2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_2", "cmp_status_hosp_2",
                         NULL, "Failure to Thrive/Fatigue/Dehydration (Carboplatin AUC ≥ 3)", n_bonf = 1)
 ```
@@ -1572,7 +1577,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_2", "cmp_status_hosp_2",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-hosp3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_3", "cmp_status_hosp_3",
                         NULL, "AKI (Carboplatin AUC ≥ 3)", n_bonf = 1)
 ```
@@ -1582,7 +1587,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_3", "cmp_status_hosp_3",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-hosp4
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_4", "cmp_status_hosp_4",
                         NULL, "Electrolyte Abnormalities (Carboplatin AUC ≥ 3)", n_bonf = 1)
 ```
@@ -1592,7 +1597,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_4", "cmp_status_hosp_4",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-hosp5
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_5", "cmp_status_hosp_5",
                         NULL, "Cytopenia (Carboplatin AUC ≥ 3)", n_bonf = 1)
 ```
@@ -1602,7 +1607,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_5", "cmp_status_hosp_5",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-hosp6
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_6", "cmp_status_hosp_6",
                         NULL, "Febrile Neutropenia (Carboplatin AUC ≥ 3)", n_bonf = 1)
 ```
@@ -1612,7 +1617,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_6", "cmp_status_hosp_6",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-hosp7
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_7", "cmp_status_hosp_7",
                         NULL, "Infection/Sepsis (Carboplatin AUC ≥ 3)", n_bonf = 1)
 ```
@@ -1622,7 +1627,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_7", "cmp_status_hosp_7",
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-hosp8
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_8", "cmp_status_hosp_8",
                         NULL, "Cancer Progression (Carboplatin AUC ≥ 3)", n_bonf = 1)
 ```
@@ -1634,7 +1639,7 @@ Composite competing-risk outcome combining hospitalisations coded as Immune-rela
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-hosp-immune-other
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_immune_other", "cmp_status_hosp_immune_other",
                         NULL, "Immune-related AE & Other (Carboplatin AUC ≥ 3)", n_bonf = 1)
 ```
@@ -1644,7 +1649,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_immune_other", "cmp_status_hosp_immune_ot
 ```{r}
 #| label: jx-auc3-linsubhr-ratio-hosp10
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_10", "cmp_status_hosp_10",
                         NULL, "Planned Surgery/Port (Carboplatin AUC ≥ 3)", n_bonf = 1)
 ```
@@ -2091,7 +2096,7 @@ plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     ucl   = exp(log_hr + 1.96 * se)
   )
 
-  ggplot(df_plot, aes(x = x, y = subhr)) +
+  p <- ggplot(df_plot, aes(x = x, y = subhr)) +
     geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "darkorange") +
     geom_line(color = "darkorange", linewidth = 1) +
     geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
@@ -2105,6 +2110,8 @@ plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     coord_cartesian(ylim = c(0, 4)) +
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
+  p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  p / p_fine
 }
 
 plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
@@ -2154,7 +2161,7 @@ plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     ucl = exp(log_hr + 1.96 * se)
   )
 
-  ggplot(df_plot, aes(x = x, y = hr)) +
+  p <- ggplot(df_plot, aes(x = x, y = hr)) +
     geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "darkorange") +
     geom_line(color = "darkorange", linewidth = 1) +
     geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
@@ -2168,6 +2175,8 @@ plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     coord_cartesian(ylim = c(0, 4)) +
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
+  p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  p / p_fine
 }
 ```
 
@@ -2176,7 +2185,7 @@ plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
 ```{r}
 #| label: jx-auc3-linsubhr-sens-anemia2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_anemia_2", "cmp_status_anemia_2",
                        "pre_HGB_45days", "Anemia Grade 2 (Sensitivity, Carboplatin AUC ≥ 3)")
 ```
@@ -2186,7 +2195,7 @@ plot_subhr_linear_sens("cmp_time_anemia_2", "cmp_status_anemia_2",
 ```{r}
 #| label: jx-auc3-linsubhr-sens-anemia3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_anemia_3", "cmp_status_anemia_3",
                        "pre_HGB_45days", "Anemia Grade 3 (Sensitivity, Carboplatin AUC ≥ 3)")
 ```
@@ -2196,7 +2205,7 @@ plot_subhr_linear_sens("cmp_time_anemia_3", "cmp_status_anemia_3",
 ```{r}
 #| label: jx-auc3-linsubhr-sens-throm2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_throm_2", "cmp_status_throm_2",
                        "pre_PLT_45days", "Thrombocytopenia Grade 2 (Sensitivity, Carboplatin AUC ≥ 3)")
 ```
@@ -2206,7 +2215,7 @@ plot_subhr_linear_sens("cmp_time_throm_2", "cmp_status_throm_2",
 ```{r}
 #| label: jx-auc3-linsubhr-sens-throm3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_throm_3", "cmp_status_throm_3",
                        "pre_PLT_45days", "Thrombocytopenia Grade 3 (Sensitivity, Carboplatin AUC ≥ 3)")
 ```
@@ -2216,7 +2225,7 @@ plot_subhr_linear_sens("cmp_time_throm_3", "cmp_status_throm_3",
 ```{r}
 #| label: jx-auc3-linsubhr-sens-aki2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_aki_2", "cmp_status_aki_2",
                        NULL, "AKI Grade 2 (Sensitivity, Carboplatin AUC ≥ 3)")
 ```
@@ -2226,7 +2235,7 @@ plot_subhr_linear_sens("cmp_time_aki_2", "cmp_status_aki_2",
 ```{r}
 #| label: jx-auc3-linsubhr-sens-akikdigo
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                        NULL, "AKI (KDIGO) (Sensitivity, Carboplatin AUC ≥ 3)")
 ```
@@ -2236,7 +2245,7 @@ plot_subhr_linear_sens("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
 ```{r}
 #| label: jx-auc3-linsubhr-sens-grade2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                        NULL, "Composite Grade 2 AEs (Sensitivity, Carboplatin AUC ≥ 3)")
 ```
@@ -2246,7 +2255,7 @@ plot_subhr_linear_sens("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
 ```{r}
 #| label: jx-auc3-linsubhr-sens-grade3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                        NULL, "Composite Grade 3 AEs (Sensitivity, Carboplatin AUC ≥ 3)")
 ```
@@ -2256,7 +2265,7 @@ plot_subhr_linear_sens("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
 ```{r}
 #| label: jx-auc3-linsubhr-sens-anyhosp
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_any_hosp", "cmp_status_any_hosp",
                        NULL, "Overall Hospitalization (Sensitivity, Carboplatin AUC ≥ 3)")
 ```
@@ -2266,7 +2275,7 @@ plot_subhr_linear_sens("cmp_time_any_hosp", "cmp_status_any_hosp",
 ```{r}
 #| label: jx-auc3-linsubhr-sens-sideeffect
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_side_effect", "cmp_status_side_effect",
                        NULL, "Platinum-Related Hospitalization (Sensitivity, Carboplatin AUC ≥ 3)")
 ```
@@ -2276,7 +2285,7 @@ plot_subhr_linear_sens("cmp_time_side_effect", "cmp_status_side_effect",
 ```{r}
 #| label: jx-auc3-linsubhr-sens-death
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_cox_linear_sens("time_to_death_90", "death_90",
                      NULL, "90-Day Death (Cox PH) (Sensitivity, Carboplatin AUC ≥ 3)")
 ```

@@ -24,6 +24,7 @@ library(gtsummary)
 library(flextable)
 library(rvg)
 library(officer)
+library(patchwork)
 
 # Output directory for downloadable Word tables (placed under docs/ so the
 # rendered website can serve them from ../tables/whole/<name>.docx).
@@ -685,7 +686,9 @@ plot_subhr_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
 
-  p + coord_cartesian(ylim = c(0, 4))
+  p <- p + coord_cartesian(ylim = c(0, 4))
+  p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  p / p_fine
 }
 
 plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
@@ -759,7 +762,9 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
 
-  p + coord_cartesian(ylim = c(0, 4))
+  p <- p + coord_cartesian(ylim = c(0, 4))
+  p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  p / p_fine
 }
 ```
 
@@ -768,7 +773,7 @@ plot_cox_linear_ratio <- function(time_var, status_var, extra_adj = NULL,
 ```{r}
 #| label: jx-linsubhr-ratio-anemia2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_anemia_2", "cmp_status_anemia_2",
                         "pre_HGB_45days", "Anemia Grade 2", "ratio")
 ```
@@ -778,7 +783,7 @@ plot_subhr_linear_ratio("cmp_time_anemia_2", "cmp_status_anemia_2",
 ```{r}
 #| label: jx-linsubhr-ratio-anemia3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_anemia_3", "cmp_status_anemia_3",
                         "pre_HGB_45days", "Anemia Grade 3", "ratio")
 ```
@@ -788,7 +793,7 @@ plot_subhr_linear_ratio("cmp_time_anemia_3", "cmp_status_anemia_3",
 ```{r}
 #| label: jx-linsubhr-ratio-throm2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_throm_2", "cmp_status_throm_2",
                         "pre_PLT_45days", "Thrombocytopenia Grade 2", "ratio")
 ```
@@ -798,7 +803,7 @@ plot_subhr_linear_ratio("cmp_time_throm_2", "cmp_status_throm_2",
 ```{r}
 #| label: jx-linsubhr-ratio-throm3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_throm_3", "cmp_status_throm_3",
                         "pre_PLT_45days", "Thrombocytopenia Grade 3", "ratio")
 ```
@@ -808,7 +813,7 @@ plot_subhr_linear_ratio("cmp_time_throm_3", "cmp_status_throm_3",
 ```{r}
 #| label: jx-linsubhr-ratio-aki2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_aki_2", "cmp_status_aki_2",
                         NULL, "AKI Grade 2", "ratio")
 ```
@@ -818,7 +823,7 @@ plot_subhr_linear_ratio("cmp_time_aki_2", "cmp_status_aki_2",
 ```{r}
 #| label: jx-linsubhr-ratio-akikdigo
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                         NULL, "AKI (KDIGO)", "ratio")
 ```
@@ -828,7 +833,7 @@ plot_subhr_linear_ratio("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
 ```{r}
 #| label: jx-linsubhr-ratio-grade2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                         NULL, "Composite Grade 2 AEs", "ratio")
 ```
@@ -838,7 +843,7 @@ plot_subhr_linear_ratio("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
 ```{r}
 #| label: jx-linsubhr-ratio-grade3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                         NULL, "Composite Grade 3 AEs", "ratio")
 ```
@@ -848,7 +853,7 @@ plot_subhr_linear_ratio("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
 ```{r}
 #| label: jx-linsubhr-ratio-anyhosp
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_any_hosp", "cmp_status_any_hosp",
                         NULL, "Overall Hospitalization", "ratio")
 ```
@@ -858,7 +863,7 @@ plot_subhr_linear_ratio("cmp_time_any_hosp", "cmp_status_any_hosp",
 ```{r}
 #| label: jx-linsubhr-ratio-sideeffect
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_side_effect", "cmp_status_side_effect",
                         NULL, "Platinum-Related Hospitalization", "ratio")
 ```
@@ -868,7 +873,7 @@ plot_subhr_linear_ratio("cmp_time_side_effect", "cmp_status_side_effect",
 ```{r}
 #| label: jx-cox-linear-ratio-death
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_cox_linear_ratio("time_to_death_90", "death_90",
                       NULL, "90-Day Death (Cox PH)", "ratio")
 ```
@@ -1215,7 +1220,7 @@ plot_cox_linear_disc("time_to_death_90", "death_90",
 ```{r}
 #| label: jx-linsubhr-ratio-hosp1
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_1", "cmp_status_hosp_1",
                         NULL, "Nausea/Vomiting/GI", n_bonf = 1)
 ```
@@ -1225,7 +1230,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_1", "cmp_status_hosp_1",
 ```{r}
 #| label: jx-linsubhr-ratio-hosp2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_2", "cmp_status_hosp_2",
                         NULL, "Failure to Thrive/Fatigue/Dehydration", n_bonf = 1)
 ```
@@ -1235,7 +1240,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_2", "cmp_status_hosp_2",
 ```{r}
 #| label: jx-linsubhr-ratio-hosp3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_3", "cmp_status_hosp_3",
                         NULL, "AKI", n_bonf = 1)
 ```
@@ -1245,7 +1250,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_3", "cmp_status_hosp_3",
 ```{r}
 #| label: jx-linsubhr-ratio-hosp4
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_4", "cmp_status_hosp_4",
                         NULL, "Electrolyte Abnormalities", n_bonf = 1)
 ```
@@ -1255,7 +1260,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_4", "cmp_status_hosp_4",
 ```{r}
 #| label: jx-linsubhr-ratio-hosp5
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_5", "cmp_status_hosp_5",
                         NULL, "Cytopenia", n_bonf = 1)
 ```
@@ -1265,7 +1270,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_5", "cmp_status_hosp_5",
 ```{r}
 #| label: jx-linsubhr-ratio-hosp6
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_6", "cmp_status_hosp_6",
                         NULL, "Febrile Neutropenia", n_bonf = 1)
 ```
@@ -1275,7 +1280,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_6", "cmp_status_hosp_6",
 ```{r}
 #| label: jx-linsubhr-ratio-hosp7
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_7", "cmp_status_hosp_7",
                         NULL, "Infection/Sepsis", n_bonf = 1)
 ```
@@ -1285,7 +1290,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_7", "cmp_status_hosp_7",
 ```{r}
 #| label: jx-linsubhr-ratio-hosp8
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_8", "cmp_status_hosp_8",
                         NULL, "Cancer Progression", n_bonf = 1)
 ```
@@ -1297,7 +1302,7 @@ Composite competing-risk outcome combining hospitalisations coded as Immune-rela
 ```{r}
 #| label: jx-linsubhr-ratio-hosp-immune-other
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_immune_other", "cmp_status_hosp_immune_other",
                         NULL, "Immune-related AE & Other", n_bonf = 1)
 ```
@@ -1307,7 +1312,7 @@ plot_subhr_linear_ratio("cmp_time_hosp_immune_other", "cmp_status_hosp_immune_ot
 ```{r}
 #| label: jx-linsubhr-ratio-hosp10
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_ratio("cmp_time_hosp_10", "cmp_status_hosp_10",
                         NULL, "Planned Surgery/Port", n_bonf = 1)
 ```
@@ -1780,7 +1785,7 @@ plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     ucl   = exp(log_hr + 1.96 * se)
   )
 
-  ggplot(df_plot, aes(x = x, y = subhr)) +
+  p <- ggplot(df_plot, aes(x = x, y = subhr)) +
     geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "darkorange") +
     geom_line(color = "darkorange", linewidth = 1) +
     geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
@@ -1794,6 +1799,8 @@ plot_subhr_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     coord_cartesian(ylim = c(0, 4)) +
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
+  p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  p / p_fine
 }
 
 plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
@@ -1843,7 +1850,7 @@ plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     ucl = exp(log_hr + 1.96 * se)
   )
 
-  ggplot(df_plot, aes(x = x, y = hr)) +
+  p <- ggplot(df_plot, aes(x = x, y = hr)) +
     geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "darkorange") +
     geom_line(color = "darkorange", linewidth = 1) +
     geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
@@ -1857,6 +1864,8 @@ plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
     coord_cartesian(ylim = c(0, 4)) +
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
+  p_fine <- p + scale_x_continuous(breaks = seq(-100, 200, 10))
+  p / p_fine
 }
 ```
 
@@ -1865,7 +1874,7 @@ plot_cox_linear_sens <- function(time_var, status_var, extra_adj = NULL,
 ```{r}
 #| label: jx-linsubhr-sens-anemia2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_anemia_2", "cmp_status_anemia_2",
                        "pre_HGB_45days", "Anemia Grade 2 (Sensitivity)")
 ```
@@ -1875,7 +1884,7 @@ plot_subhr_linear_sens("cmp_time_anemia_2", "cmp_status_anemia_2",
 ```{r}
 #| label: jx-linsubhr-sens-anemia3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_anemia_3", "cmp_status_anemia_3",
                        "pre_HGB_45days", "Anemia Grade 3 (Sensitivity)")
 ```
@@ -1885,7 +1894,7 @@ plot_subhr_linear_sens("cmp_time_anemia_3", "cmp_status_anemia_3",
 ```{r}
 #| label: jx-linsubhr-sens-throm2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_throm_2", "cmp_status_throm_2",
                        "pre_PLT_45days", "Thrombocytopenia Grade 2 (Sensitivity)")
 ```
@@ -1895,7 +1904,7 @@ plot_subhr_linear_sens("cmp_time_throm_2", "cmp_status_throm_2",
 ```{r}
 #| label: jx-linsubhr-sens-throm3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_throm_3", "cmp_status_throm_3",
                        "pre_PLT_45days", "Thrombocytopenia Grade 3 (Sensitivity)")
 ```
@@ -1905,7 +1914,7 @@ plot_subhr_linear_sens("cmp_time_throm_3", "cmp_status_throm_3",
 ```{r}
 #| label: jx-linsubhr-sens-aki2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_aki_2", "cmp_status_aki_2",
                        NULL, "AKI Grade 2 (Sensitivity)")
 ```
@@ -1915,7 +1924,7 @@ plot_subhr_linear_sens("cmp_time_aki_2", "cmp_status_aki_2",
 ```{r}
 #| label: jx-linsubhr-sens-akikdigo
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
                        NULL, "AKI (KDIGO) (Sensitivity)")
 ```
@@ -1925,7 +1934,7 @@ plot_subhr_linear_sens("cmp_time_aki_kdigo", "cmp_status_aki_kdigo",
 ```{r}
 #| label: jx-linsubhr-sens-grade2
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
                        NULL, "Composite Grade 2 AEs (Sensitivity)")
 ```
@@ -1935,7 +1944,7 @@ plot_subhr_linear_sens("cmp_time_grade_2_aes", "cmp_status_grade_2_aes",
 ```{r}
 #| label: jx-linsubhr-sens-grade3
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
                        NULL, "Composite Grade 3 AEs (Sensitivity)")
 ```
@@ -1945,7 +1954,7 @@ plot_subhr_linear_sens("cmp_time_grade_3_aes", "cmp_status_grade_3_aes",
 ```{r}
 #| label: jx-linsubhr-sens-anyhosp
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_any_hosp", "cmp_status_any_hosp",
                        NULL, "Overall Hospitalization (Sensitivity)")
 ```
@@ -1955,7 +1964,7 @@ plot_subhr_linear_sens("cmp_time_any_hosp", "cmp_status_any_hosp",
 ```{r}
 #| label: jx-linsubhr-sens-sideeffect
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_subhr_linear_sens("cmp_time_side_effect", "cmp_status_side_effect",
                        NULL, "Platinum-Related Hospitalization (Sensitivity)")
 ```
@@ -1965,7 +1974,7 @@ plot_subhr_linear_sens("cmp_time_side_effect", "cmp_status_side_effect",
 ```{r}
 #| label: jx-linsubhr-sens-death
 #| fig-width: 6
-#| fig-height: 4
+#| fig-height: 8
 plot_cox_linear_sens("time_to_death_90", "death_90",
                      NULL, "90-Day Death (Cox PH) (Sensitivity)")
 ```
