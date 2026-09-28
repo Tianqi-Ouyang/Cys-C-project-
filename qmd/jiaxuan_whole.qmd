@@ -2012,3 +2012,84 @@ plot_subhr_linear_sens("cmp_time_side_effect", "cmp_status_side_effect",
 plot_cox_linear_sens("time_to_death_90", "death_90",
                      NULL, "90-Day Death (Cox PH) (Sensitivity)")
 ```
+
+# 12 Adjusted CIF — eGFR Difference < −10 % vs Others (Platinum-Related Hospitalisation)
+
+Standardized cumulative incidence function contrasting patients with `egfr_diff_pct < -10 %` (red, "exposed") against all other patients (blue, "reference"). Multivariable Fine-Gray model fit with the binary exposure plus the same adjuster set as Section 4 (`cockcroft` retained as an adjuster so the difference variable carries no residual creatinine information). Curves are *adjusted (standardized)* via g-computation: for every patient predict CIF under exposure = 1 and under exposure = 0, then average the two CIF curves over the whole cohort. Y-axis is cumulative incidence of platinum-related hospitalisation, x-axis is days from baseline; death is the competing event.
+
+```{r}
+#| label: jx-adjcif-egfrdiff-sideeffect
+#| fig-width: 7
+#| fig-height: 4.5
+adj_cif_egfrdiff <- function(time_var, status_var, extra_pre = NULL, label) {
+  base_adj <- c("age","sex","score","ecog_score_cat2",
+                "cancer_type_cat_7","tumor_stage","platin_group","high_dose",
+                "Paclitaxel","Pemetrexed","Gemcitabine","ici",
+                "bmi","smoking","steroids","thyroid","cockcroft")
+  d <- dat %>%
+    dplyr::mutate(egfr_diff_lt_neg10 = as.integer(egfr_diff_pct < -10)) %>%
+    dplyr::select(all_of(c(time_var, status_var, "egfr_diff_lt_neg10", base_adj, extra_pre))) %>%
+    tidyr::drop_na()
+
+  fmla <- as.formula(paste("~",
+            paste(c("egfr_diff_lt_neg10", base_adj, extra_pre), collapse = " + ")))
+  X_full <- model.matrix(fmla, data = d)[, -1, drop = FALSE]
+
+  stat_num <- suppressWarnings(as.integer(as.character(d[[status_var]])))
+  time_num <- as.numeric(d[[time_var]])
+
+  fit <- cmprsk::crr(ftime = time_num, fstatus = stat_num,
+                     cov1 = X_full, failcode = 1)
+
+  beta_e <- unname(fit$coef[1])
+  se_e   <- sqrt(fit$var[1, 1])
+  hr     <- exp(beta_e)
+  lcl    <- exp(beta_e - 1.96 * se_e)
+  ucl    <- exp(beta_e + 1.96 * se_e)
+  pval   <- 2 * (1 - pnorm(abs(beta_e / se_e)))
+  p_str  <- ifelse(pval < 0.001, "<0.001", sprintf("%.3f", pval))
+  n_exp  <- sum(d$egfr_diff_lt_neg10 == 1)
+  n_ref  <- sum(d$egfr_diff_lt_neg10 == 0)
+  subtitle_str <- sprintf(
+    "eGFR diff < -10%% (n = %d) vs others (n = %d): subHR = %.2f (95%% CI %.2f-%.2f), p = %s",
+    n_exp, n_ref, hr, lcl, ucl, p_str
+  )
+
+  X0 <- X_full; X0[, "egfr_diff_lt_neg10"] <- 0
+  X1 <- X_full; X1[, "egfr_diff_lt_neg10"] <- 1
+
+  pred0 <- predict(fit, X0)
+  pred1 <- predict(fit, X1)
+
+  times <- pred0[, 1]
+  cif0  <- rowMeans(pred0[, -1, drop = FALSE])
+  cif1  <- rowMeans(pred1[, -1, drop = FALSE])
+
+  df <- bind_rows(
+    tibble(time = times, cif = cif0, group = "eGFR diff ≥ -10 % (others)"),
+    tibble(time = times, cif = cif1, group = "eGFR diff < -10 % (exposed)")
+  )
+  df$group <- factor(df$group,
+                     levels = c("eGFR diff < -10 % (exposed)",
+                                "eGFR diff ≥ -10 % (others)"))
+
+  ymax <- max(df$cif, na.rm = TRUE)
+
+  ggplot(df, aes(x = time, y = cif, color = group)) +
+    geom_step(linewidth = 1) +
+    scale_color_manual(values = c("eGFR diff < -10 % (exposed)"  = "#E31A1C",
+                                  "eGFR diff ≥ -10 % (others)"   = "#1F78B4")) +
+    coord_cartesian(ylim = c(0, max(0.05, ymax * 1.05))) +
+    labs(x = "Days from baseline",
+         y = "Cumulative incidence",
+         color = NULL,
+         title = label,
+         subtitle = subtitle_str) +
+    theme_minimal(base_size = 11) +
+    theme(legend.position = "top",
+          plot.subtitle = element_text(size = 10, color = "grey25"))
+}
+
+adj_cif_egfrdiff("cmp_time_side_effect", "cmp_status_side_effect",
+                 NULL, "Platinum-Related Hospitalisation — eGFR diff < -10 % vs others")
+```
