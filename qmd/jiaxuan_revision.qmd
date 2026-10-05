@@ -1,0 +1,744 @@
+---
+title: "Jiaxuan Project — Revision"
+author: "Tianqi Ouyang"
+date: "2026-10-05"
+execute:
+  eval: true
+  warning: false
+  message: false
+---
+
+# 1 Setup {.content-hidden}
+
+```{r}
+#| label: setup-jx-revision
+invisible(Sys.setlocale("LC_ALL", "en_US.UTF-8"))
+library(tidyverse)
+library(scales)
+library(ggplot2)
+library(survival)
+library(cmprsk)
+library(flextable)
+library(rvg)
+library(officer)
+
+docx_dir <- "docs/tables/revision"
+dir.create(docx_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create("docs/pptx/revision", recursive = TRUE, showWarnings = FALSE)
+pptx_dir <- normalizePath("docs/pptx/revision", mustWork = TRUE)
+pptx_rel_prefix <- "../pptx/revision/"
+.pptx_written <- new.env()
+
+.save_pptx <- function(p, path) {
+  tryCatch({
+    doc <- officer::read_pptx()
+    doc <- officer::add_slide(doc, layout = "Title and Content",
+                              master = "Office Theme")
+    doc <- officer::ph_with(doc, rvg::dml(ggobj = p),
+                            location = officer::ph_location_type(type = "body"))
+    print(doc, target = path)
+    TRUE
+  }, error = function(e) FALSE)
+}
+
+knitr::opts_chunk$set(fig.process = function(filename) {
+  label <- knitr::opts_current$get("label")
+  if (is.null(label)) return(filename)
+  p <- tryCatch(ggplot2::last_plot(), error = function(e) NULL)
+  if (is.null(p) || !inherits(p, "ggplot")) return(filename)
+  if (.save_pptx(p, file.path(pptx_dir, paste0(label, ".pptx")))) {
+    .pptx_written[[label]] <- paste0(pptx_rel_prefix, label, ".pptx")
+  }
+  filename
+})
+
+local({
+  default_chunk_hook <- knitr::knit_hooks$get("chunk")
+  knitr::knit_hooks$set(chunk = function(x, options) {
+    out <- default_chunk_hook(x, options)
+    label <- options$label
+    if (!is.null(label) && !is.null(.pptx_written[[label]])) {
+      out <- paste0(out, sprintf(
+        '\n\n<p style="margin-top:-0.5em;font-size:0.9em;"><a href="%s" download>&#128202; Download as PowerPoint (editable)</a></p>\n\n',
+        .pptx_written[[label]]))
+    }
+    out
+  })
+})
+
+dat <- readRDS("jiaxuan_final_master.rds") %>%
+  mutate(
+    egfr_diff_pct     = 100 * (ckd_epi_gfr_cre_cys_unindex - cockcroft) / cockcroft,
+    egfr_logdiff      = 100 * log(ckd_epi_gfr_cre_cys_unindex / cockcroft),
+    cockcroft_bsa173  = cockcroft * 1.73 / BSA,
+    egfr_diff_pct_bsa = 100 * (ckd_epi_gfr_cre_cys - cockcroft_bsa173) / cockcroft_bsa173,
+    egfr_abs_diff     = ckd_epi_gfr_cre_cys_unindex - cockcroft
+  )
+
+fmt_p  <- function(p) ifelse(p < 0.001, "<0.001", sprintf("%.3f", p))
+fmt_hr <- function(b, se, delta) {
+  sprintf("%.2f (%.2f-%.2f)", exp(delta * b),
+          exp(delta * b - 1.96 * abs(delta) * se),
+          exp(delta * b + 1.96 * abs(delta) * se))
+}
+skewness <- function(x) { x <- x[!is.na(x)]; mean((x - mean(x))^3) / sd(x)^3 }
+```
+
+```{r}
+#| label: rev-model-helpers
+adj_base <- c("age", "sex", "score", "ecog_score_cat2", "cockcroft",
+              "cancer_type_cat_7", "tumor_stage", "platin_group", "high_dose",
+              "Paclitaxel", "Pemetrexed", "Gemcitabine", "ici",
+              "bmi", "smoking", "steroids", "thyroid")
+
+outcomes <- tibble::tribble(
+  ~key,         ~time,                  ~status,                  ~label,                             ~extra,           ~model,
+  "anemia2",    "cmp_time_anemia_2",    "cmp_status_anemia_2",    "Anemia Grade 2",                   "pre_HGB_45days", "fg",
+  "anemia3",    "cmp_time_anemia_3",    "cmp_status_anemia_3",    "Anemia Grade 3",                   "pre_HGB_45days", "fg",
+  "throm2",     "cmp_time_throm_2",     "cmp_status_throm_2",     "Thrombocytopenia Grade 2",         "pre_PLT_45days", "fg",
+  "throm3",     "cmp_time_throm_3",     "cmp_status_throm_3",     "Thrombocytopenia Grade 3",         "pre_PLT_45days", "fg",
+  "aki2",       "cmp_time_aki_2",       "cmp_status_aki_2",       "AKI Grade 2",                      NA,               "fg",
+  "akikdigo",   "cmp_time_aki_kdigo",   "cmp_status_aki_kdigo",   "AKI (KDIGO)",                      NA,               "fg",
+  "grade2",     "cmp_time_grade_2_aes", "cmp_status_grade_2_aes", "Composite Grade 2 AEs",            NA,               "fg",
+  "grade3",     "cmp_time_grade_3_aes", "cmp_status_grade_3_aes", "Composite Grade 3 AEs",            NA,               "fg",
+  "anyhosp",    "cmp_time_any_hosp",    "cmp_status_any_hosp",    "Overall Hospitalization",          NA,               "fg",
+  "sideeffect", "cmp_time_side_effect", "cmp_status_side_effect", "Platinum-Related Hospitalization", NA,               "fg",
+  "death",      "time_to_death_90",     "death_90",               "90-Day Death (Cox PH)",            NA,               "cox"
+)
+
+.prep <- function(o, xvar) {
+  adj <- c(adj_base, if (!is.na(o$extra)) o$extra)
+  d <- dat %>%
+    dplyr::select(dplyr::all_of(c(xvar, o$time, o$status, adj))) %>%
+    tidyr::drop_na()
+  list(d = d, adj = adj)
+}
+
+.fit_terms <- function(o, d, adj, Xexp) {
+  k <- ncol(Xexp)
+  if (o$model == "fg") {
+    X_adj  <- model.matrix(~ ., data = d[, adj, drop = FALSE])[, -1, drop = FALSE]
+    status <- suppressWarnings(as.integer(as.character(d[[o$status]])))
+    fit <- cmprsk::crr(ftime = as.numeric(d[[o$time]]), fstatus = status,
+                       cov1 = cbind(Xexp, X_adj), failcode = 1)
+    list(beta = fit$coef[seq_len(k)],
+         V = fit$var[seq_len(k), seq_len(k), drop = FALSE],
+         n = nrow(d), events = sum(status == 1))
+  } else {
+    nm  <- colnames(Xexp)
+    fit <- survival::coxph(
+      as.formula(paste0("survival::Surv(", o$time, ", ", o$status, ") ~ ",
+                        paste(c(nm, adj), collapse = " + "))),
+      data = cbind(d, Xexp))
+    list(beta = coef(fit)[nm], V = vcov(fit)[nm, nm, drop = FALSE],
+         n = nrow(d), events = sum(d[[o$status]] == 1))
+  }
+}
+
+fit_linear <- function(o, xvar) {
+  p <- .prep(o, xvar)
+  X <- matrix(p$d[[xvar]], ncol = 1, dimnames = list(NULL, "x_lin"))
+  f <- .fit_terms(o, p$d, p$adj, X)
+  b <- unname(f$beta[1]); se <- sqrt(f$V[1, 1])
+  c(f, list(b = b, se = se, x = p$d[[xvar]], p = 2 * pnorm(-abs(b / se))))
+}
+
+rcs_mat <- function(x, knots) {
+  B <- Hmisc::rcspline.eval(x, knots = knots, inclx = TRUE)
+  B <- matrix(B, nrow = length(x))
+  colnames(B) <- paste0("rcs", seq_len(ncol(B)))
+  B
+}
+
+fit_spline <- function(o, xvar) {
+  p  <- .prep(o, xvar)
+  x  <- p$d[[xvar]]
+  kn <- as.numeric(quantile(x, c(0.05, 0.35, 0.65, 0.95)))
+  f  <- .fit_terms(o, p$d, p$adj, rcs_mat(x, kn))
+  bn <- f$beta[-1]; Vn <- f$V[-1, -1, drop = FALSE]
+  chi_nl  <- as.numeric(t(bn) %*% solve(Vn, bn))
+  chi_all <- as.numeric(t(f$beta) %*% solve(f$V, f$beta))
+  c(f, list(x = x, knots = kn,
+            p_nl  = pchisq(chi_nl,  df = length(bn),     lower.tail = FALSE),
+            p_all = pchisq(chi_all, df = length(f$beta), lower.tail = FALSE)))
+}
+
+run_all <- function(fun, xvar) {
+  setNames(lapply(seq_len(nrow(outcomes)), function(i) fun(outcomes[i, ], xvar)),
+           outcomes$key)
+}
+
+fits_lin_log <- run_all(fit_linear, "egfr_logdiff")
+fits_lin_pct <- run_all(fit_linear, "egfr_diff_pct")
+fits_rcs_log <- run_all(fit_spline, "egfr_logdiff")
+fits_rcs_pct <- run_all(fit_spline, "egfr_diff_pct")
+
+hist_33 <- function(var, title, xlab, breaks = seq(-100, 200, 10), angle = 0) {
+  h <- dat %>%
+    filter(!is.na(.data[[var]])) %>%
+    mutate(v = .data[[var]], side = ifelse(v < 0, "neg", "pos"))
+  ggplot(h, aes(x = v, fill = side)) +
+    geom_histogram(aes(y = after_stat(count) / sum(after_stat(count)) * 100),
+                   binwidth = 2, boundary = 0,
+                   color = "black", alpha = 0.85) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "grey30") +
+    scale_fill_manual(values = c(neg = "#E31A1C", pos = "grey60"), guide = "none") +
+    labs(title = title, x = xlab, y = "Percent of Patients (%)") +
+    scale_x_continuous(breaks = breaks) +
+    theme_minimal(base_size = 14) +
+    theme(axis.text.x = element_text(angle = angle, hjust = if (angle > 0) 1 else 0.5))
+}
+
+xlab_log <- "eGFR difference, log scale (%): 100 × ln(CKD-EPI Cr-Cys / CG)"
+
+plot_linear_curve <- function(key, n_bonf = 6) {
+  o <- outcomes[outcomes$key == key, ]
+  f <- fits_lin_log[[key]]
+  x <- f$x
+  ref  <- median(x)
+  grid <- seq(quantile(x, 0.025), quantile(x, 0.975), length.out = 200)
+  lhr  <- f$b * (grid - ref)
+  se   <- abs(grid - ref) * f$se
+  q1 <- unname(quantile(x, 0.25)); q3 <- unname(quantile(x, 0.75)); iqr <- q3 - q1
+  hr_lab <- if (o$model == "cox") "HR" else "subHR"
+  subtitle_str <- sprintf(
+    "%s per 10 %% decline (log scale): %s, p_Bonf = %s (n = %d)\nper IQR decline (Δ = %.1f): %s  |  IQR: [%.1f, %.1f]",
+    hr_lab, fmt_hr(f$b, f$se, -10), fmt_p(min(f$p * n_bonf, 1)), n_bonf,
+    iqr, fmt_hr(f$b, f$se, -iqr), q1, q3)
+  ggplot(tibble(x = grid, hr = exp(lhr),
+                lcl = exp(lhr - 1.96 * se), ucl = exp(lhr + 1.96 * se)),
+         aes(x = x, y = hr)) +
+    geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "darkorange") +
+    geom_line(color = "darkorange", linewidth = 1) +
+    geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
+    geom_vline(xintercept = ref, linetype = "dotted", color = "grey40") +
+    scale_x_continuous(breaks = seq(-200, 200, 10)) +
+    coord_cartesian(ylim = c(0, 4)) +
+    labs(x = xlab_log, y = paste0(hr_lab, " (95% CI)"),
+         title = o$label, subtitle = subtitle_str) +
+    theme_minimal(base_size = 11) +
+    theme(plot.subtitle = element_text(size = 9, color = "grey25"))
+}
+
+spline_vs_linear <- function(key) {
+  fs <- fits_rcs_log[[key]]
+  fl <- fits_lin_log[[key]]
+  x  <- fs$x
+  ref  <- median(x)
+  grid <- seq(quantile(x, 0.025), quantile(x, 0.975), length.out = 200)
+  D    <- sweep(rcs_mat(grid, fs$knots), 2, rcs_mat(ref, fs$knots)[1, ])
+  lhr  <- as.numeric(D %*% fs$beta)
+  se   <- sqrt(rowSums((D %*% fs$V) * D))
+  tibble(x = grid, ref = ref,
+         spline = exp(lhr), lcl = exp(lhr - 1.96 * se), ucl = exp(lhr + 1.96 * se),
+         linear = exp(fl$b * (grid - ref)))
+}
+
+lin_coverage <- sapply(outcomes$key, function(k) {
+  g <- spline_vs_linear(k)
+  100 * mean(g$linear >= g$lcl & g$linear <= g$ucl)
+})
+
+plot_spline_curve <- function(key) {
+  o  <- outcomes[outcomes$key == key, ]
+  fs <- fits_rcs_log[[key]]
+  fl <- fits_lin_log[[key]]
+  g  <- spline_vs_linear(key)
+  ref <- g$ref[1]
+  hr_lab <- if (o$model == "cox") "HR" else "subHR"
+  curves <- bind_rows(
+    tibble(x = g$x, hr = g$spline, lcl = g$lcl, ucl = g$ucl,
+           fit = "Restricted cubic spline (4 knots)"),
+    tibble(x = g$x, hr = g$linear, lcl = NA_real_, ucl = NA_real_,
+           fit = "Linear term")
+  )
+  subtitle_str <- sprintf(
+    "Spline: p non-linear = %s (2 df), p overall = %s (3 df)  |  Linear: %s per 10 %% decline = %s",
+    fmt_p(fs$p_nl), fmt_p(fs$p_all), hr_lab, fmt_hr(fl$b, fl$se, -10))
+  ggplot(curves, aes(x = x, y = hr, color = fit, linetype = fit)) +
+    geom_ribbon(data = filter(curves, !is.na(lcl)),
+                aes(ymin = lcl, ymax = ucl), fill = "#1F78B4", alpha = 0.15,
+                color = NA, show.legend = FALSE) +
+    geom_line(linewidth = 1) +
+    geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
+    geom_vline(xintercept = ref, linetype = "dotted", color = "grey40") +
+    geom_rug(data = tibble(x = fs$knots), aes(x = x), inherit.aes = FALSE,
+             sides = "b", color = "grey30", linewidth = 0.8) +
+    scale_color_manual(values = c("Restricted cubic spline (4 knots)" = "#1F78B4",
+                                  "Linear term" = "darkorange")) +
+    scale_linetype_manual(values = c("Restricted cubic spline (4 knots)" = "solid",
+                                     "Linear term" = "dashed")) +
+    scale_x_continuous(breaks = seq(-200, 200, 10)) +
+    coord_cartesian(ylim = c(0, 4)) +
+    labs(x = xlab_log, y = paste0(hr_lab, " (95% CI)"), color = NULL, linetype = NULL,
+         title = o$label, subtitle = subtitle_str) +
+    theme_minimal(base_size = 11) +
+    theme(legend.position = "top",
+          plot.subtitle = element_text(size = 9, color = "grey25"))
+}
+```
+
+# 2 Exposure definitions
+
+Four versions of the eGFR difference are compared on this page. All use the uncapped CKD-EPI 2012 creatinine–cystatin C equation and the Cockcroft-Gault creatinine clearance (CG) from the same baseline creatinine; BSA is DuBois.
+
+```{r}
+#| label: rev-defs-table
+defs <- tibble::tribble(
+  ~var,                ~Metric,                                  ~Formula,                                                                       ~Unit,
+  "egfr_diff_pct",     "eGFR difference (%) — submitted",        "100 × (CKD-EPI Cr-Cys unindexed − CG) / CG",                                   "%",
+  "egfr_logdiff",      "eGFR difference, log scale (%) — item 1", "100 × ln(CKD-EPI Cr-Cys unindexed / CG)",                                     "%",
+  "egfr_diff_pct_bsa", "eGFR difference (%), BSA-indexed — item 3", "100 × (CKD-EPI Cr-Cys per 1.73 m² − CG × 1.73/BSA) / (CG × 1.73/BSA)",      "%",
+  "egfr_abs_diff",     "Absolute eGFR difference — item 4",      "CKD-EPI Cr-Cys unindexed − CG",                                                "mL/min"
+)
+
+defs_tbl <- defs %>%
+  rowwise() %>%
+  mutate(
+    v = list(dat[[var]][!is.na(dat[[var]])]),
+    N = length(v),
+    `Median [IQR]` = sprintf("%.1f [%.1f, %.1f]", median(v),
+                             quantile(v, 0.25), quantile(v, 0.75)),
+    `Min, Max` = sprintf("%.1f, %.1f", min(v), max(v)),
+    Skewness = sprintf("%.2f", skewness(v)),
+    `< 0, n (%)` = sprintf("%d (%.1f%%)", sum(v < 0), 100 * mean(v < 0)),
+    `< −10, n (%)` = sprintf("%d (%.1f%%)", sum(v < -10), 100 * mean(v < -10))
+  ) %>%
+  ungroup() %>%
+  select(-var, -v)
+
+ft_defs <- flextable::flextable(defs_tbl) |>
+  flextable::set_caption("eGFR difference metrics — whole cohort") |>
+  flextable::autofit()
+flextable::save_as_docx(ft_defs, path = file.path(docx_dir, "rev_defs.docx"))
+ft_defs
+```
+
+[📄 Download Word table](../tables/revision/rev_defs.docx)
+
+# 3 eGFR difference on the log scale (reviewer item 1)
+
+## 3.1 Why the log scale
+
+```{r}
+#| label: rev-skew-values
+#| include: false
+sk_pct <- skewness(dat$egfr_diff_pct)
+sk_log <- skewness(dat$egfr_logdiff)
+```
+
+The submitted metric, 100 × (CKD-EPI − CG) / CG, divides by CG, which makes it asymmetric: if CKD-EPI Cr-Cys is 20 % below CG, then CG is 25 % above CKD-EPI Cr-Cys, and the scale is bounded at −100 % but unbounded above. Expressing the difference as **100 × ln(CKD-EPI Cr-Cys / CG)** (the "symmetric percentage", Cole, *Stat Med* 2000;19:3109–25; Törnqvist et al., *Am Stat* 1985;39:43–6) has three advantages:
+
+1. **Symmetric with respect to the reference.** Swapping numerator and denominator only flips the sign (+22.3 ↔ −22.3), so the result does not depend on treating CG as the reference.
+2. **Additive.** Log differences sum across steps, and the metric is the log of the ratio of the two GFR estimates, which is the natural scale for comparing them.
+3. **Same interpretation for small differences.** Within about ±15 % the two metrics are almost identical (Table 3.3). A 10-unit decline on the log scale corresponds to a CKD-EPI/CG ratio that is 9.5 % lower (ratio × e^−0.1^ = 0.905).
+
+Note for the response letter: in this cohort the log transformation does **not** make the distribution more symmetric (skewness `r sprintf("%.2f", sk_log)` on the log scale vs `r sprintf("%.2f", sk_pct)` for the submitted metric); it lengthens the lower tail. The justification therefore rests on the properties of the measure (points 1–3), not on its distribution.
+
+## 3.2 Distribution
+
+```{r}
+#| label: rev-logdiff-hist
+#| fig-width: 8
+#| fig-height: 5
+hist_33("egfr_logdiff",
+        "Distribution of eGFR Difference (log scale)",
+        "eGFR Difference, log scale (%): 100 × ln(CKD-EPI Cr-Cys / CG)")
+```
+
+## 3.3 Correspondence between the two metrics
+
+```{r}
+#| label: rev-correspondence
+ratio <- c(0.70, 0.80, 0.90, 0.95, 1.00, 1.05, 1.10, 1.25, 1.50)
+corr_tbl <- tibble(
+  `CKD-EPI / CG ratio` = sprintf("%.2f", ratio),
+  `% difference (CG as reference)` = sprintf("%+.1f", 100 * (ratio - 1)),
+  `% difference (CKD-EPI as reference)` = sprintf("%+.1f", 100 * (1 / ratio - 1)),
+  `Log-scale difference` = sprintf("%+.1f", 100 * log(ratio)),
+  `Log-scale difference (reference swapped)` = sprintf("%+.1f", -100 * log(ratio))
+)
+flextable::flextable(corr_tbl) |>
+  flextable::set_caption("The conventional % depends on which equation is the reference; the log-scale difference only changes sign") |>
+  flextable::autofit()
+```
+
+## 3.4 Fine-Gray / Cox summary: per 10 % decline on the log scale
+
+Same adjuster set as the submitted models (age, sex, Charlson score, ECOG, Cockcroft-Gault, cancer type, tumor stage, platinum type, high dose, paclitaxel, pemetrexed, gemcitabine, ICI, BMI, smoking, steroids, thyroid disease; plus baseline hemoglobin for anemia and baseline platelets for thrombocytopenia). The submitted-metric estimate is shown alongside for comparison. p-values in the table are raw Wald; the curves in 3.5 apply Bonferroni correction across the six primary outcomes.
+
+```{r}
+#| label: rev-logdiff-summary
+summ <- purrr::map_dfr(outcomes$key, function(k) {
+  o  <- outcomes[outcomes$key == k, ]
+  fl <- fits_lin_log[[k]]; fp <- fits_lin_pct[[k]]
+  tibble(
+    Outcome = o$label,
+    Model   = ifelse(o$model == "cox", "Cox PH", "Fine-Gray"),
+    N       = fl$n,
+    `Excluded (missing cov.)` = nrow(dat) - fl$n,
+    Events  = fl$events,
+    `(sub)HR per 10 % decline, log scale (95% CI)` = fmt_hr(fl$b, fl$se, -10),
+    `p (log scale)` = fmt_p(fl$p),
+    `(sub)HR per 10 % decline, submitted metric (95% CI)` = fmt_hr(fp$b, fp$se, -10),
+    `p (submitted)` = fmt_p(fp$p)
+  )
+})
+ft_summ <- flextable::flextable(summ) |>
+  flextable::set_caption("Multivariable (sub)HR per 10 % decline in eGFR difference — log scale vs submitted metric — whole cohort") |>
+  flextable::autofit()
+flextable::save_as_docx(ft_summ, path = file.path(docx_dir, "rev_logdiff_summary.docx"))
+ft_summ
+```
+
+[📄 Download Word table](../tables/revision/rev_logdiff_summary.docx)
+
+## 3.5 Linear subHR curves — log scale
+
+::: {.callout-note}
+## p-value convention
+
+Panel p-values are Bonferroni-adjusted across the six primary manuscript outcomes (platinum-related hospitalisation, overall hospitalisation, 90-day mortality, grade ≥ 3 anemia, grade ≥ 3 thrombocytopenia, acute kidney injury): `p_Bonf = min(raw p × 6, 1)`. The curve is plotted between the 2.5th and 97.5th percentiles with the cohort median as reference (dotted line).
+:::
+
+### 3.5.1 Anemia Grade 2
+
+```{r}
+#| label: rev-lin-anemia2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("anemia2")
+```
+
+### 3.5.2 Anemia Grade 3
+
+```{r}
+#| label: rev-lin-anemia3
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("anemia3")
+```
+
+### 3.5.3 Thrombocytopenia Grade 2
+
+```{r}
+#| label: rev-lin-throm2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("throm2")
+```
+
+### 3.5.4 Thrombocytopenia Grade 3
+
+```{r}
+#| label: rev-lin-throm3
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("throm3")
+```
+
+### 3.5.5 AKI Grade 2
+
+```{r}
+#| label: rev-lin-aki2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("aki2")
+```
+
+### 3.5.6 AKI (KDIGO)
+
+```{r}
+#| label: rev-lin-akikdigo
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("akikdigo")
+```
+
+### 3.5.7 Composite Grade 2 AEs
+
+```{r}
+#| label: rev-lin-grade2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("grade2")
+```
+
+### 3.5.8 Composite Grade 3 AEs
+
+```{r}
+#| label: rev-lin-grade3
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("grade3")
+```
+
+### 3.5.9 Overall Hospitalization
+
+```{r}
+#| label: rev-lin-anyhosp
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("anyhosp")
+```
+
+### 3.5.10 Platinum-Related Hospitalization
+
+```{r}
+#| label: rev-lin-sideeffect
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("sideeffect")
+```
+
+### 3.5.11 90-Day Death (Cox PH)
+
+```{r}
+#| label: rev-lin-death
+#| fig-width: 7
+#| fig-height: 4.5
+plot_linear_curve("death")
+```
+
+# 4 Linearity of the sHR curves (reviewer item 2)
+
+> *Reviewer:* "In the figures where sHR were plotted, did you force linearity of eGFR difference or are these based on splines to capture potential non-linearity of these associations?"
+
+## 4.1 What the submitted figures show
+
+Linearity was assumed, not estimated. Each submitted curve came from a Fine-Gray model (Cox proportional hazards for 90-day death) in which eGFR difference entered as a **single linear term** together with the full adjuster set. The plotted line is sHR(x) = exp{β (x − median)} with a 95 % delta-method confidence band, so it is a straight line on the log-sHR scale by construction: the figures show the size of a linear association across the observed range (2.5th–97.5th percentile), not its shape.
+
+## 4.2 Testing for non-linearity
+
+Every model was re-fitted with eGFR difference modelled as a **restricted cubic spline with 4 knots** at the 5th, 35th, 65th and 95th percentiles (Harrell's default placement), keeping the covariates, the competing-risk handling and the analytic cohort unchanged. Departure from linearity was tested with a Wald test of the two non-linear spline coefficients (2 df), using the Fine-Gray sandwich variance from `cmprsk::crr` (model-based variance for Cox). The same test was run on the submitted % metric. p-values are unadjusted. The "inside spline 95% CI" column gives the share of the plotted range (2.5th–97.5th percentile) over which the linear curve lies within the spline's confidence band.
+
+```{r}
+#| label: rev-nonlin-table
+nl_tbl <- purrr::map_dfr(outcomes$key, function(k) {
+  o <- outcomes[outcomes$key == k, ]
+  tibble(
+    Outcome = o$label,
+    Model   = ifelse(o$model == "cox", "Cox PH", "Fine-Gray"),
+    N       = fits_rcs_log[[k]]$n,
+    Events  = fits_rcs_log[[k]]$events,
+    `Knots, log scale (5/35/65/95th pct)` = paste(sprintf("%.1f", fits_rcs_log[[k]]$knots), collapse = " / "),
+    `p overall, log scale (3 df)`    = fmt_p(fits_rcs_log[[k]]$p_all),
+    `p non-linear, log scale (2 df)` = fmt_p(fits_rcs_log[[k]]$p_nl),
+    `Linear curve inside spline 95% CI (% of plotted range)` = sprintf("%.0f%%", lin_coverage[[k]]),
+    `p non-linear, submitted % (2 df)` = fmt_p(fits_rcs_pct[[k]]$p_nl)
+  )
+})
+ft_nl <- flextable::flextable(nl_tbl) |>
+  flextable::set_caption("Restricted cubic spline (4 knots): tests of overall association and of non-linearity — whole cohort") |>
+  flextable::autofit()
+flextable::save_as_docx(ft_nl, path = file.path(docx_dir, "rev_spline_nonlinearity.docx"))
+ft_nl
+```
+
+[📄 Download Word table](../tables/revision/rev_spline_nonlinearity.docx)
+
+## 4.3 Spline vs linear curves — log scale
+
+Blue: restricted cubic spline with 95 % CI. Orange dashed: the linear-term curve from Section 3.5. Ticks on the x-axis mark the knot positions; reference is the cohort median.
+
+### 4.3.1 Anemia Grade 2
+
+```{r}
+#| label: rev-rcs-anemia2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("anemia2")
+```
+
+### 4.3.2 Anemia Grade 3
+
+```{r}
+#| label: rev-rcs-anemia3
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("anemia3")
+```
+
+### 4.3.3 Thrombocytopenia Grade 2
+
+```{r}
+#| label: rev-rcs-throm2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("throm2")
+```
+
+### 4.3.4 Thrombocytopenia Grade 3
+
+```{r}
+#| label: rev-rcs-throm3
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("throm3")
+```
+
+### 4.3.5 AKI Grade 2
+
+```{r}
+#| label: rev-rcs-aki2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("aki2")
+```
+
+### 4.3.6 AKI (KDIGO)
+
+```{r}
+#| label: rev-rcs-akikdigo
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("akikdigo")
+```
+
+### 4.3.7 Composite Grade 2 AEs
+
+```{r}
+#| label: rev-rcs-grade2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("grade2")
+```
+
+### 4.3.8 Composite Grade 3 AEs
+
+```{r}
+#| label: rev-rcs-grade3
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("grade3")
+```
+
+### 4.3.9 Overall Hospitalization
+
+```{r}
+#| label: rev-rcs-anyhosp
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("anyhosp")
+```
+
+### 4.3.10 Platinum-Related Hospitalization
+
+```{r}
+#| label: rev-rcs-sideeffect
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("sideeffect")
+```
+
+### 4.3.11 90-Day Death (Cox PH)
+
+```{r}
+#| label: rev-rcs-death
+#| fig-width: 7
+#| fig-height: 4.5
+plot_spline_curve("death")
+```
+
+## 4.4 Draft response to the reviewer
+
+```{r}
+#| label: rev-response-text
+#| results: asis
+pnl_log <- sapply(fits_rcs_log, `[[`, "p_nl")
+pnl_pct <- sapply(fits_rcs_pct, `[[`, "p_nl")
+n_out   <- length(pnl_log)
+sig_log <- pnl_log < 0.05
+sig_pct <- pnl_pct < 0.05
+rng_txt <- function(p) sprintf("%s–%s", fmt_p(min(p)), fmt_p(max(p)))
+list_p  <- function(lbl, p) paste(sprintf("%s, p = %s", lbl, fmt_p(p)), collapse = "; ")
+
+finding_log <- if (!any(sig_log)) {
+  sprintf("There was no evidence of departure from linearity for any of the %d outcomes (p for non-linearity %s).",
+          n_out, rng_txt(pnl_log))
+} else {
+  sprintf("Departure from linearity was observed for %s; for the remaining outcomes p for non-linearity ranged %s.",
+          list_p(outcomes$label[sig_log], pnl_log[sig_log]), rng_txt(pnl_log[!sig_log]))
+}
+
+full_cov <- lin_coverage >= 100
+coverage_txt <- if (all(full_cov)) {
+  "The linear curve lay within the 95% confidence band of the spline curve across the entire plotted range (2.5th–97.5th percentile) for every outcome"
+} else {
+  sprintf("The linear curve lay within the 95%% confidence band of the spline curve across the entire plotted range (2.5th–97.5th percentile) for %d of %d outcomes, and over %s of the range for %s",
+          sum(full_cov), n_out,
+          if (sum(!full_cov) == 1) sprintf("%.0f%%", min(lin_coverage[!full_cov]))
+          else sprintf("%.0f%%–%.0f%%", min(lin_coverage[!full_cov]), max(lin_coverage[!full_cov])),
+          paste(outcomes$label[!full_cov], collapse = ", "))
+}
+
+pct_txt <- if (!any(sig_pct)) {
+  sprintf("For the originally submitted percent-difference metric there was likewise no evidence of non-linearity (p %s).",
+          rng_txt(pnl_pct))
+} else {
+  sprintf("For the originally submitted percent-difference metric, the same test gave nominal p < 0.05 for %d of %d outcomes (%s), %s; these departures were not present on the log scale, which supports expressing the difference on the log scale.",
+          sum(sig_pct), n_out, list_p(outcomes$label[sig_pct], pnl_pct[sig_pct]),
+          if (all(pnl_pct * n_out >= 0.05)) sprintf("none of which remained significant after Bonferroni correction for %d tests", n_out)
+          else "some of which remained significant after Bonferroni correction")
+}
+
+conclusion <- if (!any(sig_log)) {
+  "We therefore retained the linear specification on the log scale, which gives a single interpretable estimate per 10% decline in eGFR difference, now show the spline-based curves in new Supplementary Figure S_, and state the linearity assumption and its assessment in the Methods."
+} else {
+  "We now present the spline-based curves for these outcomes alongside the linear estimates (new Supplementary Figure S_) and describe the shape of the association in the Results; for all other outcomes the linear specification was retained."
+}
+
+cat(sprintf(
+  "> We thank the reviewer for this question. In the submitted figures, eGFR difference was entered as a linear term, so the curves show the estimated linear association rather than a data-driven shape. To assess potential non-linearity, we re-fitted all models with eGFR difference (now expressed on the log scale) modelled as a restricted cubic spline with four knots at the 5th, 35th, 65th and 95th percentiles, with all covariates unchanged, and tested departure from linearity with a Wald test of the non-linear spline terms. %s %s. %s %s\n",
+  finding_log, coverage_txt, pct_txt, conclusion))
+```
+
+# 5 BSA-indexed eGFR difference (%) (item 3)
+
+Definition requested: (eGFR~CR-CYS~ in mL/min/1.73 m², not adjusted to the patient's BSA − CG CrCl indexed to 1.73 m²) / (CG CrCl indexed to 1.73 m²), i.e.
+
+`egfr_diff_pct_bsa = 100 × (ckd_epi_gfr_cre_cys − CG × 1.73/BSA) / (CG × 1.73/BSA)`
+
+```{r}
+#| label: rev-bsa-identity
+#| include: false
+bsa_maxdiff <- max(abs(dat$egfr_diff_pct_bsa - dat$egfr_diff_pct), na.rm = TRUE)
+```
+
+::: {.callout-important}
+## This is the same number as the submitted % difference
+
+Dividing the numerator and denominator by 1.73/BSA cancels BSA:
+(eGFR~CR-CYS~ per 1.73 m² − CG × 1.73/BSA) / (CG × 1.73/BSA) = (eGFR~CR-CYS~ per 1.73 m² × BSA/1.73 − CG) / CG = (eGFR~CR-CYS~ unindexed − CG) / CG.
+
+The unindexed CKD-EPI value used throughout the analysis is the indexed value × BSA/1.73 with the same DuBois BSA, so the two definitions agree for every patient (largest absolute difference across the cohort: `r format(signif(bsa_maxdiff, 2))` percentage points, i.e. floating-point rounding). Indexing to body size changes the **absolute** difference in mL/min, but not the **percent** difference, so all models and figures using the submitted % metric are unchanged under this definition.
+:::
+
+```{r}
+#| label: rev-bsa-hist
+#| fig-width: 8
+#| fig-height: 5
+hist_33("egfr_diff_pct_bsa",
+        "Distribution of eGFR Difference (%), BSA-indexed",
+        "100 × (CKD-EPI Cr-Cys per 1.73 m² − CG × 1.73/BSA) / (CG × 1.73/BSA)")
+```
+
+# 6 Absolute eGFR difference (mL/min) — Figure 2 remake (item 4)
+
+```{r}
+#| label: rev-abs-stats
+#| include: false
+a <- dat$egfr_abs_diff[!is.na(dat$egfr_abs_diff)]
+```
+
+Absolute eGFR difference = eGFR~CR-CYS~ (CKD-EPI 2012, unindexed, mL/min) − CG CrCl (mL/min). Median `r sprintf("%.1f", median(a))` mL/min (IQR `r sprintf("%.1f", quantile(a, 0.25))` to `r sprintf("%.1f", quantile(a, 0.75))`); range `r sprintf("%.1f", min(a))` to `r sprintf("%.1f", max(a))`; `r sum(a < 0)` of `r length(a)` patients (`r sprintf("%.1f", 100 * mean(a < 0))` %) had eGFR~CR-CYS~ below CG. Same style as Section 3.3 of the whole-cohort page (2-unit bins, red below 0, grey at or above 0).
+
+```{r}
+#| label: rev-abs-hist
+#| fig-width: 10
+#| fig-height: 5
+hist_33("egfr_abs_diff",
+        "Distribution of Absolute eGFR Difference (CKD-EPI Cr-Cys − CG)",
+        "Absolute eGFR Difference (mL/min)",
+        breaks = seq(-220, 60, 10), angle = 45)
+```
