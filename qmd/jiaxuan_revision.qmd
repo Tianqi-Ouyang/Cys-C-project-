@@ -170,6 +170,7 @@ run_all <- function(fun, xvar) {
 
 fits_lin_log <- run_all(fit_linear, "egfr_logdiff")
 fits_lin_pct <- run_all(fit_linear, "egfr_diff_pct")
+fits_lin_bsa <- run_all(fit_linear, "egfr_diff_pct_bsa")
 fits_rcs_log <- run_all(fit_spline, "egfr_logdiff")
 fits_rcs_pct <- run_all(fit_spline, "egfr_diff_pct")
 
@@ -191,9 +192,13 @@ hist_33 <- function(var, title, xlab, breaks = seq(-100, 200, 10), angle = 0) {
 
 xlab_log <- "eGFR difference, log scale (%): 100 × ln(CKD-EPI Cr-Cys / CG)"
 
-plot_linear_curve <- function(key, n_bonf = 6) {
+xlab_bsa <- "eGFR difference (%), BSA-indexed (per 1.73 m²)"
+
+plot_linear_curve <- function(key, fits = fits_lin_log, xlab = xlab_log,
+                              scale_txt = " (log scale)", iqr_lines = FALSE,
+                              n_bonf = 6) {
   o <- outcomes[outcomes$key == key, ]
-  f <- fits_lin_log[[key]]
+  f <- fits[[key]]
   x <- f$x
   ref  <- median(x)
   grid <- seq(quantile(x, 0.025), quantile(x, 0.975), length.out = 200)
@@ -202,22 +207,32 @@ plot_linear_curve <- function(key, n_bonf = 6) {
   q1 <- unname(quantile(x, 0.25)); q3 <- unname(quantile(x, 0.75)); iqr <- q3 - q1
   hr_lab <- if (o$model == "cox") "HR" else "subHR"
   subtitle_str <- sprintf(
-    "%s per 10 %% decline (log scale): %s, p_Bonf = %s (n = %d)\nper IQR decline (Δ = %.1f): %s  |  IQR: [%.1f, %.1f]",
-    hr_lab, fmt_hr(f$b, f$se, -10), fmt_p(min(f$p * n_bonf, 1)), n_bonf,
+    "%s per 10 %% decline%s: %s, p_Bonf = %s (n = %d)\nper IQR decline (Δ = %.1f): %s  |  IQR: [%.1f, %.1f]",
+    hr_lab, scale_txt, fmt_hr(f$b, f$se, -10), fmt_p(min(f$p * n_bonf, 1)), n_bonf,
     iqr, fmt_hr(f$b, f$se, -iqr), q1, q3)
-  ggplot(tibble(x = grid, hr = exp(lhr),
-                lcl = exp(lhr - 1.96 * se), ucl = exp(lhr + 1.96 * se)),
-         aes(x = x, y = hr)) +
+  p <- ggplot(tibble(x = grid, hr = exp(lhr),
+                     lcl = exp(lhr - 1.96 * se), ucl = exp(lhr + 1.96 * se)),
+              aes(x = x, y = hr)) +
     geom_ribbon(aes(ymin = lcl, ymax = ucl), alpha = 0.2, fill = "darkorange") +
     geom_line(color = "darkorange", linewidth = 1) +
     geom_hline(yintercept = 1, linetype = "dashed", color = "grey50") +
-    geom_vline(xintercept = ref, linetype = "dotted", color = "grey40") +
+    geom_vline(xintercept = ref, linetype = "dotted", color = "grey40")
+  if (iqr_lines) {
+    p <- p + geom_vline(xintercept = c(q1, q3), linetype = "dashed",
+                        color = "steelblue", alpha = 0.7)
+  }
+  p +
     scale_x_continuous(breaks = seq(-200, 200, 10)) +
     coord_cartesian(ylim = c(0, 4)) +
-    labs(x = xlab_log, y = paste0(hr_lab, " (95% CI)"),
+    labs(x = xlab, y = paste0(hr_lab, " (95% CI)"),
          title = o$label, subtitle = subtitle_str) +
     theme_minimal(base_size = 11) +
     theme(plot.subtitle = element_text(size = 9, color = "grey25"))
+}
+
+plot_bsa_curve <- function(key) {
+  plot_linear_curve(key, fits = fits_lin_bsa, xlab = xlab_bsa,
+                    scale_txt = "", iqr_lines = TRUE)
 }
 
 spline_vs_linear <- function(key) {
@@ -695,6 +710,8 @@ cat(sprintf(
 
 # 5 BSA-indexed eGFR difference (%) (item 3)
 
+## 5.1 Definition
+
 Definition requested: (eGFR~CR-CYS~ in mL/min/1.73 m², not adjusted to the patient's BSA − CG CrCl indexed to 1.73 m²) / (CG CrCl indexed to 1.73 m²), i.e.
 
 `egfr_diff_pct_bsa = 100 × (ckd_epi_gfr_cre_cys − CG × 1.73/BSA) / (CG × 1.73/BSA)`
@@ -714,6 +731,8 @@ Dividing the numerator and denominator by 1.73/BSA cancels BSA:
 The unindexed CKD-EPI value used throughout the analysis is the indexed value × BSA/1.73 with the same DuBois BSA, so the two definitions agree for every patient (largest absolute difference across the cohort: `r format(signif(bsa_maxdiff, 2))` percentage points, i.e. floating-point rounding). Indexing to body size changes the **absolute** difference in mL/min, but not the **percent** difference, so all models and figures using the submitted % metric are unchanged under this definition.
 :::
 
+## 5.2 Distribution
+
 ```{r}
 #| label: rev-bsa-hist
 #| fig-width: 8
@@ -721,6 +740,148 @@ The unindexed CKD-EPI value used throughout the analysis is the indexed value ×
 hist_33("egfr_diff_pct_bsa",
         "Distribution of eGFR Difference (%), BSA-indexed",
         "100 × (CKD-EPI Cr-Cys per 1.73 m² − CG × 1.73/BSA) / (CG × 1.73/BSA)")
+```
+
+## 5.3 Fine-Gray / Cox summary: per 10 % decline in BSA-indexed eGFR difference
+
+```{r}
+#| label: rev-bsa-beta-identity
+#| include: false
+bsa_beta_diff <- max(sapply(outcomes$key, function(k)
+  abs(fits_lin_bsa[[k]]$b - fits_lin_pct[[k]]$b)))
+```
+
+One row per outcome, with the same adjuster set as Section 3.4 (Cockcroft-Gault included; baseline hemoglobin for anemia and baseline platelets for thrombocytopenia). The (sub)HR reads as the multiplicative change per **10 % decline** in BSA-indexed eGFR difference. 90-day death uses Cox PH; all other outcomes use Fine-Gray with death as the competing event. p-values in the table are raw Wald; the curves in 5.4 apply Bonferroni correction across the six primary outcomes. As expected from 5.1, the coefficients match the submitted-metric models (largest difference in the log-(sub)HR coefficient across the 11 outcomes: `r format(signif(bsa_beta_diff, 2))`), so this table reproduces the submitted-metric column of Table 3.4.
+
+```{r}
+#| label: rev-bsa-summary
+bsa_summ <- purrr::map_dfr(outcomes$key, function(k) {
+  o <- outcomes[outcomes$key == k, ]
+  f <- fits_lin_bsa[[k]]
+  tibble(
+    Outcome = o$label,
+    Model   = ifelse(o$model == "cox", "Cox PH", "Fine-Gray"),
+    N       = f$n,
+    `Excluded (missing cov.)` = nrow(dat) - f$n,
+    Events  = f$events,
+    `(sub)HR per 10 % decline (95% CI)` = fmt_hr(f$b, f$se, -10),
+    `p-value` = fmt_p(f$p)
+  )
+})
+ft_bsa <- flextable::flextable(bsa_summ) |>
+  flextable::set_caption("Multivariable (sub)HR per 10 % decline in BSA-indexed eGFR difference (%) — whole cohort. Fine-Gray for competing-risk outcomes; Cox PH for 90-day death.") |>
+  flextable::autofit()
+flextable::save_as_docx(ft_bsa, path = file.path(docx_dir, "rev_bsa_summary.docx"))
+ft_bsa
+```
+
+[📄 Download Word table](../tables/revision/rev_bsa_summary.docx)
+
+## 5.4 Linear subHR curves — BSA-indexed eGFR difference (%)
+
+::: {.callout-note}
+## p-value convention
+
+Panel p-values are Bonferroni-adjusted across the six primary manuscript outcomes: `p_Bonf = min(raw p × 6, 1)`. Curves are plotted between the 2.5th and 97.5th percentiles; dotted line = cohort median (reference, sHR = 1); blue dashed lines = 25th and 75th percentiles.
+:::
+
+### 5.4.1 Anemia Grade 2
+
+```{r}
+#| label: rev-bsa-lin-anemia2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("anemia2")
+```
+
+### 5.4.2 Anemia Grade 3
+
+```{r}
+#| label: rev-bsa-lin-anemia3
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("anemia3")
+```
+
+### 5.4.3 Thrombocytopenia Grade 2
+
+```{r}
+#| label: rev-bsa-lin-throm2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("throm2")
+```
+
+### 5.4.4 Thrombocytopenia Grade 3
+
+```{r}
+#| label: rev-bsa-lin-throm3
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("throm3")
+```
+
+### 5.4.5 AKI Grade 2
+
+```{r}
+#| label: rev-bsa-lin-aki2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("aki2")
+```
+
+### 5.4.6 AKI (KDIGO)
+
+```{r}
+#| label: rev-bsa-lin-akikdigo
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("akikdigo")
+```
+
+### 5.4.7 Composite Grade 2 AEs
+
+```{r}
+#| label: rev-bsa-lin-grade2
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("grade2")
+```
+
+### 5.4.8 Composite Grade 3 AEs
+
+```{r}
+#| label: rev-bsa-lin-grade3
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("grade3")
+```
+
+### 5.4.9 Overall Hospitalization
+
+```{r}
+#| label: rev-bsa-lin-anyhosp
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("anyhosp")
+```
+
+### 5.4.10 Platinum-Related Hospitalization
+
+```{r}
+#| label: rev-bsa-lin-sideeffect
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("sideeffect")
+```
+
+### 5.4.11 90-Day Death (Cox PH)
+
+```{r}
+#| label: rev-bsa-lin-death
+#| fig-width: 7
+#| fig-height: 4.5
+plot_bsa_curve("death")
 ```
 
 # 6 Absolute eGFR difference (mL/min) — Figure 2 remake (item 4)
